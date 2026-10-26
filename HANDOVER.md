@@ -5,18 +5,18 @@ Repository: TenzoNkz/YuGiOh-Duel-Link-MOD
 Branch: main
 
 ## Last verified step
-1. Confirmed the public Release Platinmods Original, tag Platinmods_V11.0.0.
-2. GitHub Actions downloaded the 127,424,878-byte APK. The calculated SHA-256 matched the Release API digest and the ZIP CRC scan passed. Report: APP_ANALYSIS_REPORT.md.
+1. Confirmed public Release Platinmods Original, tag Platinmods_V11.0.0.
+2. GitHub Actions downloaded the 127,424,878-byte APK; calculated SHA-256 matched GitHub metadata and ZIP CRC scan passed. Report: APP_ANALYSIS_REPORT.md.
 3. Successful inventory run: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40272870450
-4. Checkpoint Validation succeeded: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40273558822
-5. Apktool decoded the manifest to package jp.konami.duellinks. JADX produced 8,194 Java source files but reported 96 decompilation errors and exited with code 3; the first deep report is therefore partial.
-6. Static indicators include the Platinmods Java menu classes/JNI entry points and native strings DLL_DuelGetDamageValue and DLL_DuelComCheatCard. These do not establish feature functionality.
-7. Refined code analysis is active at: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40273558853
+4. Checkpoint Validation passed after latest script/checkpoint changes: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40274001348
+5. Apktool decoded the manifest to package jp.konami.duellinks. JADX produced 8,194 Java source files but reported 96 decompilation errors and exited with code 3; code-level findings are partial.
+6. Decompiled files include com.platinmods.FloatingModMenuService and PMLauncher. PMLauncher loads platinmods. Native strings include menu JNI exports and DLL_DuelGetDamageValue / DLL_DuelComCheatCard; these do not prove feature functionality.
+7. The code-analysis script was refined to isolate menu-framework traces from unrelated AndroidX Preferences files. Latest run: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40274001397
 
 ## NEXT ACTION
-Refresh run 40273558853. Verify its conclusion and the newly committed APK_CODE_ANALYSIS.md. If the refined report is still partial, preserve that status and continue tracing the menu feature-list/preferences flow and native references. Do not claim a Damage Multiplier works based only on the existence of a damage-related symbol.
+Refresh run 40274001397. Verify its conclusion and the regenerated APK_CODE_ANALYSIS.md. Review exact references from com/platinmods/FloatingModMenuService.java, PMLauncher.java, Preferences.java, and native string sections. Then document only supported evidence in MOD_CANDIDATES.md. Do not implement or claim a live online Damage Multiplier works based only on damage symbol names.
 
 ## Do not repeat
-- Do not ask the user to re-upload the APK because a chat changed; the canonical public Release is available to Actions.
-- Do not claim full APK analysis is complete before the refined report and code-level findings are reviewed.
-- Do not assume a UI toggle is functional based only on the screenshot or a matching string.
+- Do not ask for re-upload because the canonical public Release is available to Actions.
+- Do not claim full APK analysis is complete before the refined report and follow-up traces are reviewed.
+- Do not assume a UI toggle is functional based only on a screenshot or string hit.
