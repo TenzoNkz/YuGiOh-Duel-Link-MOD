@@ -1,0 +1,70 @@
+name: APK Static Analysis
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Existing public GitHub Release tag to inspect
+        required: true
+        default: Platinmods_V11.0.0
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/apk-static-analysis.yml
+      - tools/analyze_release_apk.py
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apk-static-analysis-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  inspect-release-apk:
+    name: Download and inspect APK as data
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Analyze release asset
+        id: analyze
+        continue-on-error: true
+        env:
+          RELEASE_TAG: ${{ github.event.inputs.release_tag || 'Platinmods_V11.0.0' }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          python3 tools/analyze_release_apk.py \
+            --repo "$GITHUB_REPOSITORY" \
+            --release-tag "$RELEASE_TAG" \
+            --output APP_ANALYSIS_REPORT.md
+
+      - name: Commit generated report
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ ! -f APP_ANALYSIS_REPORT.md ]; then
+            echo "No report was produced; see the analysis step output."
+            exit 0
+          fi
+          git add APP_ANALYSIS_REPORT.md
+          if git diff --cached --quiet; then
+            echo "The report has no changes."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "docs: refresh APK static analysis report"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+
+      - name: Preserve analysis failure status
+        if: steps.analyze.outcome == 'failure'
+        run: |
+          echo "APK analysis did not finish cleanly. Inspect the report and this run's logs."
+          exit 1
