@@ -3,58 +3,49 @@
 Last checkpoint: 2026-10-26  
 Canonical repository: TenzoNkz/YuGiOh-Duel-Link-MOD  
 Canonical branch: main  
-Project status: initial APK inventory passed; deep static analysis has produced useful partial findings; the most recent refinement of the source-trace filter is queued in GitHub Actions.
+Status: APK archive inventory passed; the latest deeper static-analysis job succeeded, but its report remains partial because JADX reported 96 decompilation errors.
 
-## Verified repository and Release facts
-- Repository is public and the default branch is main.
-- Release URL: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/releases/tag/Platinmods_V11.0.0
+## Verified Release
+- Release: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/releases/tag/Platinmods_V11.0.0
 - Release title: Platinmods Original
-- Release tag: Platinmods_V11.0.0
 - APK asset: Yu-Gi-Oh.Duel.Links.Platinmods.V11.0.0.apk
-- Asset size: 127,424,878 bytes (about 121.52 MiB).
-- GitHub asset digest and independently calculated SHA-256: d7855754afbfe8e6b0a5db51ba47e4cefcd3079631190c11478d6556e06c56fb.
+- Size: 127,424,878 bytes (about 121.52 MiB)
+- GitHub-reported and independently calculated SHA-256: d7855754afbfe8e6b0a5db51ba47e4cefcd3079631190c11478d6556e06c56fb
 - Successful archive inventory: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40272870450
-- Most recent checkpoint validation pass: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40274001348
 
-## First-stage APK inventory — verified findings
-- Downloaded asset size matched GitHub's size.
-- Calculated SHA-256 matched GitHub's reported digest.
-- APK opened as ZIP; CRC scan passed.
-- Archive has 3,397 entries and about 307.33 MiB total uncompressed size.
-- Three DEX files found: classes.dex, classes2.dex, and classes3.dex.
-- Twenty native .so files found: ten under arm64-v8a and ten under armeabi-v7a.
-- Strong Unity/IL2CPP filename indicators found: assets/bin/Data/, libunity.so, libil2cpp.so, and global-metadata.dat.
-- Additional native files include libduel.so and libplatinmods.so.
-- META-INF/BNDLTOOL.SF and META-INF/BNDLTOOL.RSA exist; those entries do not validate APK signatures or establish signer trust.
+## Verified archive inventory
+- Downloaded size matched Release metadata; SHA-256 matched; ZIP/APK CRC scan passed.
+- 3,397 archive entries and about 307.33 MiB uncompressed.
+- Three DEX files; 20 native .so libraries (10 per ABI).
+- Unity/IL2CPP indicators include assets/bin/Data/, libunity.so, libil2cpp.so, and global-metadata.dat.
+- Relevant native library names include libduel.so and libplatinmods.so.
+- META-INF signature-related entries exist, but their presence alone does not validate the APK signature or signer trust.
 
-## Deep static analysis — verified partial findings
-- Apktool 3.0.3 successfully decoded the Android manifest; package name is jp.konami.duellinks.
-- Apktool decoded 18,765 output entries.
-- JADX 1.5.6 produced 8,194 Java source files but exited with code 3 and reported 96 decompilation errors. The report must remain labelled partial.
-- Decompiled output includes com.platinmods.FloatingModMenuService.java, PMLauncher.java, Preferences.java; PMLauncher loads the native library platinmods.
-- Native JNI strings include Java_com_platinmods_FloatingModMenuService_getFeatureList, settingsList, and Java_com_platinmods_Preferences_Changes.
-- libduel.so contains strings DLL_DuelGetDamageValue, DLL_DuelGetDamageSrcPosition, DLL_DuelGetDamageDstPosition, and DLL_DuelComCheatCard. These are symbol/string leads only, not proof of call sites, hookability, card-ownership filtering, server acceptance, or working damage modification.
-- The APK has not been executed or installed; no runtime or online duel behavior has been tested.
-
-## Current code-analysis workflow state
-- Report path: APK_CODE_ANALYSIS.md.
-- Workflow: .github/workflows/apk-code-analysis.yml, script: tools/analyze_apk_code.py.
-- Prior successful partial report run: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40273870551.
-- A more focused menu/native-string scan run was queued: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40274001397.
-- This latest script version restricts framework traces to com/platinmods classes and reports focused strings around menu/native damage symbols. Inspect the actual run conclusion and committed report before accepting findings.
-
-## User's objective
-Use GitHub as the durable source of truth for the full analysis workflow and recovery prompts. Investigate the existing Platinmods menu toggles and evaluate possible mods one by one using evidence. The initial requested idea was a Damage Multiplier that affects only the user's own cards.
+## Latest code-analysis findings
+- Latest successful run: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40274382469
+- Report: APK_CODE_ANALYSIS.md. Its status is CODE_ANALYSIS_PARTIAL despite the workflow job succeeding.
+- Apktool 3.0.3 decoded the manifest to package jp.konami.duellinks and generated 18,765 output entries.
+- JADX 1.5.6 generated 8,194 Java sources but exited with code 3 and reported 96 decompilation errors.
+- com/platinmods/FloatingModMenuService.java contains generic menu widgets and toggle callbacks that invoke Preferences.changeFeatureBoolean(...) and localChanges(...).
+- com/platinmods/Preferences.java declares native Changes(Context, int, int, boolean, String), routes changes to it, and stores preferences.
+- com/platinmods/PMLauncher.java declares native initialize(Context) and loads the platinmods library.
+- libplatinmods.so contains JNI string names including getFeatureList, settingsList, and Preferences_Changes.
+- libduel.so / IL2CPP metadata strings include DLL_DuelGetDamageValue, DLL_DuelGetDamageSrcPosition, DLL_DuelGetDamageDstPosition, DLL_DuelComCheatCard, CHEATCARD, PROCESS_DAMAGE variants, and ShowMonster/showMonster.
+- These are source/symbol/string clues only. They do not prove an in-game effect, exact mapping from overlay labels to feature IDs, native call flow, ownership filtering, or server behavior.
 
 ## Current evidence boundary
-- APK checksum/archive integrity and structural inventory are verified.
-- DEX/manifest/native-string analysis is partial. No full IL2CPP control-flow trace has been completed.
-- A file listing or string hit alone does not establish that a mod feature works. Static decompilation cannot prove server-authoritative behavior.
+- APK integrity and archive inventory are verified.
+- Generic Platinmods overlay and native callback architecture are visible in static output.
+- Feature-specific native dispatch and full Unity/IL2CPP control flow remain untraced.
+- APK has not been installed or executed; no runtime, live-match, or server-authority behavior has been tested.
+
+## User objective
+Use GitHub as the durable source of truth for the APK, analysis reports, candidate register, workflow status, and copy-ready chat recovery prompts. Evaluate existing Platinmods toggles and candidate modifications one by one. The original requested idea was a Damage Multiplier affecting only the user's own cards.
 
 ## Next action
-Open the latest APK Code Analysis run (starting with 40274001397). Confirm that it completes and commits APK_CODE_ANALYSIS.md. Review the focused source/native evidence, then trace the feature-list/preferences flow and update MOD_CANDIDATES.md one item at a time. If the latest run fails, inspect job logs and fix the smallest blocking issue.
+Inspect the newest Checkpoint Validation run triggered by report commit 9215f3d8e28713b76753f169fc96c00654194128. Then continue static tracing of the native menu dispatch: relate getFeatureList/settingsList to Preferences.Changes and the displayed feature IDs. Update MOD_CANDIDATES.md only with evidence-backed conclusions. Do not implement a live online damage-changing cheat; an isolated offline simulation is a separate possible task.
 
 ## Known boundaries
-- No APK patch or rebuilt APK has been produced.
+- No APK patch/rebuilt APK has been produced.
 - No live match, game account, or server behavior has been tested.
-- Do not label any candidate as working until there is specific evidence and a reproducible safe test.
+- Do not mark any candidate as working until a safe, reproducible test supports it.
