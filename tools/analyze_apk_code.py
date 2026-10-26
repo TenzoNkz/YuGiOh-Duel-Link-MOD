@@ -177,13 +177,18 @@ def scan_key_java_sources(root: Path, limit: int = 100) -> tuple[list[str], int]
     total = 0
     if not root.exists():
         return hits, total
+    target_sources = {
+        "com/platinmods/FloatingModMenuService.java",
+        "com/platinmods/PMLauncher.java",
+        "com/platinmods/Preferences.java",
+        "com/platinmods/MainActivity.java",
+    }
     for path in sorted(root.rglob("*.java")):
-        if path.name not in {
-            "FloatingModMenuService.java",
-            "PMLauncher.java",
-            "Preferences.java",
-            "MainActivity.java",
-        }:
+        try:
+            relative_path = path.relative_to(root).as_posix()
+        except ValueError:
+            continue
+        if relative_path not in target_sources:
             continue
         try:
             lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
