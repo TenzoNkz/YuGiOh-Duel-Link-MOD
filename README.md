@@ -1,6 +1,6 @@
 # YuGiOh-Duel-Link-MOD — GitHub Analysis Workspace
 
-This repository keeps the durable state for static APK analysis and evidence-based evaluation of possible Duel Links modifications. The APK itself is stored as a GitHub Release asset; it is not committed into the Git history.
+This repository keeps the durable state for static APK analysis and evidence-based evaluation of possible Duel Links modifications. The APK itself is stored as a GitHub Release asset; it is not committed into Git history.
 
 ## Canonical source
 - Repository: TenzoNkz/YuGiOh-Duel-Link-MOD
@@ -15,21 +15,25 @@ This repository keeps the durable state for static APK analysis and evidence-bas
 - MEMORY_INDEX.md — file index and load order.
 - PROJECT_STATE.md — verified project status and next action.
 - HANDOVER.md — exact last verified checkpoint and next action.
-- APP_ANALYSIS_REPORT.md — latest measured APK static inventory.
+- APP_ANALYSIS_REPORT.md — measured APK archive inventory.
+- APK_CODE_ANALYSIS.md — JADX/Apktool manifest, DEX, resource, and selected native-string analysis.
 - MOD_CANDIDATES.md — per-feature evidence/status register.
 - ANALYSIS_LOG.md — chronological log of durable findings and decisions.
 
 ## GitHub Actions workflows
 
 ### APK Static Analysis
-Open the repository's Actions tab and select APK Static Analysis. The workflow also attempts to start automatically when its workflow or analysis script changes on main. For a manual run, choose Run workflow and enter the existing release tag, normally Platinmods_V11.0.0.
+Open Actions → APK Static Analysis. It downloads the APK from the public Release as data, calculates SHA-256, checks ZIP/APK CRC integrity, inventories DEX/native libraries, and records common engine filename indicators. The result is committed to APP_ANALYSIS_REPORT.md.
 
-The workflow downloads the APK from the public Release as data, computes SHA-256, checks ZIP/APK integrity when within resource limits, inventories DEX and native libraries, and records likely engine filename indicators. It then commits APP_ANALYSIS_REPORT.md if the report changed.
+Latest successful initial inventory: [Run 40272870450](https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40272870450).
 
-The first stage does NOT execute or install the APK, decode the binary manifest, validate APK signing certificates, decompile feature logic, or prove that any toggle works. Review the report and Actions logs before drawing conclusions. If the workflow cannot push the generated report, check repository Actions permissions and the run log.
+### APK Code Analysis
+Open Actions → APK Code Analysis. Run manually with release tag Platinmods_V11.0.0 if no run is in progress. This workflow uses pinned JADX and Apktool releases to decode the Android manifest and inspect DEX/Java sources, resources, plus selected native/IL2CPP printable strings. It commits APK_CODE_ANALYSIS.md and keeps the decompiled source only in the temporary runner workspace.
+
+It does not execute or install the APK. Static search hits are leads, not proof that a menu toggle works. Full IL2CPP native control-flow analysis and runtime testing remain separate tasks.
 
 ### Checkpoint Validation
-This workflow checks that all durable checkpoint files exist and that CHAT_TRANSFER.md and HANDOVER.md retain required recovery markers. It does not validate APK features.
+Checks that required project-memory files exist and the transfer prompts preserve recovery markers. It does not validate APK feature behavior.
 
 ## Chat-limit recovery
 1. Open CHAT_TRANSFER.md.
@@ -38,7 +42,7 @@ This workflow checks that all durable checkpoint files exist and that CHAT_TRANS
 4. The new chat must read the live checkpoint documents and verify current Actions/Release evidence before proceeding.
 
 ## Analysis status
-The source Release metadata is confirmed. See APP_ANALYSIS_REPORT.md for the current status of binary verification. Do not describe the APK as fully analyzed until the report and subsequent code-level evidence support that claim.
+The initial archive inventory passed: downloaded bytes matched GitHub's reported SHA-256 and the ZIP CRC scan passed. See APP_ANALYSIS_REPORT.md for measurements and APK_CODE_ANALYSIS.md for the deeper static-analysis status. Do not describe the APK as fully analyzed until all relevant reports and code-level evidence support that claim.
 
 ## Scope
 The workflow treats the APK as data and never runs it. Candidate mods must be evidence-based and tested separately. No implementation should be presented as a working online-match modification without reproducible evidence.
