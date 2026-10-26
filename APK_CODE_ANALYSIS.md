@@ -1,6 +1,6 @@
 # APK Code Analysis Report
 
-**Generated:** 2026-10-26 05:26:21 UTC
+**Generated:** 2026-10-26 05:28:12 UTC
 **Method:** JADX/Apktool static analysis; the APK was not installed or executed.
 - Repository: TenzoNkz/YuGiOh-Duel-Link-MOD
 - Requested release tag: Platinmods_V11.0.0
@@ -35,10 +35,10 @@
 
 ### Apktool output excerpt
     I: Using Apktool 3.0.3 on source.apk with 4 threads
-    I: Baksmaling classes.dex...
     I: Baksmaling classes2.dex...
-    I: Loading resource table...
+    I: Baksmaling classes.dex...
     I: Baksmaling classes3.dex...
+    I: Loading resource table...
     I: Decoding value resources...
     I: Loading resource table from file: /home/runner/.local/share/apktool/framework/1.apk
     I: Decoding file resources...
@@ -50,17 +50,19 @@
     I: Copying unknown files...
 
 ### JADX output excerpt
-    INFO  - progress: 7461 of 8893 (83%)
-    INFO  - progress: 7551 of 8893 (84%)
-    INFO  - progress: 7657 of 8893 (86%)
-    INFO  - progress: 7736 of 8893 (86%)
-    INFO  - progress: 7810 of 8893 (87%)
-    INFO  - progress: 7822 of 8893 (87%)
-    INFO  - progress: 7858 of 8893 (88%)
+    INFO  - progress: 6678 of 8893 (75%)
+    INFO  - progress: 6872 of 8893 (77%)
+    INFO  - progress: 7046 of 8893 (79%)
+    INFO  - progress: 7098 of 8893 (79%)
+    INFO  - progress: 7209 of 8893 (81%)
+    INFO  - progress: 7288 of 8893 (81%)
+    INFO  - progress: 7385 of 8893 (83%)
+    INFO  - progress: 7469 of 8893 (83%)
+    INFO  - progress: 7559 of 8893 (84%)
+    INFO  - progress: 7769 of 8893 (87%)
+    INFO  - progress: 7846 of 8893 (88%)
     INFO  - progress: 8001 of 8893 (89%)
-    INFO  - progress: 8042 of 8893 (90%)
-    INFO  - progress: 8137 of 8893 (91%)
-    INFO  - progress: 8154 of 8893 (91%)
+    INFO  - progress: 8143 of 8893 (91%)
     INFO  - progress: 8269 of 8893 (92%)
     INFO  - progress: 8535 of 8893 (95%)
     INFO  - progress: 8535 of 8893 (95%)
@@ -69,9 +71,7 @@
     INFO  - progress: 8535 of 8893 (95%)
     INFO  - progress: 8535 of 8893 (95%)
     INFO  - progress: 8535 of 8893 (95%)
-    INFO  - progress: 8535 of 8893 (95%)
-    INFO  - progress: 8729 of 8893 (98%)
-    INFO  - progress: 8889 of 8893 (99%)
+    INFO  - progress: 8625 of 8893 (96%)
                                                                  
     ERROR - finished with errors, count: 96
 
@@ -119,107 +119,63 @@
 - kotlin/collections/builders/MapBuilder.java:534: throw new IllegalStateException("This cannot happen with fixed magic multiplier and grow-only hash array. Have object hashCodes changed?");
 
 ## Key Platinmods menu-framework source references
-- Matching source lines found: 135; displaying context for up to 100 lines.
-- com/platinmods/FloatingModMenuService.java:60: /* JADX INFO: loaded from: classes3.dex */
-- com/platinmods/FloatingModMenuService.java:61: public class FloatingModMenuService extends Service {
-- com/platinmods/FloatingModMenuService.java:62: public static final String TAG = "Mod_Menu";
-- com/platinmods/FloatingModMenuService.java:65: GradientDrawable gdMenuBody;
-- com/platinmods/FloatingModMenuService.java:66: String inputFieldFeatureName;
-- com/platinmods/FloatingModMenuService.java:67: int inputFieldFeatureNum;
-- com/platinmods/FloatingModMenuService.java:66: String inputFieldFeatureName;
-- com/platinmods/FloatingModMenuService.java:67: int inputFieldFeatureNum;
-- com/platinmods/FloatingModMenuService.java:68: TextView inputFieldTextView;
-- com/platinmods/FloatingModMenuService.java:87: final int MENU_BG_COLOR = Color.parseColor("#DD1C2A35");
-- com/platinmods/FloatingModMenuService.java:88: final int MENU_FEATURE_BG_COLOR = Color.parseColor("#FF171E24");
-- com/platinmods/FloatingModMenuService.java:89: final int MENU_WIDTH = 290;
-- com/platinmods/FloatingModMenuService.java:120: button.setBackgroundColor(this.BTN_COLOR);
-- com/platinmods/FloatingModMenuService.java:121: button.setOnClickListener(new View.OnClickListener() { // from class: com.platinmods.FloatingModMenuService.12
-- com/platinmods/FloatingModMenuService.java:122: @Override // android.view.View.OnClickListener
-- com/platinmods/FloatingModMenuService.java:123: public void onClick(View view) {
-- com/platinmods/FloatingModMenuService.java:124: FloatingModMenuService.this.localChanges(i, false);
-- com/platinmods/FloatingModMenuService.java:125: Preferences.changeFeatureInt(str, i, 0);
-- com/platinmods/FloatingModMenuService.java:124: FloatingModMenuService.this.localChanges(i, false);
-- com/platinmods/FloatingModMenuService.java:125: Preferences.changeFeatureInt(str, i, 0);
-- com/platinmods/FloatingModMenuService.java:126: }
-- com/platinmods/FloatingModMenuService.java:140: button.setBackgroundColor(this.BTN_COLOR);
-- com/platinmods/FloatingModMenuService.java:141: button.setOnClickListener(new View.OnClickListener() { // from class: com.platinmods.FloatingModMenuService.13
-- com/platinmods/FloatingModMenuService.java:142: @Override // android.view.View.OnClickListener
-- com/platinmods/FloatingModMenuService.java:146: intent.setData(Uri.parse(str2));
-- com/platinmods/FloatingModMenuService.java:147: FloatingModMenuService.this.startActivity(intent);
-- com/platinmods/FloatingModMenuService.java:148: }
-- com/platinmods/FloatingModMenuService.java:162: String strReplace = str.replace("OnOff_", "");
-- com/platinmods/FloatingModMenuService.java:163: if (Preferences.loadPrefBoolean(str, i)) {
-- com/platinmods/FloatingModMenuService.java:164: button.setText(strReplace + ": ON");
-- com/platinmods/FloatingModMenuService.java:171: }
-- com/platinmods/FloatingModMenuService.java:172: button.setOnClickListener(new View.OnClickListener(z, i, strReplace, button) { // from class: com.platinmods.FloatingModMenuService.14
-- com/platinmods/FloatingModMenuService.java:173: boolean isOn;
-- com/platinmods/FloatingModMenuService.java:174: final /* synthetic */ Button val$button;
-- com/platinmods/FloatingModMenuService.java:175: final /* synthetic */ int val$featureNum;
-- com/platinmods/FloatingModMenuService.java:176: final /* synthetic */ String val$finalFeatureName;
-- com/platinmods/FloatingModMenuService.java:175: final /* synthetic */ int val$featureNum;
-- com/platinmods/FloatingModMenuService.java:176: final /* synthetic */ String val$finalFeatureName;
-- com/platinmods/FloatingModMenuService.java:177: final /* synthetic */ boolean val$finalIsOn;
-- com/platinmods/FloatingModMenuService.java:180: this.val$finalIsOn = z;
-- com/platinmods/FloatingModMenuService.java:181: this.val$featureNum = i;
-- com/platinmods/FloatingModMenuService.java:182: this.val$finalFeatureName = strReplace;
-- com/platinmods/FloatingModMenuService.java:181: this.val$featureNum = i;
-- com/platinmods/FloatingModMenuService.java:182: this.val$finalFeatureName = strReplace;
-- com/platinmods/FloatingModMenuService.java:183: this.val$button = button;
-- com/platinmods/FloatingModMenuService.java:188: public void onClick(View view) {
-- com/platinmods/FloatingModMenuService.java:189: FloatingModMenuService.this.localChanges(this.val$featureNum, this.isOn);
-- com/platinmods/FloatingModMenuService.java:190: Preferences.changeFeatureBoolean(this.val$finalFeatureName, this.val$featureNum, this.isOn);
-- com/platinmods/FloatingModMenuService.java:189: FloatingModMenuService.this.localChanges(this.val$featureNum, this.isOn);
-- com/platinmods/FloatingModMenuService.java:190: Preferences.changeFeatureBoolean(this.val$finalFeatureName, this.val$featureNum, this.isOn);
-- com/platinmods/FloatingModMenuService.java:191: if (this.isOn) {
-- com/platinmods/FloatingModMenuService.java:192: this.val$button.setText(this.val$finalFeatureName + ": ON");
-- com/platinmods/FloatingModMenuService.java:193: this.val$button.setBackgroundColor(Color.parseColor("#003300"));
-- com/platinmods/FloatingModMenuService.java:195: } else {
-- com/platinmods/FloatingModMenuService.java:196: this.val$button.setText(this.val$finalFeatureName + ": OFF");
-- com/platinmods/FloatingModMenuService.java:197: this.val$button.setBackgroundColor(Color.parseColor("#7f0000"));
-- com/platinmods/FloatingModMenuService.java:220: checkBox.setTextColor(this.TEXT_COLOR_2);
-- com/platinmods/FloatingModMenuService.java:221: checkBox.setChecked(Preferences.loadPrefBoolean(str, i));
-- com/platinmods/FloatingModMenuService.java:222: checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() { // from class: com.platinmods.FloatingModMenuService.17
-- com/platinmods/FloatingModMenuService.java:221: checkBox.setChecked(Preferences.loadPrefBoolean(str, i));
-- com/platinmods/FloatingModMenuService.java:222: checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() { // from class: com.platinmods.FloatingModMenuService.17
-- com/platinmods/FloatingModMenuService.java:223: @Override // android.widget.CompoundButton.OnCheckedChangeListener
-- com/platinmods/FloatingModMenuService.java:224: public void onCheckedChanged(CompoundButton compoundButton, boolean z) {
-- com/platinmods/FloatingModMenuService.java:225: if (checkBox.isChecked()) {
-- com/platinmods/FloatingModMenuService.java:226: Preferences.changeFeatureBoolean(str, i, z);
-- com/platinmods/FloatingModMenuService.java:227: } else {
-- com/platinmods/FloatingModMenuService.java:228: Preferences.changeFeatureBoolean(str, i, z);
-- com/platinmods/FloatingModMenuService.java:229: }
-- com/platinmods/FloatingModMenuService.java:235: private View RadioButton(final int i, final String str, String str2) {
-- com/platinmods/FloatingModMenuService.java:236: FloatingModMenuService floatingModMenuService = this;
-- com/platinmods/FloatingModMenuService.java:237: LinkedList linkedList = new LinkedList(Arrays.asList(str2.split(",")));
-- com/platinmods/FloatingModMenuService.java:238: final TextView textView = new TextView(floatingModMenuService);
-- com/platinmods/FloatingModMenuService.java:239: textView.setText(str + ":");
-- com/platinmods/FloatingModMenuService.java:240: textView.setTextColor(floatingModMenuService.TEXT_COLOR_2);
-- com/platinmods/FloatingModMenuService.java:241: final RadioGroup radioGroup = new RadioGroup(floatingModMenuService);
-- com/platinmods/FloatingModMenuService.java:240: textView.setTextColor(floatingModMenuService.TEXT_COLOR_2);
-- com/platinmods/FloatingModMenuService.java:241: final RadioGroup radioGroup = new RadioGroup(floatingModMenuService);
-- com/platinmods/FloatingModMenuService.java:242: radioGroup.setPadding(10, 5, 10, 5);
-- com/platinmods/FloatingModMenuService.java:249: while (i2 < linkedList.size()) {
-- com/platinmods/FloatingModMenuService.java:250: final RadioButton radioButton = new RadioButton(floatingModMenuService);
-- com/platinmods/FloatingModMenuService.java:251: final String str3 = (String) linkedList.get(i2);
-- com/platinmods/FloatingModMenuService.java:255: int[] iArr4 = iArr;
-- com/platinmods/FloatingModMenuService.java:256: View.OnClickListener onClickListener = new View.OnClickListener() { // from class: com.platinmods.FloatingModMenuService.18
-- com/platinmods/FloatingModMenuService.java:257: @Override // android.view.View.OnClickListener
-- com/platinmods/FloatingModMenuService.java:260: textView.setText(Html.fromHtml("<font face='roboto'>" + str + ": <font color='#41c300'>" + str3 + "</font>"));
-- com/platinmods/FloatingModMenuService.java:261: Preferences.changeFeatureInt(str, i, radioGroup.indexOfChild(radioButton));
-- com/platinmods/FloatingModMenuService.java:262: }
-- com/platinmods/FloatingModMenuService.java:272: i2 = i3 + 1;
-- com/platinmods/FloatingModMenuService.java:273: floatingModMenuService = this;
-- com/platinmods/FloatingModMenuService.java:274: colorStateList = colorStateList2;
-- com/platinmods/FloatingModMenuService.java:299: private View SeekBar(final int i, final String str, final int i2, int i3) {
-- com/platinmods/FloatingModMenuService.java:300: int iLoadPrefInt = Preferences.loadPrefInt(str, i);
-- com/platinmods/FloatingModMenuService.java:301: LinearLayout linearLayout = new LinearLayout(this);
-- com/platinmods/FloatingModMenuService.java:314: seekBar.setProgress(iLoadPrefInt == 0 ? i2 : iLoadPrefInt);
-- com/platinmods/FloatingModMenuService.java:315: seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() { // from class: com.platinmods.FloatingModMenuService.11
-- com/platinmods/FloatingModMenuService.java:316: @Override // android.widget.SeekBar.OnSeekBarChangeListener
-- com/platinmods/FloatingModMenuService.java:328: }
-- com/platinmods/FloatingModMenuService.java:329: Preferences.changeFeatureInt(str2, i6, i7);
-- com/platinmods/FloatingModMenuService.java:330: TextView textView2 = textView;
-- com/platinmods/FloatingModMenuService.java:366: spinner.setAdapter((SpinnerAdapter) arrayAdapter);
+- Matching source lines found: 904; displaying context for up to 56 lines.
+- com/platinmods/FloatingModMenuService.java:1: package com.platinmods;
+- com/platinmods/FloatingModMenuService.java:2: 
+- com/platinmods/FloatingModMenuService.java:3: import android.R;
+- com/platinmods/FloatingModMenuService.java:4: import android.animation.ArgbEvaluator;
+- com/platinmods/FloatingModMenuService.java:5: import android.animation.TimeAnimator;
+- com/platinmods/FloatingModMenuService.java:6: import android.animation.ValueAnimator;
+- com/platinmods/FloatingModMenuService.java:7: import android.app.ActivityManager;
+- com/platinmods/FloatingModMenuService.java:8: import android.app.AlertDialog;
+- com/platinmods/FloatingModMenuService.java:9: import android.app.Service;
+- com/platinmods/FloatingModMenuService.java:10: import android.content.Intent;
+- com/platinmods/FloatingModMenuService.java:11: import android.content.res.ColorStateList;
+- com/platinmods/FloatingModMenuService.java:12: import android.graphics.BitmapFactory;
+- com/platinmods/FloatingModMenuService.java:13: import android.graphics.Color;
+- com/platinmods/FloatingModMenuService.java:14: import android.graphics.PorterDuff;
+- com/platinmods/FloatingModMenuService.java:15: import android.graphics.Typeface;
+- com/platinmods/FloatingModMenuService.java:16: import android.graphics.drawable.GradientDrawable;
+- com/platinmods/FloatingModMenuService.java:17: import android.net.Uri;
+- com/platinmods/FloatingModMenuService.java:18: import android.os.Build;
+- com/platinmods/FloatingModMenuService.java:19: import android.os.Handler;
+- com/platinmods/FloatingModMenuService.java:20: import android.os.IBinder;
+- com/platinmods/FloatingModMenuService.java:21: import android.text.Html;
+- com/platinmods/FloatingModMenuService.java:22: import android.text.InputFilter;
+- com/platinmods/FloatingModMenuService.java:23: import android.text.TextUtils;
+- com/platinmods/FloatingModMenuService.java:24: import android.text.method.DigitsKeyListener;
+- com/platinmods/FloatingModMenuService.java:25: import android.util.Base64;
+- com/platinmods/FloatingModMenuService.java: displayed 25 selected lines; 877 cumulative source matches scanned so far.
+- com/platinmods/PMLauncher.java:67: private static native void initialize(Context context);
+- com/platinmods/PMLauncher.java:70: System.loadLibrary("platinmods");
+- com/platinmods/PMLauncher.java: displayed 2 selected lines; 879 cumulative source matches scanned so far.
+- com/platinmods/Preferences.java:4: import android.content.SharedPreferences;
+- com/platinmods/Preferences.java:11: private static SharedPreferences.Editor editor;
+- com/platinmods/Preferences.java:12: public static boolean savePref = false;
+- com/platinmods/Preferences.java:16: public static native void Changes(Context context2, int i, int i2, boolean z, String str);
+- com/platinmods/Preferences.java:18: public static void changeFeatureBoolean(String str, int i, boolean z) {
+- com/platinmods/Preferences.java:26: savePref = z;
+- com/platinmods/Preferences.java:28: Changes(context, i, 0, z, str);
+- com/platinmods/Preferences.java:29: SharedPreferences.Editor editorEdit = PreferenceManager.getDefaultSharedPreferences(context).edit();
+- com/platinmods/Preferences.java:34: public static void changeFeatureInt(String str, int i, int i2) {
+- com/platinmods/Preferences.java:35: Changes(context, i, i2, false, str);
+- com/platinmods/Preferences.java:36: SharedPreferences.Editor editorEdit = PreferenceManager.getDefaultSharedPreferences(context).edit();
+- com/platinmods/Preferences.java:41: public static boolean loadPrefBoolean(String str, int i) {
+- com/platinmods/Preferences.java:43: SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+- com/platinmods/Preferences.java:45: savePref = defaultSharedPreferences.getBoolean(String.valueOf(i), false);
+- com/platinmods/Preferences.java:47: if (!savePref && i > 0) {
+- com/platinmods/Preferences.java:50: boolean z = defaultSharedPreferences.getBoolean(String.valueOf(i), false);
+- com/platinmods/Preferences.java:51: Changes(context, i, 0, z, str);
+- com/platinmods/Preferences.java:58: public static int loadPrefInt(String str, int i) {
+- com/platinmods/Preferences.java:60: if (savePref) {
+- com/platinmods/Preferences.java:61: int i2 = PreferenceManager.getDefaultSharedPreferences(context).getInt(String.valueOf(i), 0);
+- com/platinmods/Preferences.java:62: Changes(context, i, i2, false, str);
+- com/platinmods/Preferences.java: displayed 21 selected lines; 900 cumulative source matches scanned so far.
+- com/platinmods/MainActivity.java:10: public static void CallToast(final Context context) {
+- com/platinmods/MainActivity.java:14: MainActivity.Toast(context);
+- com/platinmods/MainActivity.java:23: context.startService(new Intent(context, (Class<?>) FloatingModMenuService.class));
+- com/platinmods/MainActivity.java:28: public static native void Toast(Context context);
+- com/platinmods/MainActivity.java: displayed 4 selected lines; 904 cumulative source matches scanned so far.
 
 ## Search hits in decoded resources
 - Matching lines found: 0; displaying up to 0.
