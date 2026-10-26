@@ -5,18 +5,21 @@ Repository: TenzoNkz/YuGiOh-Duel-Link-MOD
 Branch: main
 
 ## Last verified step
-1. Confirmed the public repository and default branch main.
-2. Confirmed Release Platinmods Original, tag Platinmods_V11.0.0.
-3. Confirmed the Release API lists Yu-Gi-Oh.Duel.Links.Platinmods.V11.0.0.apk at 127,424,878 bytes and reports SHA-256 d7855754afbfe8e6b0a5db51ba47e4cefcd3079631190c11478d6556e06c56fb.
-4. The uploaded asset has not yet been independently downloaded, checksum-checked, or inventoried by a completed project Actions run at this checkpoint.
+1. Confirmed the public Release Platinmods Original, tag Platinmods_V11.0.0.
+2. Downloaded the APK through GitHub Actions, verified the byte count and SHA-256 against Release metadata, opened the archive successfully, and passed the ZIP CRC scan.
+3. Inventory report committed at APP_ANALYSIS_REPORT.md. Successful run: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40272870450
+4. Checkpoint Validation passed: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40272812594
+5. Initial archive evidence indicates Unity/IL2CPP components and the native libraries libduel.so and libplatinmods.so. This is structural evidence only, not proof of toggle functionality.
+6. Added the deeper APK Code Analysis workflow and script, pinned to JADX 1.5.6 and Apktool 3.0.3.
 
-## Current workstream
-Set up durable GitHub memory records plus a safe, non-executing APK static inventory workflow. The goal is to avoid relying on a chat transcript after a chat limit.
+## Current workflow state
+APK Code Analysis run 40273104014 was observed as queued after creation:
+https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40273104014
 
 ## NEXT ACTION
-Open the repository's Actions tab and inspect the newest “APK Static Analysis” run. If it has not run, use Run workflow and set release_tag to Platinmods_V11.0.0. Once complete, verify the report commit and record the run URL/status and concrete report findings here.
+Refresh run 40273104014. If it has completed, verify conclusion and inspect APK_CODE_ANALYSIS.md. If still queued/running, do not claim completion; continue with any other non-conflicting checkpoint work. If failed, inspect the job logs, fix the script/workflow, and rerun.
 
 ## Do not repeat
-- Do not ask the user to re-upload the APK merely because a chat session changed; the public Release is the canonical source.
-- Do not claim full APK analysis is complete just because the Release exists or the workflow file is committed.
-- Do not assume a UI toggle is functional based only on the screenshot.
+- Do not ask the user to re-upload the APK because a chat changed; the canonical public Release is available to Actions.
+- Do not claim full APK analysis is complete before the deeper report is reviewed.
+- Do not assume a UI toggle is functional based only on the screenshot or a matching string.
