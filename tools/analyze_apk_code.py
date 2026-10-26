@@ -45,13 +45,13 @@ NATIVE_TERMS = re.compile(
 )
 TRACE_TERMS = re.compile(
     r"getFeatureList|settingsList|Preferences|onCheckedChanged|"
-    r"setOnCheckedChangeListener|System\\.loadLibrary|native\\s|"
+    r"setOnCheckedChangeListener|System\.loadLibrary|native\s|"
     r"feature|changes|FloatingModMenuService|PMLauncher",
     re.IGNORECASE,
 )
 FOCUSED_BINARY_TERMS = re.compile(
-    r"AutoPlay\\s*Bot|Show\\s*Monster(?:\\s*&\\s*Status\\s*Details)?|"
-    r"Reveal\\s*Card\\s*Face|CHEATCARD|PROCESS_DAMAGE[0-9]?|"
+    r"AutoPlay\s*Bot|Show\s*Monster(?:\s*&\s*Status\s*Details)?|"
+    r"Reveal\s*Card\s*Face|CHEATCARD|PROCESS_DAMAGE[0-9]?|"
     r"DLL_DuelGetDamageValue|DLL_DuelComCheatCard|"
     r"Java_com_platinmods_(?:FloatingModMenuService_(?:getFeatureList|settingsList)|Preferences_Changes)",
     re.IGNORECASE,
@@ -356,6 +356,7 @@ def main() -> int:
             if not source_root.exists():
                 source_root = jadx_out
             source_hits, source_hit_count = scan_text_files(source_root, limit=100)
+            key_source_hits, key_source_hit_count = scan_key_java_sources(source_root, limit=100)
             key_source_hits, key_source_hit_count = scan_key_java_sources(source_root, limit=100)
             resource_hits, resource_hit_count = scan_text_files(apktool_out / "res", limit=40, pattern=RESOURCE_TERMS)
 
