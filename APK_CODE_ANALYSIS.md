@@ -1,6 +1,6 @@
 # APK Code Analysis Report
 
-**Generated:** 2026-10-26 05:24:58 UTC
+**Generated:** 2026-10-26 05:26:21 UTC
 **Method:** JADX/Apktool static analysis; the APK was not installed or executed.
 - Repository: TenzoNkz/YuGiOh-Duel-Link-MOD
 - Requested release tag: Platinmods_V11.0.0
@@ -37,8 +37,8 @@
     I: Using Apktool 3.0.3 on source.apk with 4 threads
     I: Baksmaling classes.dex...
     I: Baksmaling classes2.dex...
-    I: Baksmaling classes3.dex...
     I: Loading resource table...
+    I: Baksmaling classes3.dex...
     I: Decoding value resources...
     I: Loading resource table from file: /home/runner/.local/share/apktool/framework/1.apk
     I: Decoding file resources...
@@ -50,20 +50,18 @@
     I: Copying unknown files...
 
 ### JADX output excerpt
-    INFO  - progress: 6638 of 8893 (74%)
-    INFO  - progress: 6785 of 8893 (76%)
-    INFO  - progress: 6983 of 8893 (78%)
-    INFO  - progress: 7098 of 8893 (79%)
-    INFO  - progress: 7172 of 8893 (80%)
-    INFO  - progress: 7250 of 8893 (81%)
-    INFO  - progress: 7378 of 8893 (82%)
-    INFO  - progress: 7448 of 8893 (83%)
-    INFO  - progress: 7583 of 8893 (85%)
-    INFO  - progress: 7771 of 8893 (87%)
+    INFO  - progress: 7461 of 8893 (83%)
+    INFO  - progress: 7551 of 8893 (84%)
+    INFO  - progress: 7657 of 8893 (86%)
+    INFO  - progress: 7736 of 8893 (86%)
+    INFO  - progress: 7810 of 8893 (87%)
     INFO  - progress: 7822 of 8893 (87%)
+    INFO  - progress: 7858 of 8893 (88%)
     INFO  - progress: 8001 of 8893 (89%)
+    INFO  - progress: 8042 of 8893 (90%)
     INFO  - progress: 8137 of 8893 (91%)
-    INFO  - progress: 8217 of 8893 (92%)
+    INFO  - progress: 8154 of 8893 (91%)
+    INFO  - progress: 8269 of 8893 (92%)
     INFO  - progress: 8535 of 8893 (95%)
     INFO  - progress: 8535 of 8893 (95%)
     INFO  - progress: 8535 of 8893 (95%)
@@ -71,7 +69,9 @@
     INFO  - progress: 8535 of 8893 (95%)
     INFO  - progress: 8535 of 8893 (95%)
     INFO  - progress: 8535 of 8893 (95%)
-    INFO  - progress: 8618 of 8893 (96%)
+    INFO  - progress: 8535 of 8893 (95%)
+    INFO  - progress: 8729 of 8893 (98%)
+    INFO  - progress: 8889 of 8893 (99%)
                                                                  
     ERROR - finished with errors, count: 96
 
