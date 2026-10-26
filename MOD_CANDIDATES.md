@@ -2,35 +2,36 @@
 
 Status labels: NOT_INSPECTED, INDICATED_BY_STATIC_EVIDENCE, NEEDS_DEEPER_ANALYSIS, TESTED_IN_ISOLATED_ENVIRONMENT, NOT_SUPPORTED.
 
-The APK archive integrity is verified. Initial decompilation found Platinmods menu-framework classes and damage-related native string names, but JADX reported 96 errors. No feature is currently confirmed as working from the code report alone.
+APK checksum and archive CRC verification passed. The deeper code-analysis workflow succeeded, but the report is partial because JADX reported 96 decompilation errors. Static strings and UI labels do not prove gameplay behavior.
 
-## Verified structural/code clues
-- Three DEX files and 20 native shared libraries across arm64-v8a and armeabi-v7a.
-- Unity/IL2CPP indicators: assets/bin/Data/, libunity.so, libil2cpp.so, and global-metadata.dat.
-- Apktool-decoded package: jp.konami.duellinks.
-- Decompiled classes include com.platinmods.FloatingModMenuService and PMLauncher; PMLauncher loads native library platinmods.
-- Native JNI strings include getFeatureList, settingsList, and Preferences_Changes callbacks.
-- libduel.so printable strings include DLL_DuelGetDamageValue and DLL_DuelComCheatCard.
-- These strings do not prove invocation/call flow, parameters, card ownership filters, server authority, or that any feature works.
+## Verified architecture evidence
+- Decoded manifest package: jp.konami.duellinks.
+- Unity/IL2CPP indicators and 20 native shared libraries; notable names include libduel.so and libplatinmods.so.
+- Decompiled com/platinmods/FloatingModMenuService.java creates generic menu widgets. Toggle callbacks call Preferences.changeFeatureBoolean(...) and localChanges(...).
+- com/platinmods/Preferences.java declares native Changes(Context, int, int, boolean, String) and saves preferences.
+- com/platinmods/PMLauncher.java declares native initialize(Context) and calls System.loadLibrary("platinmods").
+- libplatinmods.so contains JNI string names for getFeatureList, settingsList, and Preferences_Changes.
+- global-metadata.dat contains ShowMonster/showMonster, CHEATCARD, PROCESS_DAMAGE variants; libduel.so includes DLL_DuelGetDamageValue and DLL_DuelComCheatCard strings.
+- Evidence does not establish call flow, feature ID mapping, ownership filters, server authority, or successful in-game effects.
 
 ## Candidate register
 
-| Candidate | Current status | What evidence is next | Scope |
+| Candidate | Current status | Evidence / next check | Scope |
 |---|---|---|---|
-| Existing AutoPlay Bot toggle | NEEDS_DEEPER_ANALYSIS | Locate the exact feature ID/label and trace its native callback; a menu label is not proof of effect | Audit existing behavior |
-| Show Monster & Status Details | NEEDS_DEEPER_ANALYSIS | Locate feature label/ID and determine what values are read and displayed | Prefer local visual analysis |
-| Reveal Card Face | NEEDS_DEEPER_ANALYSIS | Locate feature label/ID and determine the source of card-face information | Analyze visibility/data flow |
-| Add another menu toggle | INDICATED_BY_STATIC_EVIDENCE | Generic menu framework and JNI callbacks exist; trace how feature strings/IDs are parsed and dispatched | UI architecture study only |
-| Visual/accessibility adjustments | NEEDS_DEEPER_ANALYSIS | Inspect relevant layout/resources and test local-only display changes in isolation | Potential isolated test |
-| Offline damage-multiplier simulation | NOT_INSPECTED | Create a separate deterministic test model with unit tests for selected entities | Offline simulation only |
-| Damage multiplier affecting only the user's cards in online duels | NEEDS_DEEPER_ANALYSIS | Damage-related symbols were found, but call sites, ownership checks, and server-authoritative behavior are unknown | Do not implement or provide instructions for live-match cheating |
+| Existing AutoPlay Bot toggle | NEEDS_DEEPER_ANALYSIS | Screenshot proves its label is shown, but the current static scan does not map it to a native feature ID/callback. Trace getFeatureList/native dispatch. | Audit only |
+| Show Monster & Status Details | INDICATED_BY_STATIC_EVIDENCE | ShowMonster/showMonster strings exist in IL2CPP metadata, but linkage to the exact overlay label and its data source is not proven. | Trace data path; favor local display |
+| Reveal Card Face | NEEDS_DEEPER_ANALYSIS | Exact label/feature ID and callback mapping remain unverified. | Analyze visibility/data flow |
+| Add another menu toggle (UI only) | INDICATED_BY_STATIC_EVIDENCE | Generic toggle controls and preference/native callbacks are present; UI is supported by the existing framework, but any gameplay effect needs its own native dispatch. | UI/architecture study only |
+| Visual/accessibility adjustment of overlay | INDICATED_BY_STATIC_EVIDENCE | Framework source contains menu dimensions/colors and local UI-control construction. | Test locally; no gameplay change |
+| Offline damage-multiplier simulation | NOT_INSPECTED | Create a separate deterministic model with unit tests for selected entities. | Offline simulation only |
+| Damage Multiplier affecting only the user's cards in online duels | NEEDS_DEEPER_ANALYSIS | Damage-related strings exist, but call sites, ownership-specific behavior, and server-authoritative acceptance are unknown. | No live-match cheat implementation |
 
-## Per-candidate evidence template
+## Required candidate evidence
 1. Exact APK Release/tag and checksum.
-2. File/class/method/resource/symbol evidence with context.
-3. What is proven and what remains a hypothesis.
-4. Dependencies, compatibility/crash risks, and local-vs-server behavior if known.
-5. Reproducible isolated test result if applicable.
-6. Status label with justification.
+2. Exact class/method/resource/native symbol and surrounding context.
+3. What is directly proven versus hypothesized.
+4. Dependencies, compatibility/crash risks, and local-versus-server behavior if known.
+5. Reproducible isolated test and result if safe.
+6. Status label and justification.
 
-Do not label a mod as working based only on strings, menu labels, successful decompilation, or a successful build.
+Do not call a mod working based only on strings, labels, decompilation, or a successful build.
