@@ -1,0 +1,74 @@
+name: Checkpoint Validation
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - README.md
+      - CHAT_TRANSFER.md
+      - CHAT_RULES.md
+      - MEMORY_INDEX.md
+      - PROJECT_STATE.md
+      - HANDOVER.md
+      - APP_ANALYSIS_REPORT.md
+      - MOD_CANDIDATES.md
+      - ANALYSIS_LOG.md
+      - .github/workflows/checkpoint-validation.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-checkpoints:
+    name: Validate durable project records
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check required files and transfer prompts
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import sys
+
+          required = [
+              "README.md",
+              "CHAT_TRANSFER.md",
+              "CHAT_RULES.md",
+              "MEMORY_INDEX.md",
+              "PROJECT_STATE.md",
+              "HANDOVER.md",
+              "APP_ANALYSIS_REPORT.md",
+              "MOD_CANDIDATES.md",
+              "ANALYSIS_LOG.md",
+          ]
+          missing = [name for name in required if not Path(name).is_file()]
+          empty = [name for name in required if Path(name).is_file() and not Path(name).read_text(encoding="utf-8").strip()]
+          transfer = Path("CHAT_TRANSFER.md").read_text(encoding="utf-8") if Path("CHAT_TRANSFER.md").exists() else ""
+          project_state = Path("PROJECT_STATE.md").read_text(encoding="utf-8") if Path("PROJECT_STATE.md").exists() else ""
+          handover = Path("HANDOVER.md").read_text(encoding="utf-8") if Path("HANDOVER.md").exists() else ""
+
+          problems = []
+          if missing:
+              problems.append("Missing required files: " + ", ".join(missing))
+          if empty:
+              problems.append("Empty required files: " + ", ".join(empty))
+          for marker in ("Diskusi!", "Eksekusi Analisa APK!", "Chat Stuck!", "CANONICAL REPOSITORY"):
+              if marker not in transfer:
+                  problems.append("CHAT_TRANSFER.md is missing marker: " + marker)
+          if "TenzoNkz/YuGiOh-Duel-Link-MOD" not in project_state:
+              problems.append("PROJECT_STATE.md is missing the canonical repository identifier.")
+          if "NEXT ACTION" not in handover:
+              problems.append("HANDOVER.md needs an explicit NEXT ACTION.")
+
+          if problems:
+              print("Checkpoint validation failed:")
+              for problem in problems:
+                  print("- " + problem)
+              sys.exit(1)
+
+          print("Checkpoint validation passed. All required records exist and transfer prompts contain the expected markers.")
+          PY
