@@ -29,7 +29,7 @@ APKTOOL_URL = "https://github.com/iBotPeaches/Apktool/releases/download/v3.0.3/a
 ANDROID_NS = "{http://schemas.android.com/apk/res/android}"
 TERMS = re.compile(
     r"autoplay|auto.?play|show.?monster|status.?details|reveal.?card|"
-    r"platinmods|g-bo|damage|multipli|cheat|bot",
+    r"platinmods|g-bo|damage|multipli|cheat|(?<![a-z])bot(?![a-z])",
     re.IGNORECASE,
 )
 
@@ -269,7 +269,10 @@ def main() -> int:
             manifest_lines = decode_manifest(apktool_out)
             java_sources = list(jadx_out.rglob("*.java")) if jadx_out.exists() else []
             decoded_resources = list(apktool_out.rglob("*")) if apktool_out.exists() else []
-            source_hits, source_hit_count = scan_text_files(jadx_out, limit=100)
+            source_root = jadx_out / "sources"
+            if not source_root.exists():
+                source_root = jadx_out
+            source_hits, source_hit_count = scan_text_files(source_root, limit=100)
             resource_hits, resource_hit_count = scan_text_files(apktool_out / "res", limit=40)
 
             native_hits: list[str] = []
@@ -296,6 +299,9 @@ def main() -> int:
                         native_hits.append(f"### {name}")
                         native_hits.extend(f"- {value}" for value in matches)
 
+            combined_jadx_output = (jadx_result.get("stdout", "") or "") + "\n" + (jadx_result.get("stderr", "") or "")
+            error_match = re.search(r"finished with errors, count:\\s*(\\d+)", combined_jadx_output, re.IGNORECASE)
+            jadx_error_count = int(error_match.group(1)) if error_match else 0
             status = "CODE_ANALYSIS_COMPLETE"
             if apktool_result["returncode"] != 0 or jadx_result["returncode"] != 0:
                 status = "CODE_ANALYSIS_PARTIAL"
@@ -309,6 +315,7 @@ def main() -> int:
                 "## Tool execution",
                 f"- Apktool exit code: {apktool_result['returncode']}",
                 f"- JADX exit code: {jadx_result['returncode']}",
+                f"- JADX-reported decompiler error count: {jadx_error_count}",
                 f"- Decompiled Java source files found: {len(java_sources)}",
                 f"- Decoded Apktool output entries: {len(decoded_resources)}",
                 "",
@@ -344,11 +351,12 @@ def main() -> int:
                 "",
             ])
             output_path.write_text("\n".join(base_lines) + "\n", encoding="utf-8")
-            if status == "CODE_ANALYSIS_PARTIAL":
-                print(f"Wrote partial report to {output_path}")
-                print(f"Apktool exit={apktool_result['returncode']}; JADX exit={jadx_result['returncode']}")
+            print(f"Wrote {output_path} with status {status}")
+            if apktool_result["returncode"] != 0 or (jadx_result["returncode"] != 0 and not java_sources):
+                print(f"Critical tool error: Apktool exit={apktool_result['returncode']}; JADX exit={jadx_result['returncode']}", file=sys.stderr)
                 return 2
-            print(f"Wrote {output_path}")
+            if jadx_result["returncode"] != 0:
+                print("JADX emitted partial output with decompiler errors; see the report for its error count.", file=sys.stderr)
             return 0
 
     except Exception as error:
