@@ -27,9 +27,20 @@ JADX_URL = "https://github.com/skylot/jadx/releases/download/v1.5.6/jadx-1.5.6.z
 APKTOOL_VERSION = "3.0.3"
 APKTOOL_URL = "https://github.com/iBotPeaches/Apktool/releases/download/v3.0.3/apktool_3.0.3.jar"
 ANDROID_NS = "{http://schemas.android.com/apk/res/android}"
-TERMS = re.compile(
+JAVA_TERMS = re.compile(
     r"autoplay|auto.?play|show.?monster|status.?details|reveal.?card|"
-    r"platinmods|g-bo|damage|multipli|cheat|(?<![a-z])bot(?![a-z])",
+    r"damage|multiplier|multipli|cheat.?card|comcheatcard|duelgetdamagevalue",
+    re.IGNORECASE,
+)
+RESOURCE_TERMS = re.compile(
+    r"autoplay|auto.?play|show.?monster|status.?details|reveal.?card.?face|"
+    r"damage.?multiplier|platinmods|g-bo",
+    re.IGNORECASE,
+)
+NATIVE_TERMS = re.compile(
+    r"Java_com_platinmods_|DLL_DuelGetDamageValue|DLL_DuelGetDamageSrcPosition|"
+    r"DLL_DuelGetDamageDstPosition|DLL_DuelComCheatCard|autoplay|auto.?play|"
+    r"show.?monster|reveal.?card|damage|multiplier|cheat.?card",
     re.IGNORECASE,
 )
 
@@ -87,7 +98,7 @@ def run_command(command: list[str], timeout: int) -> dict:
         }
 
 
-def scan_text_files(root: Path, limit: int = 100) -> tuple[list[str], int]:
+def scan_text_files(root: Path, limit: int = 100, pattern: re.Pattern = JAVA_TERMS) -> tuple[list[str], int]:
     hits: list[str] = []
     total = 0
     if not root.exists():
@@ -100,7 +111,7 @@ def scan_text_files(root: Path, limit: int = 100) -> tuple[list[str], int]:
         except OSError:
             continue
         for line_no, line in enumerate(text.splitlines(), start=1):
-            if TERMS.search(line):
+            if pattern.search(line):
                 total += 1
                 if len(hits) < limit:
                     try:
@@ -114,13 +125,13 @@ def scan_text_files(root: Path, limit: int = 100) -> tuple[list[str], int]:
     return hits, total
 
 
-def scan_binary_strings(data: bytes, limit: int = 20) -> tuple[list[str], int]:
+def scan_binary_strings(data: bytes, limit: int = 20, pattern: re.Pattern = NATIVE_TERMS) -> tuple[list[str], int]:
     hits: list[str] = []
     total = 0
     seen: set[str] = set()
     for match in re.finditer(rb"[ -~]{4,}", data):
         value = match.group().decode("ascii", errors="ignore").strip()
-        if value and TERMS.search(value):
+        if value and pattern.search(value):
             total += 1
             if value not in seen and len(hits) < limit:
                 seen.add(value)
@@ -273,7 +284,7 @@ def main() -> int:
             if not source_root.exists():
                 source_root = jadx_out
             source_hits, source_hit_count = scan_text_files(source_root, limit=100)
-            resource_hits, resource_hit_count = scan_text_files(apktool_out / "res", limit=40)
+            resource_hits, resource_hit_count = scan_text_files(apktool_out / "res", limit=40, pattern=RESOURCE_TERMS)
 
             native_hits: list[str] = []
             native_hit_count = 0
@@ -293,7 +304,7 @@ def main() -> int:
                 for name in wanted:
                     info = archive.getinfo(name)
                     inventory.append(f"- {name}: {info.file_size} bytes")
-                    matches, count = scan_binary_strings(archive.read(name), limit=20)
+                    matches, count = scan_binary_strings(archive.read(name), limit=20, pattern=NATIVE_TERMS)
                     native_hit_count += count
                     if matches:
                         native_hits.append(f"### {name}")
