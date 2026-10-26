@@ -46,7 +46,7 @@ NATIVE_TERMS = re.compile(
 TRACE_PATTERNS = {
     "com/platinmods/FloatingModMenuService.java": re.compile(
         r"getFeatureList|settingsList|localChanges|changeFeature|loadPref|"
-        r"inputFieldFeature|featureNum|featureName|setOnCheckedChangeListener|",
+        r"inputFieldFeature|featureNum|featureName|setOnCheckedChangeListener",
         re.IGNORECASE,
     ),
     "com/platinmods/PMLauncher.java": re.compile(
@@ -204,10 +204,12 @@ def scan_key_java_sources(root: Path, limit_per_file: int = 25) -> tuple[list[st
             continue
 
         file_matches = 0
+        file_match_total = 0
         for index, line in enumerate(lines):
             if not pattern.search(line):
                 continue
             total += 1
+            file_match_total += 1
             if file_matches >= limit_per_file:
                 continue
             snippet = " ".join(line.strip().split())
@@ -215,7 +217,7 @@ def scan_key_java_sources(root: Path, limit_per_file: int = 25) -> tuple[list[st
                 snippet = snippet[:237] + "..."
             hits.append(f"- {relative_name}:{index + 1}: {snippet}")
             file_matches += 1
-        hits.append(f"- {relative_name}: displayed {min(file_matches, limit_per_file)} selected lines; {max(0, total)} cumulative source matches scanned so far.")
+        hits.append(f"- {relative_name}: displayed {file_matches} of {file_match_total} matching source lines.")
 
     return hits, total
 
