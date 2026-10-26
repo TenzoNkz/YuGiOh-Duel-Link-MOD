@@ -1,0 +1,88 @@
+name: APK Code Analysis
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Existing public GitHub Release tag to inspect
+        required: true
+        default: Platinmods_V11.0.0
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/apk-code-analysis.yml
+      - tools/analyze_apk_code.py
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apk-code-analysis-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  decompile-and-scan:
+    name: Decode manifest and inspect DEX/native strings
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Run pinned JADX and Apktool analysis
+        id: analyze
+        continue-on-error: true
+        env:
+          RELEASE_TAG: ${{ github.event.inputs.release_tag || 'Platinmods_V11.0.0' }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          python3 tools/analyze_apk_code.py \
+            --repo "$GITHUB_REPOSITORY" \
+            --release-tag "$RELEASE_TAG" \
+            --output APK_CODE_ANALYSIS.md
+
+      - name: Commit generated report
+        if: always()
+        run: |
+          if [ ! -f APK_CODE_ANALYSIS.md ]; then
+            echo "No code-analysis report was produced; see the analysis step output."
+            exit 0
+          fi
+          git add APK_CODE_ANALYSIS.md
+          if git diff --cached --quiet; then
+            echo "The code-analysis report has no changes."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "docs: refresh APK code analysis report"
+          for attempt in 1 2 3; do
+            git fetch origin "$GITHUB_REF_NAME"
+            if ! git rebase "origin/$GITHUB_REF_NAME"; then
+              git rebase --abort || true
+              echo "Could not rebase the report because of a concurrent change."
+              exit 1
+            fi
+            if git push origin "HEAD:$GITHUB_REF_NAME"; then
+              exit 0
+            fi
+            echo "Push attempt $attempt failed; retrying."
+            sleep 2
+          done
+          echo "Unable to push the generated report after three attempts."
+          exit 1
+
+      - name: Preserve analysis failure status
+        if: steps.analyze.outcome == 'failure'
+        run: |
+          echo "Code analysis did not finish cleanly. Inspect APK_CODE_ANALYSIS.md and this run's logs."
+          exit 1
