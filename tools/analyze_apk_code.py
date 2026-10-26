@@ -357,7 +357,6 @@ def main() -> int:
                 source_root = jadx_out
             source_hits, source_hit_count = scan_text_files(source_root, limit=100)
             key_source_hits, key_source_hit_count = scan_key_java_sources(source_root, limit=100)
-            key_source_hits, key_source_hit_count = scan_key_java_sources(source_root, limit=100)
             resource_hits, resource_hit_count = scan_text_files(apktool_out / "res", limit=40, pattern=RESOURCE_TERMS)
 
             native_hits: list[str] = []
