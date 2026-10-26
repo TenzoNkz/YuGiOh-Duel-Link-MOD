@@ -1,6 +1,6 @@
 # APK Code Analysis Report
 
-**Generated:** 2026-10-26 05:19:07 UTC
+**Generated:** 2026-10-26 05:22:38 UTC
 **Method:** JADX/Apktool static analysis; the APK was not installed or executed.
 - Repository: TenzoNkz/YuGiOh-Duel-Link-MOD
 - Requested release tag: Platinmods_V11.0.0
@@ -36,9 +36,9 @@
 ### Apktool output excerpt
     I: Using Apktool 3.0.3 on source.apk with 4 threads
     I: Baksmaling classes.dex...
-    I: Loading resource table...
     I: Baksmaling classes2.dex...
     I: Baksmaling classes3.dex...
+    I: Loading resource table...
     I: Decoding value resources...
     I: Loading resource table from file: /home/runner/.local/share/apktool/framework/1.apk
     I: Decoding file resources...
@@ -50,28 +50,28 @@
     I: Copying unknown files...
 
 ### JADX output excerpt
+    INFO  - progress: 7050 of 8893 (79%)
+    INFO  - progress: 7146 of 8893 (80%)
+    INFO  - progress: 7242 of 8893 (81%)
+    INFO  - progress: 7375 of 8893 (82%)
+    INFO  - progress: 7529 of 8893 (84%)
+    INFO  - progress: 7657 of 8893 (86%)
+    INFO  - progress: 7703 of 8893 (86%)
+    INFO  - progress: 7810 of 8893 (87%)
+    INFO  - progress: 7839 of 8893 (88%)
     INFO  - progress: 8001 of 8893 (89%)
-    INFO  - progress: 8098 of 8893 (91%)
-    INFO  - progress: 8149 of 8893 (91%)
-    INFO  - progress: 8254 of 8893 (92%)
+    INFO  - progress: 8001 of 8893 (89%)
+    INFO  - progress: 8143 of 8893 (91%)
+    INFO  - progress: 8227 of 8893 (92%)
+    INFO  - progress: 8368 of 8893 (94%)
     INFO  - progress: 8535 of 8893 (95%)
     INFO  - progress: 8535 of 8893 (95%)
     INFO  - progress: 8535 of 8893 (95%)
     INFO  - progress: 8535 of 8893 (95%)
     INFO  - progress: 8535 of 8893 (95%)
     INFO  - progress: 8535 of 8893 (95%)
-    INFO  - progress: 8535 of 8893 (95%)
-    INFO  - progress: 8535 of 8893 (95%)
-    INFO  - progress: 8535 of 8893 (95%)
-    INFO  - progress: 8535 of 8893 (95%)
-    INFO  - progress: 8535 of 8893 (95%)
-    INFO  - progress: 8535 of 8893 (95%)
-    INFO  - progress: 8535 of 8893 (95%)
-    INFO  - progress: 8535 of 8893 (95%)
-    INFO  - progress: 8535 of 8893 (95%)
-    INFO  - progress: 8535 of 8893 (95%)
-    INFO  - progress: 8733 of 8893 (98%)
-    INFO  - progress: 8889 of 8893 (99%)
+    INFO  - progress: 8633 of 8893 (97%)
+    INFO  - progress: 8855 of 8893 (99%)
                                                                  
     ERROR - finished with errors, count: 96
 
@@ -118,9 +118,141 @@
 - jp/applilink/sdk/recommend/RecommendNetworkCore.java:1098: intent.putExtra("autoPlay", z);
 - kotlin/collections/builders/MapBuilder.java:534: throw new IllegalStateException("This cannot happen with fixed magic multiplier and grow-only hash array. Have object hashCodes changed?");
 
+## Key Platinmods menu-framework source references
+- Matching source lines found: 141; displaying context for up to 100 lines.
+- androidx/datastore/preferences/core/Preferences.java:1: package androidx.datastore.preferences.core;
+- androidx/datastore/preferences/core/Preferences.java:2: 
+- androidx/datastore/preferences/core/Preferences.java:9: 
+- androidx/datastore/preferences/core/Preferences.java:10: /* JADX INFO: compiled from: Preferences.kt */
+- androidx/datastore/preferences/core/Preferences.java:11: /* JADX INFO: loaded from: classes.dex */
+- androidx/datastore/preferences/core/Preferences.java:12: @Metadata(d1 = {"\u0000&\n\u0002\u0018\u0002\n\u0002\u0010\u0000\n\u0002\b\u0002\n\u0002\u0010$\n\u0002\u0018\u0002\n\u0000\n\u0002\u0010\u000b\n\u0002\b\u0005\n\u0002\u0018\u0002\n\u0002\b\u0004\b...
+- androidx/datastore/preferences/core/Preferences.java:13: public abstract class Preferences {
+- androidx/datastore/preferences/core/Preferences.java:12: @Metadata(d1 = {"\u0000&\n\u0002\u0018\u0002\n\u0002\u0010\u0000\n\u0002\b\u0002\n\u0002\u0010$\n\u0002\u0018\u0002\n\u0000\n\u0002\u0010\u000b\n\u0002\b\u0005\n\u0002\u0018\u0002\n\u0002\b\u0004\b...
+- androidx/datastore/preferences/core/Preferences.java:13: public abstract class Preferences {
+- androidx/datastore/preferences/core/Preferences.java:14: 
+- androidx/datastore/preferences/core/Preferences.java:15: /* JADX INFO: compiled from: Preferences.kt */
+- androidx/datastore/preferences/core/Preferences.java:16: @Metadata(d1 = {"\u0000*\n\u0002\u0018\u0002\n\u0000\n\u0002\u0010\u0000\n\u0000\n\u0002\u0010\u000e\n\u0002\b\u0004\n\u0002\u0010\u000b\n\u0002\b\u0002\n\u0002\u0010\b\n\u0000\n\u0002\u0018\u0002\...
+- androidx/datastore/preferences/core/Preferences.java:15: /* JADX INFO: compiled from: Preferences.kt */
+- androidx/datastore/preferences/core/Preferences.java:16: @Metadata(d1 = {"\u0000*\n\u0002\u0018\u0002\n\u0000\n\u0002\u0010\u0000\n\u0000\n\u0002\u0010\u000e\n\u0002\b\u0004\n\u0002\u0010\u000b\n\u0002\b\u0002\n\u0002\u0010\b\n\u0000\n\u0002\u0018\u0002\...
+- androidx/datastore/preferences/core/Preferences.java:17: public static final class Key<T> {
+- androidx/datastore/preferences/core/Preferences.java:48: 
+- androidx/datastore/preferences/core/Preferences.java:49: /* JADX INFO: compiled from: Preferences.kt */
+- androidx/datastore/preferences/core/Preferences.java:50: @Metadata(d1 = {"\u0000\u0014\n\u0002\u0018\u0002\n\u0000\n\u0002\u0010\u0000\n\u0000\n\u0002\u0018\u0002\n\u0002\b\b\u0018\u0000*\u0004\b\u0000\u0010\u00012\u00020\u0002B\u001d\b\u0000\u0012\f\u00...
+- androidx/datastore/preferences/core/Preferences.java:49: /* JADX INFO: compiled from: Preferences.kt */
+- androidx/datastore/preferences/core/Preferences.java:50: @Metadata(d1 = {"\u0000\u0014\n\u0002\u0018\u0002\n\u0000\n\u0002\u0010\u0000\n\u0000\n\u0002\u0018\u0002\n\u0002\b\b\u0018\u0000*\u0004\b\u0000\u0010\u00012\u00020\u0002B\u001d\b\u0000\u0012\f\u00...
+- androidx/datastore/preferences/core/Preferences.java:51: public static final class Pair<T> {
+- androidx/datastore/preferences/core/Preferences.java:60: 
+- androidx/datastore/preferences/core/Preferences.java:61: public final Key<T> getKey$datastore_preferences_core_release() {
+- androidx/datastore/preferences/core/Preferences.java:62: return this.key;
+- androidx/datastore/preferences/core/Preferences.java:64: 
+- androidx/datastore/preferences/core/Preferences.java:65: public final T getValue$datastore_preferences_core_release() {
+- androidx/datastore/preferences/core/Preferences.java:66: return this.value;
+- androidx/datastore/preferences/core/Preferences.java:75: 
+- androidx/datastore/preferences/core/Preferences.java:76: public final MutablePreferences toMutablePreferences() {
+- androidx/datastore/preferences/core/Preferences.java:77: return new MutablePreferences(MapsKt.toMutableMap(asMap()), false);
+- androidx/datastore/preferences/core/Preferences.java:76: public final MutablePreferences toMutablePreferences() {
+- androidx/datastore/preferences/core/Preferences.java:77: return new MutablePreferences(MapsKt.toMutableMap(asMap()), false);
+- androidx/datastore/preferences/core/Preferences.java:78: }
+- androidx/datastore/preferences/core/Preferences.java:79: 
+- androidx/datastore/preferences/core/Preferences.java:80: public final Preferences toPreferences() {
+- androidx/datastore/preferences/core/Preferences.java:81: return new MutablePreferences(MapsKt.toMutableMap(asMap()), true);
+- androidx/datastore/preferences/core/Preferences.java:80: public final Preferences toPreferences() {
+- androidx/datastore/preferences/core/Preferences.java:81: return new MutablePreferences(MapsKt.toMutableMap(asMap()), true);
+- androidx/datastore/preferences/core/Preferences.java:82: }
+- com/platinmods/FloatingModMenuService.java:60: /* JADX INFO: loaded from: classes3.dex */
+- com/platinmods/FloatingModMenuService.java:61: public class FloatingModMenuService extends Service {
+- com/platinmods/FloatingModMenuService.java:62: public static final String TAG = "Mod_Menu";
+- com/platinmods/FloatingModMenuService.java:65: GradientDrawable gdMenuBody;
+- com/platinmods/FloatingModMenuService.java:66: String inputFieldFeatureName;
+- com/platinmods/FloatingModMenuService.java:67: int inputFieldFeatureNum;
+- com/platinmods/FloatingModMenuService.java:66: String inputFieldFeatureName;
+- com/platinmods/FloatingModMenuService.java:67: int inputFieldFeatureNum;
+- com/platinmods/FloatingModMenuService.java:68: TextView inputFieldTextView;
+- com/platinmods/FloatingModMenuService.java:87: final int MENU_BG_COLOR = Color.parseColor("#DD1C2A35");
+- com/platinmods/FloatingModMenuService.java:88: final int MENU_FEATURE_BG_COLOR = Color.parseColor("#FF171E24");
+- com/platinmods/FloatingModMenuService.java:89: final int MENU_WIDTH = 290;
+- com/platinmods/FloatingModMenuService.java:120: button.setBackgroundColor(this.BTN_COLOR);
+- com/platinmods/FloatingModMenuService.java:121: button.setOnClickListener(new View.OnClickListener() { // from class: com.platinmods.FloatingModMenuService.12
+- com/platinmods/FloatingModMenuService.java:122: @Override // android.view.View.OnClickListener
+- com/platinmods/FloatingModMenuService.java:123: public void onClick(View view) {
+- com/platinmods/FloatingModMenuService.java:124: FloatingModMenuService.this.localChanges(i, false);
+- com/platinmods/FloatingModMenuService.java:125: Preferences.changeFeatureInt(str, i, 0);
+- com/platinmods/FloatingModMenuService.java:124: FloatingModMenuService.this.localChanges(i, false);
+- com/platinmods/FloatingModMenuService.java:125: Preferences.changeFeatureInt(str, i, 0);
+- com/platinmods/FloatingModMenuService.java:126: }
+- com/platinmods/FloatingModMenuService.java:140: button.setBackgroundColor(this.BTN_COLOR);
+- com/platinmods/FloatingModMenuService.java:141: button.setOnClickListener(new View.OnClickListener() { // from class: com.platinmods.FloatingModMenuService.13
+- com/platinmods/FloatingModMenuService.java:142: @Override // android.view.View.OnClickListener
+- com/platinmods/FloatingModMenuService.java:146: intent.setData(Uri.parse(str2));
+- com/platinmods/FloatingModMenuService.java:147: FloatingModMenuService.this.startActivity(intent);
+- com/platinmods/FloatingModMenuService.java:148: }
+- com/platinmods/FloatingModMenuService.java:162: String strReplace = str.replace("OnOff_", "");
+- com/platinmods/FloatingModMenuService.java:163: if (Preferences.loadPrefBoolean(str, i)) {
+- com/platinmods/FloatingModMenuService.java:164: button.setText(strReplace + ": ON");
+- com/platinmods/FloatingModMenuService.java:171: }
+- com/platinmods/FloatingModMenuService.java:172: button.setOnClickListener(new View.OnClickListener(z, i, strReplace, button) { // from class: com.platinmods.FloatingModMenuService.14
+- com/platinmods/FloatingModMenuService.java:173: boolean isOn;
+- com/platinmods/FloatingModMenuService.java:174: final /* synthetic */ Button val$button;
+- com/platinmods/FloatingModMenuService.java:175: final /* synthetic */ int val$featureNum;
+- com/platinmods/FloatingModMenuService.java:176: final /* synthetic */ String val$finalFeatureName;
+- com/platinmods/FloatingModMenuService.java:175: final /* synthetic */ int val$featureNum;
+- com/platinmods/FloatingModMenuService.java:176: final /* synthetic */ String val$finalFeatureName;
+- com/platinmods/FloatingModMenuService.java:177: final /* synthetic */ boolean val$finalIsOn;
+- com/platinmods/FloatingModMenuService.java:180: this.val$finalIsOn = z;
+- com/platinmods/FloatingModMenuService.java:181: this.val$featureNum = i;
+- com/platinmods/FloatingModMenuService.java:182: this.val$finalFeatureName = strReplace;
+- com/platinmods/FloatingModMenuService.java:181: this.val$featureNum = i;
+- com/platinmods/FloatingModMenuService.java:182: this.val$finalFeatureName = strReplace;
+- com/platinmods/FloatingModMenuService.java:183: this.val$button = button;
+- com/platinmods/FloatingModMenuService.java:188: public void onClick(View view) {
+- com/platinmods/FloatingModMenuService.java:189: FloatingModMenuService.this.localChanges(this.val$featureNum, this.isOn);
+- com/platinmods/FloatingModMenuService.java:190: Preferences.changeFeatureBoolean(this.val$finalFeatureName, this.val$featureNum, this.isOn);
+- com/platinmods/FloatingModMenuService.java:189: FloatingModMenuService.this.localChanges(this.val$featureNum, this.isOn);
+- com/platinmods/FloatingModMenuService.java:190: Preferences.changeFeatureBoolean(this.val$finalFeatureName, this.val$featureNum, this.isOn);
+- com/platinmods/FloatingModMenuService.java:191: if (this.isOn) {
+- com/platinmods/FloatingModMenuService.java:192: this.val$button.setText(this.val$finalFeatureName + ": ON");
+- com/platinmods/FloatingModMenuService.java:193: this.val$button.setBackgroundColor(Color.parseColor("#003300"));
+- com/platinmods/FloatingModMenuService.java:195: } else {
+- com/platinmods/FloatingModMenuService.java:196: this.val$button.setText(this.val$finalFeatureName + ": OFF");
+- com/platinmods/FloatingModMenuService.java:197: this.val$button.setBackgroundColor(Color.parseColor("#7f0000"));
+- com/platinmods/FloatingModMenuService.java:220: checkBox.setTextColor(this.TEXT_COLOR_2);
+- com/platinmods/FloatingModMenuService.java:221: checkBox.setChecked(Preferences.loadPrefBoolean(str, i));
+- com/platinmods/FloatingModMenuService.java:222: checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() { // from class: com.platinmods.FloatingModMenuService.17
+- com/platinmods/FloatingModMenuService.java:221: checkBox.setChecked(Preferences.loadPrefBoolean(str, i));
+- com/platinmods/FloatingModMenuService.java:222: checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() { // from class: com.platinmods.FloatingModMenuService.17
+
 ## Search hits in decoded resources
 - Matching lines found: 0; displaying up to 0.
 - No matching term was found in the scanned decoded resource XML/text.
+
+## Focused strings: feature labels, menu callbacks, and duel damage
+- Focused string matches found: 19.
+### assets/bin/Data/Managed/Metadata/global-metadata.dat
+- URORAIDS_CARD.PROCESS_BLAZEIDS_CARD.PROCESS_CRYSTALIDS_CARD.PROCESS_DAMAGEIDS_CARD.PROCESS_DARKNESSIDS_CARD.PROCESS_FULLSTARLIGHTIDS_C
+- CHEATCARD
+- PROCESS_DAMAGE
+- PROCESS_DAMAGE1
+- PROCESS_DAMAGE2
+- PROCESS_DAMAGE3
+- DLL_DuelGetDamageValue
+### lib/arm64-v8a/libduel.so
+- DLL_DuelGetDamageValue
+- DLL_DuelComCheatCard
+### lib/arm64-v8a/libil2cpp.so
+- DLL_DuelGetDamageValue
+### lib/arm64-v8a/libplatinmods.so
+- Java_com_platinmods_FloatingModMenuService_settingsList
+- Java_com_platinmods_FloatingModMenuService_getFeatureList
+- Java_com_platinmods_Preferences_Changes
+### lib/armeabi-v7a/libduel.so
+- DLL_DuelGetDamageValue
+- DLL_DuelComCheatCard
+### lib/armeabi-v7a/libil2cpp.so
+- DLL_DuelGetDamageValue
+### lib/armeabi-v7a/libplatinmods.so
+- Java_com_platinmods_FloatingModMenuService_settingsList
+- Java_com_platinmods_FloatingModMenuService_getFeatureList
+- Java_com_platinmods_Preferences_Changes
 
 ## Search hits in selected native/IL2CPP strings
 - Total matching printable strings: 284.
