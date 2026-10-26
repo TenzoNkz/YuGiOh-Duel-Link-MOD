@@ -43,6 +43,19 @@ NATIVE_TERMS = re.compile(
     r"show.?monster|reveal.?card|damage|multiplier|cheat.?card",
     re.IGNORECASE,
 )
+TRACE_TERMS = re.compile(
+    r"getFeatureList|settingsList|Preferences|onCheckedChanged|"
+    r"setOnCheckedChangeListener|System\\.loadLibrary|native\\s|"
+    r"feature|changes|FloatingModMenuService|PMLauncher",
+    re.IGNORECASE,
+)
+FOCUSED_BINARY_TERMS = re.compile(
+    r"AutoPlay\\s*Bot|Show\\s*Monster(?:\\s*&\\s*Status\\s*Details)?|"
+    r"Reveal\\s*Card\\s*Face|CHEATCARD|PROCESS_DAMAGE[0-9]?|"
+    r"DLL_DuelGetDamageValue|DLL_DuelComCheatCard|"
+    r"Java_com_platinmods_(?:FloatingModMenuService_(?:getFeatureList|settingsList)|Preferences_Changes)",
+    re.IGNORECASE,
+)
 
 
 def request_json(url: str) -> dict:
@@ -137,6 +150,65 @@ def scan_binary_strings(data: bytes, limit: int = 20, pattern: re.Pattern = NATI
                 seen.add(value)
                 clipped = value if len(value) <= 220 else value[:217] + "..."
                 hits.append(clipped)
+    return hits, total
+
+
+def extract_focused_binary_matches(data: bytes, limit: int = 80) -> tuple[list[str], int]:
+    """Return short context windows around specific menu and duel-engine string clues."""
+    output: list[str] = []
+    seen: set[str] = set()
+    total = 0
+    for segment in re.finditer(rb"[ -~]{4,}", data):
+        value = segment.group().decode("ascii", errors="ignore")
+        for match in FOCUSED_BINARY_TERMS.finditer(value):
+            total += 1
+            start = max(0, match.start() - 60)
+            end = min(len(value), match.end() + 60)
+            snippet = " ".join(value[start:end].split())
+            if snippet not in seen and len(output) < limit:
+                seen.add(snippet)
+                output.append(snippet[:220])
+    return output, total
+
+
+def scan_key_java_sources(root: Path, limit: int = 100) -> tuple[list[str], int]:
+    """Capture selected Platinmods menu-framework source references with line numbers."""
+    hits: list[str] = []
+    total = 0
+    if not root.exists():
+        return hits, total
+    for path in sorted(root.rglob("*.java")):
+        if path.name not in {
+            "FloatingModMenuService.java",
+            "PMLauncher.java",
+            "Preferences.java",
+            "MainActivity.java",
+        }:
+            continue
+        try:
+            lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+        except OSError:
+            continue
+        try:
+            rel = path.relative_to(root)
+        except ValueError:
+            rel = path.name
+        for index, line in enumerate(lines):
+            if TRACE_TERMS.search(line):
+                total += 1
+                if len(hits) >= limit:
+                    continue
+                start = max(0, index - 1)
+                end = min(len(lines), index + 2)
+                for ctx in range(start, end):
+                    snippet = " ".join(lines[ctx].strip().split())
+                    if len(snippet) > 200:
+                        snippet = snippet[:197] + "..."
+                    item = f"- {rel}:{ctx + 1}: {snippet}"
+                    if not hits or hits[-1] != item:
+                        hits.append(item)
+                    if len(hits) >= limit:
+                        break
     return hits, total
 
 
@@ -284,10 +356,13 @@ def main() -> int:
             if not source_root.exists():
                 source_root = jadx_out
             source_hits, source_hit_count = scan_text_files(source_root, limit=100)
+            key_source_hits, key_source_hit_count = scan_key_java_sources(source_root, limit=100)
             resource_hits, resource_hit_count = scan_text_files(apktool_out / "res", limit=40, pattern=RESOURCE_TERMS)
 
             native_hits: list[str] = []
             native_hit_count = 0
+            focused_native_hits: list[str] = []
+            focused_native_count = 0
             inventory: list[str] = []
             with zipfile.ZipFile(apk_path, "r") as archive:
                 names = archive.namelist()
@@ -304,11 +379,17 @@ def main() -> int:
                 for name in wanted:
                     info = archive.getinfo(name)
                     inventory.append(f"- {name}: {info.file_size} bytes")
-                    matches, count = scan_binary_strings(archive.read(name), limit=20, pattern=NATIVE_TERMS)
+                    native_bytes = archive.read(name)
+                    matches, count = scan_binary_strings(native_bytes, limit=20, pattern=NATIVE_TERMS)
                     native_hit_count += count
                     if matches:
                         native_hits.append(f"### {name}")
                         native_hits.extend(f"- {value}" for value in matches)
+                    focused, focused_count = extract_focused_binary_matches(native_bytes, limit=50)
+                    focused_native_count += focused_count
+                    if focused:
+                        focused_native_hits.append(f"### {name}")
+                        focused_native_hits.extend(f"- {value}" for value in focused)
 
             combined_jadx_output = (jadx_result.get("stdout", "") or "") + "\n" + (jadx_result.get("stderr", "") or "")
             error_match = re.search(r"finished with errors, count: *([0-9]+)", combined_jadx_output, re.IGNORECASE)
@@ -343,9 +424,17 @@ def main() -> int:
                 f"- Matching lines found: {source_hit_count}; displaying up to {len(source_hits)}.",
                 *(source_hits or ["- No matching term was found in the scanned Java source."]),
                 "",
+                "## Key Platinmods menu-framework source references",
+                f"- Matching source lines found: {key_source_hit_count}; displaying context for up to {len(key_source_hits)} lines.",
+                *(key_source_hits or ["- No target menu-framework references were found in the selected Java classes."]),
+                "",
                 "## Search hits in decoded resources",
                 f"- Matching lines found: {resource_hit_count}; displaying up to {len(resource_hits)}.",
                 *(resource_hits or ["- No matching term was found in the scanned decoded resource XML/text."]),
+                "",
+                "## Focused strings: feature labels, menu callbacks, and duel damage",
+                f"- Focused string matches found: {focused_native_count}.",
+                *(focused_native_hits or ["- No focused string match was found in selected native/IL2CPP files."]),
                 "",
                 "## Search hits in selected native/IL2CPP strings",
                 f"- Total matching printable strings: {native_hit_count}.",
