@@ -61,7 +61,23 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "docs: refresh APK static analysis report"
-          git push origin "HEAD:${GITHUB_REF_NAME}"
+          # Another documentation/checkpoint commit may land while the APK downloads.
+          # Rebase the report commit onto the newest branch head before pushing.
+          for attempt in 1 2 3; do
+            git fetch origin "$GITHUB_REF_NAME"
+            if ! git rebase "origin/$GITHUB_REF_NAME"; then
+              git rebase --abort || true
+              echo "Could not rebase the report because of a concurrent change."
+              exit 1
+            fi
+            if git push origin "HEAD:$GITHUB_REF_NAME"; then
+              exit 0
+            fi
+            echo "Push attempt $attempt failed; retrying."
+            sleep 2
+          done
+          echo "Unable to push the generated report after three attempts."
+          exit 1
 
       - name: Preserve analysis failure status
         if: steps.analyze.outcome == 'failure'
