@@ -1,27 +1,33 @@
 # Analysis Log
 
-This is the durable chronological record of decisions, evidence, workflow runs, failures, and next steps. Append dated entries after each meaningful verified milestone; avoid recording guesses as facts.
+This is the durable chronological record of decisions, evidence, workflow runs, failures, and next steps. Append entries after each meaningful verified milestone; do not record guesses as facts.
 
-## 2026-10-26 — GitHub Release verified
+## 2026-10-26 — Source Release verified
 - Confirmed public repository TenzoNkz/YuGiOh-Duel-Link-MOD, default branch main.
-- Confirmed Release Platinmods Original with tag Platinmods_V11.0.0.
-- Release API lists Yu-Gi-Oh.Duel.Links.Platinmods.V11.0.0.apk, size 127,424,878 bytes.
-- Release API reports SHA-256 d7855754afbfe8e6b0a5db51ba47e4cefcd3079631190c11478d6556e06c56fb.
+- Release: Platinmods Original, tag Platinmods_V11.0.0.
+- Asset: Yu-Gi-Oh.Duel.Links.Platinmods.V11.0.0.apk, size 127,424,878 bytes.
+- GitHub Release API SHA-256: d7855754afbfe8e6b0a5db51ba47e4cefcd3079631190c11478d6556e06c56fb.
 
-## 2026-10-26 — Durable recovery files and first-stage inventory
-- Added chat recovery records and GitHub Actions for archive inventory and checkpoint validation.
-- First APK Static Analysis attempt downloaded and inspected the asset but its report push lost a race with a concurrent commit.
-- Fixed the inventory workflow to rebase its report commit before pushing.
-- Successful archive inventory: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40272870450
+## 2026-10-26 — Durable recovery system and structural inventory
+- Added CHAT_TRANSFER.md, CHAT_RULES.md, MEMORY_INDEX.md, PROJECT_STATE.md, HANDOVER.md, APP_ANALYSIS_REPORT.md, APK_CODE_ANALYSIS.md, MOD_CANDIDATES.md, and README.md.
+- Added GitHub Actions for APK static inventory, APK code analysis, and checkpoint validation.
+- Initial APK Static Analysis attempt generated a report but its push lost a race with a concurrent commit. Fixed the workflow to rebase before pushing.
+- Successful static inventory: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40272870450.
 - Verified downloaded size, matching SHA-256, ZIP open, and CRC scan. Found 3 DEX files, 20 native libraries, Unity/IL2CPP indicators, libduel.so, and libplatinmods.so.
 
-## 2026-10-26 — Initial deep static analysis
-- Added APK Code Analysis using pinned JADX 1.5.6 and Apktool 3.0.3.
-- Apktool decoded the manifest and returned package jp.konami.duellinks. It decoded 18,765 output entries.
-- JADX produced 8,194 Java source files, but the run reported 96 decompilation errors and exit code 3; findings are partial.
-- Observed Platinmods menu framework class names and native JNI string exports, plus native strings DLL_DuelGetDamageValue and DLL_DuelComCheatCard in libduel.so. These are leads, not proof of feature behavior.
-- The initial report search included overly broad matches from common Android resource names. The script was refined to separate Java, resource, and native search terms and to report the decompiler error count.
-- Current refined run: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40273558853
+## 2026-10-26 — Initial code-level static analysis
+- Apktool 3.0.3 decoded the manifest to package jp.konami.duellinks and decoded 18,765 output entries.
+- JADX 1.5.6 produced 8,194 Java files and reported 96 decompilation errors; the report status is partial.
+- Decompiled Java includes Platinmods menu classes; PMLauncher loads platinmods.
+- Native string evidence includes Java_com_platinmods_FloatingModMenuService_getFeatureList, settingsList, Java_com_platinmods_Preferences_Changes, and duel library names DLL_DuelGetDamageValue / DLL_DuelComCheatCard.
+- These names are leads only. No call-site trace, runtime test, or online behavior verification has been completed.
+
+## 2026-10-26 — Workflow and report refinements
+- Fixed report-push concurrency by fetching and rebasing onto current main.
+- Updated GitHub Actions pins to checkout v7.0.1 and setup-java v6.1.0.
+- Refined the code-analysis script to separate Java/resource/native patterns, extract short context windows for key native strings, and restrict source tracing to exact com/platinmods class paths.
+- Latest refined run: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40274001397.
+- Latest checkpoint validation pass before that run: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40274001348.
 
 ## Next
-Inspect the refined run conclusion and its committed APK_CODE_ANALYSIS.md. Then trace the menu feature-list/preferences path and update MOD_CANDIDATES.md with exact evidence. Keep any online damage-changing behavior out of implementation scope; use offline simulation for arithmetic experiments.
+Inspect run 40274001397 and its committed report. Trace the menu feature-list/preferences flow and update MOD_CANDIDATES.md one candidate at a time, recording exact evidence and limitations.
