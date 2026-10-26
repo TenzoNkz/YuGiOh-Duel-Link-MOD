@@ -12,9 +12,11 @@ on:
       - PROJECT_STATE.md
       - HANDOVER.md
       - APP_ANALYSIS_REPORT.md
+      - APK_CODE_ANALYSIS.md
       - MOD_CANDIDATES.md
       - ANALYSIS_LOG.md
-      - .github/workflows/checkpoint-validation.yml
+      - .github/workflows/*.yml
+      - tools/*.py
   workflow_dispatch:
 
 permissions:
@@ -42,6 +44,7 @@ jobs:
               "PROJECT_STATE.md",
               "HANDOVER.md",
               "APP_ANALYSIS_REPORT.md",
+              "APK_CODE_ANALYSIS.md",
               "MOD_CANDIDATES.md",
               "ANALYSIS_LOG.md",
           ]
