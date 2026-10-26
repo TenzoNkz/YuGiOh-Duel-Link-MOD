@@ -1,48 +1,38 @@
 # YuGiOh-Duel-Link-MOD — GitHub Analysis Workspace
 
-This repository keeps the durable state for static APK analysis and evidence-based evaluation of possible Duel Links modifications. The APK itself is stored as a GitHub Release asset; it is not committed into Git history.
+This repository is the durable source of truth for static APK analysis, candidate evaluation, and chat-limit recovery. The APK stays on GitHub Releases rather than in Git history.
 
 ## Canonical source
 - Repository: TenzoNkz/YuGiOh-Duel-Link-MOD
 - Branch: main
 - Release: [Platinmods Original — Platinmods_V11.0.0](https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/releases/tag/Platinmods_V11.0.0)
 - APK asset: Yu-Gi-Oh.Duel.Links.Platinmods.V11.0.0.apk
-- GitHub-reported SHA-256: d7855754afbfe8e6b0a5db51ba47e4cefcd3079631190c11478d6556e06c56fb
+- Verified SHA-256: d7855754afbfe8e6b0a5db51ba47e4cefcd3079631190c11478d6556e06c56fb
 
 ## Durable records
-- CHAT_TRANSFER.md — copy-ready prompts for Diskusi!, Eksekusi Analisa APK!, Eksekusi Full!, and Chat Stuck!.
-- CHAT_RULES.md — modes, evidence standards, and scope.
-- MEMORY_INDEX.md — file index and load order.
-- PROJECT_STATE.md — verified project status and next action.
-- HANDOVER.md — exact last verified checkpoint and next action.
-- APP_ANALYSIS_REPORT.md — measured APK archive inventory.
-- APK_CODE_ANALYSIS.md — JADX/Apktool manifest, DEX, resource, and selected native-string analysis.
-- MOD_CANDIDATES.md — per-feature evidence/status register.
-- ANALYSIS_LOG.md — chronological log of durable findings and decisions.
+- [CHAT_TRANSFER.md](CHAT_TRANSFER.md) — prompts for Diskusi!, Eksekusi Analisa APK!, Eksekusi Full!, and Chat Stuck!.
+- [CHAT_RULES.md](CHAT_RULES.md) — modes, evidence standards, boundaries.
+- [MEMORY_INDEX.md](MEMORY_INDEX.md) — read order and file index.
+- [PROJECT_STATE.md](PROJECT_STATE.md) — current verified state and next step.
+- [HANDOVER.md](HANDOVER.md) — exact checkpoint and next action.
+- [APP_ANALYSIS_REPORT.md](APP_ANALYSIS_REPORT.md) — measured archive inventory.
+- [APK_CODE_ANALYSIS.md](APK_CODE_ANALYSIS.md) — manifest/JADX/native-string findings; status is partial.
+- [MOD_CANDIDATES.md](MOD_CANDIDATES.md) — evidence-based candidate register.
+- [ANALYSIS_LOG.md](ANALYSIS_LOG.md) — verified chronological record.
 
-## GitHub Actions workflows
-
-### APK Static Analysis
-Open Actions → APK Static Analysis. It downloads the APK from the public Release as data, calculates SHA-256, checks ZIP/APK CRC integrity, inventories DEX/native libraries, and records common engine filename indicators. The result is committed to APP_ANALYSIS_REPORT.md.
-
-Latest successful initial inventory: [Run 40272870450](https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40272870450).
-
-### APK Code Analysis
-Open Actions → APK Code Analysis. Run manually with release tag Platinmods_V11.0.0 if no run is in progress. This workflow uses pinned JADX and Apktool releases to decode the Android manifest and inspect DEX/Java sources, resources, plus selected native/IL2CPP printable strings. It commits APK_CODE_ANALYSIS.md and keeps the decompiled source only in the temporary runner workspace.
-
-It does not execute or install the APK. Static search hits are leads, not proof that a menu toggle works. Full IL2CPP native control-flow analysis and runtime testing remain separate tasks.
-
-### Checkpoint Validation
-Checks that required project-memory files exist and the transfer prompts preserve recovery markers. It does not validate APK feature behavior.
+## GitHub Actions
+- [APK Static Analysis](../../actions/workflows/apk-static-analysis.yml) downloads the APK from the public Release, computes SHA-256, checks archive integrity, inventories DEX/native libraries, and commits APP_ANALYSIS_REPORT.md. Successful run: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40272870450.
+- [APK Code Analysis](../../actions/workflows/apk-code-analysis.yml) downloads the same Release asset as data, decodes its manifest, decompiles DEX with JADX, captures key Platinmods UI source lines, scans selected native/IL2CPP strings, and commits APK_CODE_ANALYSIS.md. It never executes or installs the APK. Latest successful run: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40274382469. The report remains CODE_ANALYSIS_PARTIAL because JADX emitted 96 errors.
+- [Checkpoint Validation](../../actions/workflows/checkpoint-validation.yml) checks that required durable records and recovery markers exist. It does not prove feature behavior.
 
 ## Chat-limit recovery
-1. Open CHAT_TRANSFER.md.
-2. Copy the prompt matching the intended mode.
+1. Open [CHAT_TRANSFER.md](CHAT_TRANSFER.md).
+2. Copy the prompt matching the work mode.
 3. Paste it into a new ChatGPT chat.
-4. The new chat must read the live checkpoint documents and verify current Actions/Release evidence before proceeding.
+4. The new chat must reload live GitHub reports, Release metadata, and current Actions state. Do not re-upload the same APK if the public Release is available.
 
-## Analysis status
-The initial archive inventory passed: downloaded bytes matched GitHub's reported SHA-256 and the ZIP CRC scan passed. See APP_ANALYSIS_REPORT.md for measurements and APK_CODE_ANALYSIS.md for the deeper static-analysis status. Do not describe the APK as fully analyzed until all relevant reports and code-level evidence support that claim.
+## Current analysis boundary
+Checksum and archive integrity are verified. Generic menu callbacks are visible in decompiled Java. Exact native feature dispatch and full IL2CPP control flow remain untraced; runtime behavior and server authority are untested.
 
 ## Scope
-The workflow treats the APK as data and never runs it. Candidate mods must be evidence-based and tested separately. No implementation should be presented as a working online-match modification without reproducible evidence.
+The workflow treats APK as data. Candidates must be evidence-based and tested separately. No online-match damage-changing cheat is being implemented; offline simulation and UI-only experiments can be assessed separately.
