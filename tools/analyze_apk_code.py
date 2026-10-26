@@ -300,7 +300,7 @@ def main() -> int:
                         native_hits.extend(f"- {value}" for value in matches)
 
             combined_jadx_output = (jadx_result.get("stdout", "") or "") + "\n" + (jadx_result.get("stderr", "") or "")
-            error_match = re.search(r"finished with errors, count:\\s*(\\d+)", combined_jadx_output, re.IGNORECASE)
+            error_match = re.search(r"finished with errors, count: *([0-9]+)", combined_jadx_output, re.IGNORECASE)
             jadx_error_count = int(error_match.group(1)) if error_match else 0
             status = "CODE_ANALYSIS_COMPLETE"
             if apktool_result["returncode"] != 0 or jadx_result["returncode"] != 0:
