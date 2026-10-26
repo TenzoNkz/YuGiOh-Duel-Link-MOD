@@ -43,12 +43,26 @@ NATIVE_TERMS = re.compile(
     r"show.?monster|reveal.?card|damage|multiplier|cheat.?card",
     re.IGNORECASE,
 )
-TRACE_TERMS = re.compile(
-    r"getFeatureList|settingsList|Preferences|onCheckedChanged|"
-    r"setOnCheckedChangeListener|System\.loadLibrary|native\s|"
-    r"feature|changes|FloatingModMenuService|PMLauncher",
-    re.IGNORECASE,
-)
+TRACE_PATTERNS = {
+    "com/platinmods/FloatingModMenuService.java": re.compile(
+        r"getFeatureList|settingsList|localChanges|changeFeature|loadPref|"
+        r"inputFieldFeature|featureNum|featureName|setOnCheckedChangeListener|",
+        re.IGNORECASE,
+    ),
+    "com/platinmods/PMLauncher.java": re.compile(
+        r"System\.loadLibrary|isGameLibLoaded|FloatingModMenuService|"
+        r"startService|native|settingsList|getFeatureList",
+        re.IGNORECASE,
+    ),
+    "com/platinmods/Preferences.java": re.compile(
+        r"changeFeature|loadPref|savePref|Changes|SharedPreferences|native",
+        re.IGNORECASE,
+    ),
+    "com/platinmods/MainActivity.java": re.compile(
+        r"loadLibrary|isGameLibLoaded|FloatingModMenuService|Toast|native|service",
+        re.IGNORECASE,
+    ),
+}
 FOCUSED_BINARY_TERMS = re.compile(
     r"AutoPlay\s*Bot|Show\s*Monster(?:\s*&\s*Status\s*Details)?|"
     r"Reveal\s*Card\s*Face|CHEATCARD|PROCESS_DAMAGE[0-9]?|"
@@ -171,49 +185,38 @@ def extract_focused_binary_matches(data: bytes, limit: int = 80) -> tuple[list[s
     return output, total
 
 
-def scan_key_java_sources(root: Path, limit: int = 100) -> tuple[list[str], int]:
-    """Capture selected Platinmods menu-framework source references with line numbers."""
+def scan_key_java_sources(root: Path, limit_per_file: int = 25) -> tuple[list[str], int]:
+    """Capture relevant source lines from each Platinmods menu-framework class."""
     hits: list[str] = []
     total = 0
     if not root.exists():
         return hits, total
-    target_sources = {
-        "com/platinmods/FloatingModMenuService.java",
-        "com/platinmods/PMLauncher.java",
-        "com/platinmods/Preferences.java",
-        "com/platinmods/MainActivity.java",
-    }
-    for path in sorted(root.rglob("*.java")):
-        try:
-            relative_path = path.relative_to(root).as_posix()
-        except ValueError:
-            continue
-        if relative_path not in target_sources:
+
+    for relative_name, pattern in TRACE_PATTERNS.items():
+        path = root / relative_name
+        if not path.is_file():
+            hits.append(f"- {relative_name}: not produced by JADX.")
             continue
         try:
             lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
-        except OSError:
+        except OSError as exc:
+            hits.append(f"- {relative_name}: could not read source ({type(exc).__name__}).")
             continue
-        try:
-            rel = path.relative_to(root)
-        except ValueError:
-            rel = path.name
+
+        file_matches = 0
         for index, line in enumerate(lines):
-            if TRACE_TERMS.search(line):
-                total += 1
-                if len(hits) >= limit:
-                    continue
-                start = max(0, index - 1)
-                end = min(len(lines), index + 2)
-                for ctx in range(start, end):
-                    snippet = " ".join(lines[ctx].strip().split())
-                    if len(snippet) > 200:
-                        snippet = snippet[:197] + "..."
-                    item = f"- {rel}:{ctx + 1}: {snippet}"
-                    if not hits or hits[-1] != item:
-                        hits.append(item)
-                    if len(hits) >= limit:
-                        break
+            if not pattern.search(line):
+                continue
+            total += 1
+            if file_matches >= limit_per_file:
+                continue
+            snippet = " ".join(line.strip().split())
+            if len(snippet) > 240:
+                snippet = snippet[:237] + "..."
+            hits.append(f"- {relative_name}:{index + 1}: {snippet}")
+            file_matches += 1
+        hits.append(f"- {relative_name}: displayed {min(file_matches, limit_per_file)} selected lines; {max(0, total)} cumulative source matches scanned so far.")
+
     return hits, total
 
 
@@ -361,7 +364,7 @@ def main() -> int:
             if not source_root.exists():
                 source_root = jadx_out
             source_hits, source_hit_count = scan_text_files(source_root, limit=100)
-            key_source_hits, key_source_hit_count = scan_key_java_sources(source_root, limit=100)
+            key_source_hits, key_source_hit_count = scan_key_java_sources(source_root, limit_per_file=25)
             resource_hits, resource_hit_count = scan_text_files(apktool_out / "res", limit=40, pattern=RESOURCE_TERMS)
 
             native_hits: list[str] = []
