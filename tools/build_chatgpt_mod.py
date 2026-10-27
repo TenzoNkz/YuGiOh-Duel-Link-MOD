@@ -93,8 +93,8 @@ def patch_activity_smali(activity_path: Path) -> bool:
         raise BuildError("The CHATGPT MOD install hook is already present; refusing duplicate injection.")
 
     super_call = re.compile(
-        r"(?m)^(?P<indent>\s*)invoke-super(?:/range)?\s+\{[^}]+\}, "
-        r"L[^;]+;->onCreate\(Landroid/os/Bundle;\)V\s*$"
+        r"(?m)^(?P<indent>[ \t]*)invoke-super(?:/range)?[ \t]+\{[^}]+\}, "
+        r"L[^;]+;->onCreate\(Landroid/os/Bundle;\)V[ \t]*$"
     )
     calls = list(super_call.finditer(method_text))
     if len(calls) != 1:
@@ -269,7 +269,7 @@ def compile_menu_dex(java_source: Path, class_dir: Path, dex_dir: Path,
 
 
 def add_helper_dex(apk_path: Path, helper_dex: Path, dex_name: str) -> None:
-    if not re.fullmatch(r"classes(?:[2-9][0-9]*)?\.dex", dex_name) or dex_name == "classes.dex":
+    if not re.fullmatch(r"classes(?:[2-9]|[1-9][0-9]+)\.dex", dex_name) or dex_name == "classes.dex":
         raise BuildError(f"Unexpected helper DEX name: {dex_name}")
     with zipfile.ZipFile(apk_path, "a", compression=zipfile.ZIP_STORED) as archive:
         if dex_name in archive.namelist():
@@ -284,7 +284,7 @@ def next_dex_name(apk_path: Path) -> str:
             if name == "classes.dex":
                 numbers.append(1)
             else:
-                match = re.fullmatch(r"classes([2-9][0-9]*)\.dex", name)
+                match = re.fullmatch(r"classes([2-9]|[1-9][0-9]+)\.dex", name)
                 if match:
                     numbers.append(int(match.group(1)))
         number = max(numbers, default=0) + 1
