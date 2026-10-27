@@ -101,7 +101,7 @@ jobs:
 
       - name: Set up Android SDK
         if: steps.preflight.outcome == 'success'
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v4
 
       - name: Install Android build tools
         id: android_sdk_install
