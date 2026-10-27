@@ -22,15 +22,20 @@ class ApkCodeArchiveIntegrityTests(unittest.TestCase):
         self.assertEqual(status, "PASS")
         self.assertEqual(detail, "all archive entries passed")
 
-    def test_non_zip_input_returns_explicit_failure(self) -> None:
+    def test_member_crc_mismatch_is_reported(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
-            archive_path = Path(temporary) / "not-an-apk.apk"
-            archive_path.write_bytes(b"not a ZIP/APK")
+            archive_path = Path(temporary) / "bad-crc.apk"
+            with zipfile.ZipFile(archive_path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+                archive.writestr("assets/data.bin", b"original payload")
+            damaged = bytearray(archive_path.read_bytes())
+            central = damaged.find(b"PK\\x01\\x02")
+            self.assertGreaterEqual(central, 0)
+            damaged[central + 16] ^= 0x01
+            archive_path.write_bytes(damaged)
             with zipfile.ZipFile(archive_path, "r") as archive:
                 status, detail = archive_crc_status(archive)
-        # ZipFile opens lazily; the scan must surface malformed input as FAIL.
         self.assertEqual(status, "FAIL")
-        self.assertIn("BadZipFile", detail)
+        self.assertIn("assets/data.bin", detail)
 
 
 if __name__ == "__main__":
