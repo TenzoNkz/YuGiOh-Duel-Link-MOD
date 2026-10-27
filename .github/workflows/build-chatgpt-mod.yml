@@ -1,72 +1,85 @@
-name: CHATGPT Mod Build
+name: CHATGPT MOD APK Build / QC
 
 on:
   workflow_dispatch:
+    inputs:
+      base_release_tag:
+        description: APKPure Original Release tag (the only allowed build base)
+        required: true
+        default: APKPure_Latest
 
 permissions:
   contents: write
 
 concurrency:
-  group: chatgpt-mod-build-${{ github.ref }}
+  group: chatgpt-mod-apk-build-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
   build-chatgpt-mod:
-    name: Validate and build CHATGPT Mod APK
+    name: Build the approved APKPure-based mod APK
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7.0.1
         with:
           persist-credentials: true
 
-      - name: Set up Java
-        uses: actions/setup-java@v6.1.0
-        with:
-          distribution: temurin
-          java-version: '21'
-
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v6.4.0
-
-      - name: Validate Android source project and app label
+      - name: Validate reverse-engineering and patcher preconditions
         id: preflight
         continue-on-error: true
+        env:
+          BASE_TAG: ${{ github.event.inputs.base_release_tag || 'APKPure_Latest' }}
         run: |
-          set +e
-          python3 tools/validate_chatgpt_mod_source.py --project-dir chatgpt-mod --required-label "CHATGPT Mod"
-          result=$?
-          if [ "$result" -ne 0 ]; then
-            echo "Build blocked: source project is missing or the label/project structure is invalid."
-          fi
-          exit "$result"
+          set -euo pipefail
+          test "$BASE_TAG" = "APKPure_Latest" || {
+            echo "Only APKPure_Latest is allowed as the mod base."
+            exit 1
+          }
+          test -f APK_CODE_ANALYSIS.md
+          test -f APK_VARIANT_COMPARISON.md
+          test -f MOD_CANDIDATES.md
+          grep -q "APKPure_Latest" APK_CODE_ANALYSIS.md
+          grep -q "PENDING_ANALYSIS" APK_VARIANT_COMPARISON.md && {
+            echo "Variant comparison is still pending."
+            exit 1
+          }
+          grep -q "Build approval: APPROVED_FOR_IMPLEMENTATION" MOD_CANDIDATES.md || {
+            echo "No reviewed feature scope has been approved in MOD_CANDIDATES.md."
+            exit 1
+          }
+          test -f tools/build_chatgpt_mod.py || {
+            echo "The APKPure-based patch/build tool has not been implemented."
+            exit 1
+          }
+          echo "Reverse-engineering and patcher preconditions passed."
 
-      - name: Build Debug APK
+      - name: Build modified APK from APKPure input
         id: build
         if: steps.preflight.outcome == 'success'
         continue-on-error: true
+        env:
+          BASE_TAG: ${{ github.event.inputs.base_release_tag || 'APKPure_Latest' }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
           set -euo pipefail
-          chmod +x chatgpt-mod/gradlew
-          chatgpt-mod/gradlew --project-dir chatgpt-mod --no-daemon clean :app:assembleDebug
-          mapfile -t apks < <(find chatgpt-mod/app/build/outputs/apk/debug -maxdepth 1 -type f -name '*.apk' | sort)
-          if [ "${#apks[@]}" -ne 1 ]; then
-            echo "Expected exactly one APK in app/build/outputs/apk/debug; found ${#apks[@]}."
-            exit 1
-          fi
           mkdir -p dist
-          cp "${apks[0]}" dist/CHATGPT-Mod-debug.apk
-          echo "apk_path=dist/CHATGPT-Mod-debug.apk" >> "$GITHUB_OUTPUT"
-          sha256sum dist/CHATGPT-Mod-debug.apk
-          stat -c 'APK size: %s bytes' dist/CHATGPT-Mod-debug.apk
+          python3 tools/build_chatgpt_mod.py \
+            --repo "$GITHUB_REPOSITORY" \
+            --base-release-tag "$BASE_TAG" \
+            --output dist/CHATGPT-MOD.apk
+          test -s dist/CHATGPT-MOD.apk
+          unzip -t dist/CHATGPT-MOD.apk
+          sha256sum dist/CHATGPT-MOD.apk
+          stat -c 'APK size: %s bytes' dist/CHATGPT-MOD.apk
 
-      - name: Upload CHATGPT Mod APK artifact
+      - name: Upload modified APK artifact
         if: steps.build.outcome == 'success'
         uses: actions/upload-artifact@v7.0.2
         with:
-          name: CHATGPT-Mod-debug-${{ github.sha }}
-          path: dist/CHATGPT-Mod-debug.apk
+          name: CHATGPT-MOD-${{ github.sha }}
+          path: dist/CHATGPT-MOD.apk
           if-no-files-found: error
           retention-days: 14
 
@@ -79,40 +92,43 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           if [ "$PREFLIGHT_OUTCOME" != "success" ]; then
-            status="BLOCKED_SOURCE_PROJECT_OR_LABEL"
-            detail="No successful source preflight. Inspect the preflight step. Expected project: chatgpt-mod/; required label: CHATGPT Mod."
+            status="BLOCKED_REVERSE_ENGINEERING_OR_PATCHER"
+            detail="Reverse-engineering, feature approval, or APKPure patcher preconditions are incomplete."
           elif [ "$BUILD_OUTCOME" != "success" ]; then
             status="BUILD_FAILED"
-            detail="The source project passed preflight, but assembleDebug did not complete. Inspect this Actions run."
+            detail="The APKPure-based build tool ran but did not produce a valid APK. Inspect this workflow's logs."
           else
             status="BUILD_SUCCESS"
-            detail="Debug APK built from the checked-in source project and uploaded as a workflow artifact."
+            detail="The approved APKPure-based patcher produced an APK and ZIP integrity check passed. Runtime behavior still requires separate testing."
           fi
           {
-            echo "# CHATGPT Mod Build Report"
+            echo "# CHATGPT MOD Build Report"
             echo
             echo "**Status:** $status"
             echo "**Checked:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+            echo "**Base Release:** APKPure_Latest"
+            echo "**Reference only:** Platinmods Release Latest"
             echo "**Source commit:** $SOURCE_SHA"
             echo "**Workflow run:** $RUN_URL"
-            echo "**Expected app label:** CHATGPT Mod"
+            echo "**Required in-game menu title:** CHATGPT MOD"
             echo
             echo "## Result"
             echo "$detail"
             echo
-            if [ "$BUILD_OUTCOME" = "success" ] && [ -f dist/CHATGPT-Mod-debug.apk ]; then
-              echo "- Artifact: CHATGPT-Mod-debug.apk"
-              echo "- Size: $(stat -c '%s' dist/CHATGPT-Mod-debug.apk) bytes"
-              echo "- SHA-256: $(sha256sum dist/CHATGPT-Mod-debug.apk | cut -d' ' -f1)"
-              echo "- Delivery: GitHub Actions artifact; no new Release was created."
+            if [ "$BUILD_OUTCOME" = "success" ] && [ -s dist/CHATGPT-MOD.apk ]; then
+              echo "- Artifact: CHATGPT-MOD.apk"
+              echo "- Size: $(stat -c '%s' dist/CHATGPT-MOD.apk) bytes"
+              echo "- SHA-256: $(sha256sum dist/CHATGPT-MOD.apk | cut -d' ' -f1)"
+              echo "- Delivery: GitHub Actions artifact, not committed to Git."
             else
-              echo "- No APK artifact was produced by this run."
+              echo "- No modified APK artifact was produced by this run."
             fi
             echo
-            echo "## Scope and integrity"
-            echo "- This workflow builds only from the checked-in chatgpt-mod/ source tree."
-            echo "- The original Release APK is not modified, overwritten, or republished."
-            echo "- UI-only/accessibility/local-only changes and offline simulations are allowed; live online-match outcome modifications are out of scope."
+            echo "## Source and integrity rules"
+            echo "- APKPure Original is the sole intended build base."
+            echo "- Platinmods is comparison-only."
+            echo "- The original Releases are not overwritten."
+            echo "- A ZIP integrity check is not proof that the game installs or the mod works."
           } > CHATGPT_MOD_BUILD_REPORT.md
 
       - name: Commit durable build report
@@ -125,36 +141,24 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "docs: refresh CHATGPT Mod build report"
+          git commit -m "docs: refresh CHATGPT MOD APK build report"
           for attempt in 1 2 3; do
             git fetch origin "$GITHUB_REF_NAME"
             if ! git rebase "origin/$GITHUB_REF_NAME"; then
-              mapfile -t conflicts < <(git diff --name-only --diff-filter=U)
-              if [ "${#conflicts[@]}" -eq 1 ] && [ "${conflicts[0]}" = "CHATGPT_MOD_BUILD_REPORT.md" ]; then
-                git checkout --theirs -- CHATGPT_MOD_BUILD_REPORT.md
-                git add CHATGPT_MOD_BUILD_REPORT.md
-                if ! GIT_EDITOR=true git rebase --continue; then
-                  git rebase --abort || true
-                  echo "Could not continue rebase after resolving build-report-only conflict."
-                  exit 1
-                fi
-              else
-                printf 'Unexpected concurrent conflict(s): %s\n' "${conflicts[*]}"
-                git rebase --abort || true
-                exit 1
-              fi
+              git rebase --abort || true
+              echo "Unable to rebase the build report onto the latest branch."
+              exit 1
             fi
             if git push origin "HEAD:$GITHUB_REF_NAME"; then
               exit 0
             fi
-            echo "Push attempt $attempt failed; retrying."
             sleep 2
           done
-          echo "Unable to push CHATGPT_MOD_BUILD_REPORT.md after three attempts."
+          echo "Unable to push the build report after three attempts."
           exit 1
 
-      - name: Mark blocked or failed builds
+      - name: Mark blocked or failed build
         if: steps.preflight.outcome == 'failure' || steps.build.outcome == 'failure'
         run: |
-          echo "CHATGPT Mod was not built successfully. Check CHATGPT_MOD_BUILD_REPORT.md and this run's logs."
+          echo "CHATGPT MOD was not built. See CHATGPT_MOD_BUILD_REPORT.md and the preflight/build logs."
           exit 1
