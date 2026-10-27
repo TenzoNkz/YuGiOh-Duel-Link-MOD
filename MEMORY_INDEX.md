@@ -62,8 +62,10 @@ The current APKPure XAPK (92,726,986 bytes) has SHA-256 66ba31c32fbba03b5fe0f75e
 - MOD_INTEGRATION_PLAN.md records the Activity evidence, UI-only helper, gated patcher and remaining gates.
 
 - Latest menu helper validation (Java-to-DEX, report preflight, approval-bypass regression): https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40457542823 — success.
-- Latest checkpoint validation after index/report updates: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40457881877 — success.
 - Exact next action: owner explicitly approves or declines the UI-only scope; keep approval pending until then.
+
+- Latest menu helper/patcher test and Java-to-DEX compile: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40458144076 — success.
+- Latest checkpoint validation after Java 21/tooling updates: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40458144071 — success.
 
 ## Persistence contract
 Committed GitHub records, Release metadata and verified Actions outputs are durable project state. New chats must reload live main, latest reports and Actions outcomes, then continue from HANDOVER.md. Never report a test/build as successful without checking its real output.
