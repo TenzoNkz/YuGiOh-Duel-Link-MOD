@@ -283,8 +283,8 @@ def decode_manifest(decoded_dir: Path) -> list[str]:
     return lines
 
 
-def summarize_android_entrypoint(source_root: Path, limit: int = 40) -> list[str]:
-    """Summarize lifecycle, native bridge and view/window calls in the game Activity."""
+def summarize_android_entrypoint(source_root: Path, limit: int = 60) -> list[str]:
+    """Summarize lifecycle code and native/window hooks in the game Activity."""
     candidates = list(source_root.rglob("YgomMainActivity.java")) if source_root.exists() else []
     preferred = [
         path for path in candidates
@@ -313,9 +313,12 @@ def summarize_android_entrypoint(source_root: Path, limit: int = 40) -> list[str
         r"\bonActivityResult\b|\bWebView\b",
         re.IGNORECASE,
     )
-    lifecycle = {"onCreate", "onStart", "onResume", "onPause", "onStop", "onDestroy",
-                 "onNewIntent", "onActivityResult", "dispatchKeyEvent"}
-    selected: list[tuple[int, str]] = []
+    lifecycle = {
+        "onCreate", "onStart", "onResume", "onPause", "onStop", "onDestroy",
+        "onNewIntent", "onActivityResult", "onRequestPermissionsResult",
+        "onWindowFocusChanged", "onConfigurationChanged", "dispatchKeyEvent",
+    }
+    selected: dict[int, str] = {}
     for index, line in enumerate(source_lines, start=1):
         stripped = line.strip()
         method_match = method_pattern.match(line)
@@ -324,16 +327,34 @@ def summarize_android_entrypoint(source_root: Path, limit: int = 40) -> list[str
             compact = re.sub(r"\s+", " ", stripped)
             if len(compact) > 260:
                 compact = compact[:257] + "..."
-            selected.append((index, compact))
+            selected[index] = compact
+
+        if method_name not in lifecycle:
+            continue
+        brace_depth = line.count("{") - line.count("}")
+        if brace_depth <= 0:
+            continue
+        context_used = 0
+        for context_index in range(index + 1, min(len(source_lines) + 1, index + 13)):
+            context_line = source_lines[context_index - 1]
+            context_stripped = context_line.strip()
+            if context_stripped:
+                compact = re.sub(r"\s+", " ", context_stripped)
+                if len(compact) > 260:
+                    compact = compact[:257] + "..."
+                selected.setdefault(context_index, compact)
+                context_used += 1
+            brace_depth += context_line.count("{") - context_line.count("}")
+            if brace_depth <= 0 or context_used >= 10:
+                break
+
     if not selected:
         return [f"- {candidate.relative_to(source_root).as_posix()} was found but no Activity lifecycle/native/window markers matched."]
+    ordered = sorted(selected.items())
     output = [f"- Source: {candidate.relative_to(source_root).as_posix()} ({len(source_lines)} lines)."]
-    output.extend(
-        f"- L{number}: {line}"
-        for number, line in selected[:limit]
-    )
-    if len(selected) > limit:
-        output.append(f"- Truncated: {len(selected) - limit} additional matching lines were not included.")
+    output.extend(f"- L{number}: {line}" for number, line in ordered[:limit])
+    if len(ordered) > limit:
+        output.append(f"- Truncated: {len(ordered) - limit} additional matching/context lines were not included.")
     return output
 
 
