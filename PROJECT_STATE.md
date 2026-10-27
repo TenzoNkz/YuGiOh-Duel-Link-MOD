@@ -38,7 +38,7 @@ Canonical branch: main
 - tools/analyze_il2cpp.py: pinned Il2CppDumper run, result classification and primary/split archive integrity assessment.
 - tools/compare_apk_variants.py: aggregate primary/split entry comparison and dynamic, package-specific integrity assessment.
 - tests/test_apk_inputs.py, tests/test_analyze_apk_code.py, tests/test_analyze_il2cpp.py and tests/test_compare_apk_variants.py cover input selection, CRC behavior, API authentication, dumper classification and source-integrity reporting.
-- Checkpoint Validation passed for the latest unit-test correction at https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40454118233.
+- Latest Checkpoint Validation with Activity-trace and archive-integrity tests passed at https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40454946814.
 
 ## Android integration evidence
 - The current decoded primary manifest identifies jp.konami.duellinks.plugins.YgomMainActivity as the exported Activity. JADX recovered a 581-line class extending com.google.firebase.MessagingUnityPlayerActivity and implementing BillingClientStateListener and PurchasesUpdatedListener.
