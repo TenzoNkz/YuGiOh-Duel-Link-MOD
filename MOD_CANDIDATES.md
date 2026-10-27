@@ -56,3 +56,10 @@ Status meanings:
 ## Current decision
 
 Start by completing APKPure V11.1.0 reverse engineering and archive comparison. The first candidate should be the custom CHATGPT MOD menu and its own persisted UI preferences. Do not claim any game-function toggle is possible until base-code evidence supports it. Do not start final APK packaging yet.
+
+
+## Build approval checkpoint
+
+**Build approval: PENDING_REVERSE_ENGINEERING**
+
+No feature scope is approved for implementation yet. This marker must remain pending until the V11.1.0 APKPure reports have been reviewed and a concrete, bounded feature is chosen. The build workflow intentionally requires the exact marker `Build approval: APPROVED_FOR_IMPLEMENTATION` before any patch/build attempt.
