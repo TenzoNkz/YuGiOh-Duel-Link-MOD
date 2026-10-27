@@ -1,6 +1,6 @@
 # APKPure IL2CPP Analysis
 
-**Generated:** 2026-10-27 04:25:29 UTC
+**Generated:** 2026-10-27 04:26:49 UTC
 **Status:** IL2CPP_OUTPUTS_GENERATED_WITH_POST_DUMP_CONSOLE_ERROR
 **Tool:** Perfare Il2CppDumper 6.7.46
 **Source rule:** APKPure Original is the input; Platinmods is not used by this stage.
@@ -31,21 +31,23 @@
 - dump.cs generated: YES
 - script.json generated: YES
 - stringliteral.json generated: YES
-- Focused dump.cs match lines: 81
+- Focused dump.cs match lines: 101
 - Output generation confirmed from log: YES
 - Final console-input exception after generation: NO
 - Match count by term group:
   - ShowMonster: 2
-  - Reveal Card: 10
+  - Card-face API: 10
   - CHEATCARD: 1
   - PROCESS_DAMAGE: 4
   - Damage getter: 2
   - Damage positions: 14
   - AutoPlay: 46
+  - DuelMenu/AutoPlay settings: 20
   - Monster/status: 2
 
 ### Focused type/method context
 - ShowMonster: 2 matching dump.cs line(s); showing up to 3 context(s).
+  - [CONTEXT] dump.cs:205060: public class CardRoot : MonoBehaviour, ICardStatusIconAnchor // TypeDefIndex: 4363
   - [CONTEXT] dump.cs:205371: // RVA: 0x22B652C Offset: 0x22B252C VA: 0x22B652C
   - [MATCH] dump.cs:205372: public void ShowMonster(bool immediate, bool showAura, Action onFinished) { }
   - [CONTEXT] dump.cs:205373: 
@@ -53,10 +55,12 @@
   - [CONTEXT] dump.cs:216037: private CardPlace toPlace; // 0x98
   - [MATCH] dump.cs:216038: private bool showMonster; // 0xA0
   - [CONTEXT] dump.cs:216039: 
-- Reveal Card: 10 matching dump.cs line(s); showing up to 3 context(s).
+- Card-face API: 10 matching dump.cs line(s); showing up to 3 context(s).
+  - [CONTEXT] dump.cs:168769: public class DuelClient : ViewController, IFadeSupported, IDynamicHeaderSupported // TypeDefIndex: 3553
   - [CONTEXT] dump.cs:169587: // RVA: 0x2142574 Offset: 0x213E574 VA: 0x2142574
   - [MATCH] dump.cs:169588: public static bool GetFieldCardFace(int player, int position, int index) { }
   - [CONTEXT] dump.cs:169589: 
+  - [CONTEXT] dump.cs:177530: public sealed class Engine // TypeDefIndex: 3734
   - [CONTEXT] dump.cs:177859: // RVA: 0x216C8A4 Offset: 0x21688A4 VA: 0x216C8A4
   - [MATCH] dump.cs:177860: private static extern int DLL_DuelGetCardFace(int player, int position, int index) { }
   - [CONTEXT] dump.cs:177861: 
@@ -93,16 +97,20 @@
   - [MATCH] dump.cs:178409: public static int GetDamageSrcPosition() { }
   - [CONTEXT] dump.cs:178410: 
 - AutoPlay: 46 matching dump.cs line(s); showing up to 3 context(s).
-  - [CONTEXT] dump.cs:23538: private sealed class TimelineWrapper.<>c__DisplayClass121_0 // TypeDefIndex: 539
-  - [CONTEXT] dump.cs:23551: public Action onFinished; // 0x30
-  - [MATCH] dump.cs:23552: public bool autoPlay; // 0x38
-  - [CONTEXT] dump.cs:23553: public Action<TimelineWrapper> onLoaded; // 0x40
-  - [CONTEXT] dump.cs:24013: // RVA: 0x1A56AA0 Offset: 0x1A52AA0 VA: 0x1A56AA0
-  - [MATCH] dump.cs:24014: public static void OpenTimelineWithCreateCanvas(string path, Action<TimelineWrapper> onLoaded, Action onFinished, Transform parentTrans, int cameraDepth = 1, bool widthFit = True, bool autoPlay = True, bool onSaveState = False, bool onSaveChildState = True, bo
-  - [CONTEXT] dump.cs:24015: 
-  - [CONTEXT] dump.cs:24016: // RVA: 0x1A56F3C Offset: 0x1A52F3C VA: 0x1A56F3C
-  - [MATCH] dump.cs:24017: public static void OpenTimeline(string path, Action<TimelineWrapper> onLoaded, Action onFinished, Transform parentTrans, bool widthFit = True, bool widthFitRefParentSize = False, bool autoPlay = True, bool onSaveState = False, bool onSaveChildState = True, boo
-  - [CONTEXT] dump.cs:24018: 
+  - [CONTEXT] dump.cs:69982: public struct SettingsUtil.DuelParam // TypeDefIndex: 1306
+  - [CONTEXT] dump.cs:69991: public bool production3DEnable; // 0x18
+  - [MATCH] dump.cs:69992: public bool autoPlayEnable; // 0x19
+  - [CONTEXT] dump.cs:69993: public bool fastAutoEnable; // 0x1A
+  - [CONTEXT] dump.cs:70008: // RVA: 0x1BEA66C Offset: 0x1BE666C VA: 0x1BEA66C
+  - [MATCH] dump.cs:70009: public void .ctor(DuelMenu.CAMERA_TYPE init_cameraType, DuelMenu.CONTROL_TYPE init_controlType, DuelMenu.CHAIN_TYPE init_chainType, DuelMenu.ACTORDER_TYPE init_actorderType, DuelMenu.MANUAL_TYPE init_manualType, DuelMenu.UI_LAYOUT_TYPE init_uiLayoutType, bool 
+  - [CONTEXT] dump.cs:70010: }
+  - [CONTEXT] dump.cs:70013: public class SettingsUtil // TypeDefIndex: 1307
+  - [CONTEXT] dump.cs:70243: // RVA: 0x1BE94C0 Offset: 0x1BE54C0 VA: 0x1BE94C0
+  - [MATCH] dump.cs:70244: private static bool GetAutoPlay() { }
+  - [CONTEXT] dump.cs:70245: 
+- DuelMenu/AutoPlay settings: 20 matching dump.cs line(s); showing up to 3 context(s).
+  - [CONTEXT] dump.cs:69990: public DuelMenu.MANUAL_TYPE manualType; // 0x14
+  - [CONTEXT] dump.cs:69994: public bool manualChainEnable; // 0x1B
 - Monster/status: 2 matching dump.cs line(s); showing up to 3 context(s).
 
 ### Dumper log excerpt
