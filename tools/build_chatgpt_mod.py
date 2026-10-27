@@ -16,6 +16,7 @@ import sys
 import tempfile
 import urllib.request
 import zipfile
+import zlib
 from pathlib import Path, PurePosixPath
 from typing import Sequence
 from xml.etree import ElementTree
@@ -51,7 +52,8 @@ def verify_zip(path: Path, label: str, require_manifest: bool = False) -> None:
                 raise BuildError(f"{label} failed CRC validation at {bad_member}.")
     except BuildError:
         raise
-    except (OSError, zipfile.BadZipFile, zipfile.LargeZipFile, RuntimeError) as error:
+    except (OSError, zipfile.BadZipFile, zipfile.LargeZipFile, RuntimeError,
+            zlib.error, EOFError, NotImplementedError) as error:
         raise BuildError(f"{label} is not a valid readable ZIP/APK: {type(error).__name__}: {error}") from error
 
 
