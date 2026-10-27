@@ -85,5 +85,13 @@ Inspect the final outcome and refreshed reports from https://github.com/TenzoNkz
 - Source integrity remains PASS with XAPK SHA-256 66ba31c32fbba03b5fe0f75ef27dd9fa875978de7921a0c4ee8b93b878ce64eb. APK code analysis remains partial (96 JADX decompilation errors); APKTool exits 0.
 - Actual modified APK status remains NOT BUILT / NOT INSTALLED / NOT RUNTIME-TESTED. Remaining blockers: explicit owner approval of bounded UI-only scope, configured signing secrets, end-to-end patch/build validation, and on-device Unity/lifecycle/touch testing. Do not describe the UI prototype as already integrated into the game.
 
+
+## 2026-10-27 — Final patcher safety hardening and validation
+- Pinned the gated APK build workflow to Java 21 to align with Apktool 3.0.3 and Android toolchain execution.
+- Extended tools/build_chatgpt_mod.py ZIP verification error handling to convert malformed compression/EOF/unimplemented-compression errors into an explicit guarded BuildError instead of an uncaught crash.
+- Re-ran the menu-source validation including Python compilation/tests, full preflight fixtures, exact standalone approval-marker checks, and Java-to-DEX compilation: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40458144076 — success.
+- Re-ran Checkpoint Validation on the latest patcher/workflow code: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40458144071 — success.
+- Build approval remains PENDING_REVERSE_ENGINEERING. No actual APK build was run; no mod APK exists yet. The first-stage UI-only scope remains a user-owned approval gate.
+
 ## NEXT ACTION
-Latest menu-source validation passed at https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40457542823 and latest durable-record validation passed at https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40457881877. The sole next gate is the owner's explicit decision on the UI-only scope in MOD_CANDIDATES.md. Keep approval pending until explicitly approved; then switch to Eksekusi Build App! for a signed non-release test APK and device QC.
+Owner decision: explicitly approve or decline the bounded UI-only scope in MOD_CANDIDATES.md. Keep the exact approval marker pending unless the owner explicitly approves. If approved, configure the four signing Actions secrets, then use Eksekusi Build App! for a signed non-release test APK and on-device QC.
