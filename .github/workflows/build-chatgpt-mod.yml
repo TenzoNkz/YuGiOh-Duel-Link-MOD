@@ -37,18 +37,42 @@ jobs:
             echo "Only APKPure_Latest is allowed as the mod base."
             exit 1
           }
+          test -f APP_ANALYSIS_REPORT.md
           test -f APK_CODE_ANALYSIS.md
+          test -f IL2CPP_ANALYSIS_REPORT.md
           test -f APK_VARIANT_COMPARISON.md
           test -f MOD_CANDIDATES.md
-          grep -q "APKPure_Latest" APK_CODE_ANALYSIS.md
-          grep -q "PENDING_ANALYSIS" APK_VARIANT_COMPARISON.md && {
-            echo "Variant comparison is still pending."
-            exit 1
-          }
-          grep -q "Build approval: APPROVED_FOR_IMPLEMENTATION" MOD_CANDIDATES.md || {
-            echo "No reviewed feature scope has been approved in MOD_CANDIDATES.md."
-            exit 1
-          }
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          static = Path("APP_ANALYSIS_REPORT.md").read_text(encoding="utf-8")
+          code = Path("APK_CODE_ANALYSIS.md").read_text(encoding="utf-8")
+          il2cpp = Path("IL2CPP_ANALYSIS_REPORT.md").read_text(encoding="utf-8")
+          comparison = Path("APK_VARIANT_COMPARISON.md").read_text(encoding="utf-8")
+          candidates = Path("MOD_CANDIDATES.md").read_text(encoding="utf-8")
+
+          blockers = []
+          if "**Status:** INVENTORY_COMPLETE\n" not in static:
+              blockers.append("APK static inventory is not clean: require INVENTORY_COMPLETE (no CRC/decompression warnings).")
+          if "- CRC scan: PASS" not in static:
+              blockers.append("Primary APK ZIP CRC/decompression scan must pass.")
+          if "**Status:** CODE_ANALYSIS_COMPLETE" not in code:
+              blockers.append("APK code analysis is partial or failed.")
+          if "outer CRC: FAIL" in code or "outer XAPK CRC=FAIL" in code or "read failed (" in code:
+              blockers.append("APK code report contains an unreadable split/CRC failure.")
+          if "BUILD BLOCKER:" in comparison or "unreadable/corrupt member: 2" in comparison:
+              blockers.append("APKPure-versus-reference comparison reports source corruption.")
+          if "Primary APK outer CRC: FAIL" in il2cpp or "ARM64 split outer CRC: FAIL" in il2cpp:
+              blockers.append("IL2CPP inputs fail outer XAPK member CRC.")
+          if "Build approval: APPROVED_FOR_IMPLEMENTATION" not in candidates:
+              blockers.append("No reviewed feature scope is approved in MOD_CANDIDATES.md.")
+          if blockers:
+              print("Preflight blocked:")
+              for blocker in blockers:
+                  print("- " + blocker)
+              raise SystemExit(1)
+          print("Integrity/reverse-engineering reports satisfy build preconditions.")
+          PY
           test -f tools/build_chatgpt_mod.py || {
             echo "The APKPure-based patch/build tool has not been implemented."
             exit 1
