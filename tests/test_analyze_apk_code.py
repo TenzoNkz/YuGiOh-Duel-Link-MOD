@@ -28,7 +28,7 @@ class ApkCodeArchiveIntegrityTests(unittest.TestCase):
             with zipfile.ZipFile(archive_path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
                 archive.writestr("assets/data.bin", b"original payload")
             damaged = bytearray(archive_path.read_bytes())
-            central = damaged.find(b"PK\\x01\\x02")
+            central = damaged.find(b"PK\x01\x02")
             self.assertGreaterEqual(central, 0)
             damaged[central + 16] ^= 0x01
             archive_path.write_bytes(damaged)
