@@ -1,6 +1,6 @@
 # APKPure IL2CPP Analysis
 
-**Generated:** 2026-10-27 04:22:17 UTC
+**Generated:** 2026-10-27 04:23:42 UTC
 **Status:** IL2CPP_OUTPUTS_GENERATED_WITH_POST_DUMP_CONSOLE_ERROR
 **Tool:** Perfare Il2CppDumper 6.7.46
 **Source rule:** APKPure Original is the input; Platinmods is not used by this stage.

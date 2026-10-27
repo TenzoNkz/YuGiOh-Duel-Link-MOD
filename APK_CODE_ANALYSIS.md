@@ -1,6 +1,6 @@
 # APK Code Analysis Report
 
-**Generated:** 2026-10-27 04:21:10 UTC
+**Generated:** 2026-10-27 04:22:56 UTC
 **Method:** JADX/Apktool static analysis; the APK was not installed or executed.
 - Repository: TenzoNkz/YuGiOh-Duel-Link-MOD
 - Requested release tag: APKPure_Latest
@@ -104,28 +104,28 @@
     	... 3 more
 
 ### JADX output excerpt
-    INFO  - progress: 7962 of 8855 (89%)
-    INFO  - progress: 8029 of 8855 (90%)
-    INFO  - progress: 8106 of 8855 (91%)
-    INFO  - progress: 8215 of 8855 (92%)
-    INFO  - progress: 8356 of 8855 (94%)
-    INFO  - progress: 8496 of 8855 (95%)
-    INFO  - progress: 8496 of 8855 (95%)
-    INFO  - progress: 8496 of 8855 (95%)
-    INFO  - progress: 8496 of 8855 (95%)
-    INFO  - progress: 8496 of 8855 (95%)
-    INFO  - progress: 8496 of 8855 (95%)
-    INFO  - progress: 8496 of 8855 (95%)
-    INFO  - progress: 8496 of 8855 (95%)
-    INFO  - progress: 8496 of 8855 (95%)
-    INFO  - progress: 8496 of 8855 (95%)
-    INFO  - progress: 8496 of 8855 (95%)
-    INFO  - progress: 8496 of 8855 (95%)
-    INFO  - progress: 8496 of 8855 (95%)
-    INFO  - progress: 8496 of 8855 (95%)
-    INFO  - progress: 8496 of 8855 (95%)
-    INFO  - progress: 8704 of 8855 (98%)
-    INFO  - progress: 8850 of 8855 (99%)
+    INFO  - progress: 6751 of 8855 (76%)
+    INFO  - progress: 6954 of 8855 (78%)
+    INFO  - progress: 7059 of 8855 (79%)
+    INFO  - progress: 7138 of 8855 (80%)
+    INFO  - progress: 7245 of 8855 (81%)
+    INFO  - progress: 7330 of 8855 (82%)
+    INFO  - progress: 7391 of 8855 (83%)
+    INFO  - progress: 7492 of 8855 (84%)
+    INFO  - progress: 7655 of 8855 (86%)
+    INFO  - progress: 7779 of 8855 (87%)
+    INFO  - progress: 7869 of 8855 (88%)
+    INFO  - progress: 7970 of 8855 (90%)
+    INFO  - progress: 8104 of 8855 (91%)
+    INFO  - progress: 8328 of 8855 (94%)
+    INFO  - progress: 8500 of 8855 (95%)
+    INFO  - progress: 8500 of 8855 (95%)
+    INFO  - progress: 8500 of 8855 (95%)
+    INFO  - progress: 8500 of 8855 (95%)
+    INFO  - progress: 8500 of 8855 (95%)
+    INFO  - progress: 8500 of 8855 (95%)
+    INFO  - progress: 8500 of 8855 (95%)
+    INFO  - progress: 8682 of 8855 (98%)
                                                                  
     ERROR - finished with errors, count: 96
 
