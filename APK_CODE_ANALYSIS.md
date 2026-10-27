@@ -1,6 +1,6 @@
 # APK Code Analysis Report
 
-**Generated:** 2026-10-27 05:10:08 UTC
+**Generated:** 2026-10-27 05:13:00 UTC
 **Method:** JADX/Apktool static analysis; the APK was not installed or executed.
 - Repository: TenzoNkz/YuGiOh-Duel-Link-MOD
 - Requested release tag: APKPure_Latest
@@ -89,10 +89,10 @@
 
 ### Apktool output excerpt
     I: Using Apktool 3.0.3 on source-primary.apk with 4 threads
-    I: Baksmaling classes2.dex...
-    I: Loading resource table...
-    I: Baksmaling classes3.dex...
     I: Baksmaling classes.dex...
+    I: Baksmaling classes2.dex...
+    I: Baksmaling classes3.dex...
+    I: Loading resource table...
     I: Decoding value resources...
     I: Loading resource table from file: /home/runner/.local/share/apktool/framework/1.apk
     I: Decoding file resources...
@@ -103,28 +103,28 @@
     I: Copying unknown files...
 
 ### JADX output excerpt
-    INFO  - progress: 7071 of 8855 (79%)
-    INFO  - progress: 7147 of 8855 (80%)
-    INFO  - progress: 7249 of 8855 (81%)
-    INFO  - progress: 7374 of 8855 (83%)
-    INFO  - progress: 7514 of 8855 (84%)
-    INFO  - progress: 7617 of 8855 (86%)
-    INFO  - progress: 7696 of 8855 (86%)
-    INFO  - progress: 7779 of 8855 (87%)
+    INFO  - progress: 7499 of 8855 (84%)
+    INFO  - progress: 7618 of 8855 (86%)
+    INFO  - progress: 7689 of 8855 (86%)
+    INFO  - progress: 7753 of 8855 (87%)
+    INFO  - progress: 7781 of 8855 (87%)
     INFO  - progress: 7819 of 8855 (88%)
-    INFO  - progress: 7910 of 8855 (89%)
-    INFO  - progress: 7963 of 8855 (89%)
-    INFO  - progress: 8099 of 8855 (91%)
+    INFO  - progress: 7894 of 8855 (89%)
+    INFO  - progress: 7962 of 8855 (89%)
+    INFO  - progress: 8074 of 8855 (91%)
+    INFO  - progress: 8104 of 8855 (91%)
     INFO  - progress: 8178 of 8855 (92%)
-    INFO  - progress: 8341 of 8855 (94%)
-    INFO  - progress: 8500 of 8855 (95%)
-    INFO  - progress: 8500 of 8855 (95%)
-    INFO  - progress: 8500 of 8855 (95%)
-    INFO  - progress: 8500 of 8855 (95%)
-    INFO  - progress: 8500 of 8855 (95%)
-    INFO  - progress: 8500 of 8855 (95%)
-    INFO  - progress: 8564 of 8855 (96%)
-    INFO  - progress: 8771 of 8855 (99%)
+    INFO  - progress: 8248 of 8855 (93%)
+    INFO  - progress: 8367 of 8855 (94%)
+    INFO  - progress: 8496 of 8855 (95%)
+    INFO  - progress: 8496 of 8855 (95%)
+    INFO  - progress: 8496 of 8855 (95%)
+    INFO  - progress: 8496 of 8855 (95%)
+    INFO  - progress: 8496 of 8855 (95%)
+    INFO  - progress: 8496 of 8855 (95%)
+    INFO  - progress: 8496 of 8855 (95%)
+    INFO  - progress: 8514 of 8855 (96%)
+    INFO  - progress: 8767 of 8855 (99%)
                                                                  
     ERROR - finished with errors, count: 96
 
@@ -168,8 +168,8 @@
   - (none found)
 
 ## APK split inventory
-- config.arm64_v8a.apk (config/split APK): 14 entries, 9 native libraries, 0 IL2CPP metadata file(s), outer XAPK CRC=PASS.
-- jp.konami.duellinks.apk (primary APK): 3368 entries, 0 native libraries, 1 IL2CPP metadata file(s), outer XAPK CRC=PASS.
+- config.arm64_v8a.apk (config/split APK): 14 entries, 9 native libraries, 0 IL2CPP metadata file(s), outer XAPK CRC=PASS, inner ZIP CRC=PASS.
+- jp.konami.duellinks.apk (primary APK): 3368 entries, 0 native libraries, 1 IL2CPP metadata file(s), outer XAPK CRC=PASS, inner ZIP CRC=PASS.
 
 ## Native/IL2CPP inventory across readable APK members
 - [config.arm64_v8a.apk] lib/arm64-v8a/libFirebaseCppAnalytics.so: 51296 bytes
@@ -184,7 +184,7 @@
 - assets/bin/Data/Managed/Metadata/global-metadata.dat: 11183816 bytes
 
 ## APK/split read warnings
-- No per-entry split inventory read errors were recorded; the selected primary APK CRC warning above still applies.
+- Full inner ZIP CRC/decompression scans passed for every extracted APK member.
 
 ## Search hits in decompiled Java
 - Matching lines found: 31; displaying up to 31.
