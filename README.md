@@ -15,7 +15,7 @@ This repository follows the JE X FYZ-style recovery workflow. **APKPure Original
 
 The APKPure XAPK was updated and the current asset passes verification. Current XAPK size is 92,726,986 bytes; expected and calculated SHA-256 match at 66ba31c32fbba03b5fe0f75ef27dd9fa875978de7921a0c4ee8b93b878ce64eb. Both embedded APK members pass outer CRC checks, and the primary APK plus ARM64 split pass inner ZIP CRC/decompression scans. The old digest 1f2cf45f87f52217227611b1d48f83a1d3990c326a0b2a6c64fa54296237be16 belonged to the previous corrupt upload and is superseded.
 
-Source integrity is no longer the blocker. **Do not package the final APK yet**: the code analysis is still partial (JADX returned 96 decompilation errors), feature call paths are not proven, no safe feature scope has been approved, and no genuine APKPure-based patch/build pipeline or verified XAPK/split installation strategy exists. Review PROJECT_STATE.md and HANDOVER.md for the current checkpoint.
+Source integrity is verified. An owned UI-only menu helper and a gated APKPure patcher are now in the repository; CI compiles the helper to DEX and passes patcher primitive tests. **No APK has been built or runtime-tested yet.** The feature scope is still awaiting explicit approval, and the end-to-end XAPK/split rebuild, signing, installation and Unity touch behavior remain unverified. Review PROJECT_STATE.md, HANDOVER.md and MOD_INTEGRATION_PLAN.md for the current checkpoint.
 
 ## Three primary modes
 
@@ -26,14 +26,15 @@ Review the live repository, reports, Release metadata, relevant code and Actions
 Implement the agreed engineering work, run code checks/tests, update durable reports, and verify actual Actions. The current task is APKPure-first reverse engineering and feature feasibility—not APK packaging.
 
 ### Eksekusi Build App!
-Build/QC only after the source package is clean, the feature plan is reviewed, and a real APKPure-based patch/build tool exists. Do not build a separate Gradle demo and call it a modified Duel Links APK.
+Build/QC only after the owner approves the bounded UI-only scope in MOD_CANDIDATES.md and configures the required signing secrets. The real patcher is implemented but gated; its end-to-end output still needs validation. Do not build a separate Gradle demo or call an unmodified APK a mod.
 
 ## GitHub Actions
 
 - [APK Static Analysis](../../actions/workflows/apk-static-analysis.yml) — container digest, XAPK primary/split inventory and CRC checks.
 - [APK Code Analysis (APKPure Base)](../../actions/workflows/apk-code-analysis.yml) — Apktool/JADX, split-native inventory, package comparison, and pinned Il2CppDumper metadata recovery.
 - [Checkpoint Validation](../../actions/workflows/checkpoint-validation.yml) — Python syntax and unit tests.
-- [CHATGPT MOD Build](../../actions/workflows/build-chatgpt-mod.yml) — gated until call-flow analysis, a reviewed safe feature scope, and a real APKPure-based patch/build tool exist.
+- [CHATGPT MOD Build](../../actions/workflows/build-chatgpt-mod.yml) — gated on clean source reports, explicit feature approval, and repository signing secrets.
+- [CHATGPT MOD Menu Source Validation](../../actions/workflows/menu-source-validation.yml) — compiles the helper Java source to DEX and tests patcher primitives without building the game APK.
 
 ## Durable project records
 
@@ -46,8 +47,10 @@ Build/QC only after the source package is clean, the feature plan is reviewed, a
 - [APK_CODE_ANALYSIS.md](APK_CODE_ANALYSIS.md) — manifest, DEX/JADX, native split and string analysis.
 - [IL2CPP_ANALYSIS_REPORT.md](IL2CPP_ANALYSIS_REPORT.md) — type/method recovery attempt from the APKPure ARM64 library and metadata.
 - [APK_VARIANT_COMPARISON.md](APK_VARIANT_COMPARISON.md) — byte-level comparison of APKPure payloads with Platinmods reference.
-- [MOD_CANDIDATES.md](MOD_CANDIDATES.md) — feature candidates with explicit evidence/status.
-- [MOD_INTEGRATION_PLAN.md](MOD_INTEGRATION_PLAN.md) — clean Activity entry point, menu integration options, and remaining gates.
+- [MOD_CANDIDATES.md](MOD_CANDIDATES.md) — feature candidates with explicit evidence/status and the current build-approval marker.
+- [MOD_INTEGRATION_PLAN.md](MOD_INTEGRATION_PLAN.md) — clean Activity entry point, owned UI helper, patcher flow and remaining gates.
+- [tools/build_chatgpt_mod.py](tools/build_chatgpt_mod.py) — gated APKPure-based patch/build implementation.
+- [src/mod_menu/com/chatgptmod/menu/ModMenu.java](src/mod_menu/com/chatgptmod/menu/ModMenu.java) — owned UI-only menu source; no gameplay callbacks.
 - [CHATGPT_MOD_BUILD_REPORT.md](CHATGPT_MOD_BUILD_REPORT.md) — verified build state/blockers.
 - [ANALYSIS_LOG.md](ANALYSIS_LOG.md) — chronological verified milestones.
 
