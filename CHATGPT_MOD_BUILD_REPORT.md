@@ -16,8 +16,9 @@
 - ARM64 split: config.arm64_v8a.apk, 36,869,159 bytes; SHA-256 d2bb8f75605e457b1680b2c428ba653840aed11ca49644d9ad5d10bd649dacf4.
 - Both embedded members pass outer XAPK CRC validation. Both the primary APK and ARM64 split pass their inner ZIP CRC/decompression scans. No OBB member was detected.
 - Static archive inventory run: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40453605293 (success).
-- Code analysis and IL2CPP report refresh: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40453733126 (success; code report remains partial because JADX emitted decompilation errors).
-- Enhanced inner-CRC code analysis: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40454023712 (verify its final result before considering all latest tooling checks done).
+- Latest full Code Analysis with inner ZIP CRC scans and YgomMainActivity entry-point trace: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40454946821 (success; code report remains partial because JADX emitted 96 decompilation errors).
+- Latest Checkpoint Validation including Activity-trace and archive-integrity tests: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40454946814 (success).
+- Activity/menu integration decision record: [MOD_INTEGRATION_PLAN.md](https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/blob/main/MOD_INTEGRATION_PLAN.md).
 
 ## Actual analysis state
 - APKTool exits 0 and decoded the current primary APK manifest/resources.
@@ -25,6 +26,7 @@
 - Il2CppDumper v6.7.46 generated dump.cs, script.json and stringliteral.json, then exited -6 at its final Console.ReadKey prompt. The report generator now classifies the post-output console exception without itself crashing and records the clean archive-integrity findings.
 - Metadata includes ShowMonster, card-face query declarations, the CHEATCARD enum, damage-value getters, and DuelMenu autoplay state/control names. This is static metadata only and does not prove any feature can be wired to a new menu or works at runtime.
 - APKPure versus Platinmods byte comparison is available in APK_VARIANT_COMPARISON.md. Differences in manifest, DEX or resources do not independently tell us the semantic purpose of those changes.
+- The decoded Activity is YgomMainActivity, extending Firebase's MessagingUnityPlayerActivity. The current APKPure base has no com.platinmods DEX classes, no SYSTEM_ALERT_WINDOW permission or Platinmods-style floating-menu service, and no direct WindowManager/addContentView menu hook in the Activity trace. An independently owned same-Activity UI is a candidate integration approach, but still needs a real patch and device test.
 - No CHATGPT MOD APK has been built, signed, installed or runtime-tested.
 
 ## Remaining blockers — not source integrity
@@ -51,4 +53,4 @@ A public certificate is not the private signing key. Unless the required Platinm
 Safe local UI/accessibility/settings, compatibility changes, independent preferences and offline simulations may be considered. A successful archive, static-analysis workflow or packaging step is not proof that a gameplay feature works.
 
 ## NEXT ACTION
-Trace the current clean primary APK's manifest and jp.konami.duellinks.plugins.YgomMainActivity DEX entry points, then map any proposed menu integration point against verified call paths. Keep final packaging blocked until a real APKPure-based patcher and approved feature scope exist.
+Review and approve a bounded first feature scope—recommended: independent CHATGPT MOD menu shell and local preference persistence only, without gameplay callbacks. Then implement a genuine APKPure-based patch tool and a non-release test prototype. Verify Activity/Unity lifecycle, touch handling, split packaging and signing before considering final release packaging.
