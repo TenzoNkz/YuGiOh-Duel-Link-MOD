@@ -1,6 +1,6 @@
 # APKPure Original vs Platinmods — Static Variant Comparison
 
-Generated: 2026-10-27 04:20:29 UTC
+Generated: 2026-10-27 04:22:13 UTC
 Purpose: APKPure Original is the sole intended mod base. Platinmods is a comparison reference only.
 Method: Release digest checks, primary APK resolution, archive entry inventory, and per-entry SHA-256 comparison. No app was installed or executed.
 
@@ -54,7 +54,7 @@ Method: Release digest checks, primary APK resolution, archive entry inventory, 
 - Shared entries with identical SHA-256: 2874
 - Shared entries with different SHA-256: 205
 - Shared entries with at least one unreadable/corrupt member: 2
-- Unreadable/corrupt entries in APKPure primary APK: 2
+- Unreadable/corrupt entries across APKPure main/split APKs: 2
 - Unreadable/corrupt entries in Platinmods APK: 0
 - APKPure-only entries: 296
 - Platinmods-only entries: 317
@@ -307,13 +307,14 @@ Method: Release digest checks, primary APK resolution, archive entry inventory, 
 - res/drawable-hdpi/abc_text_select_handle_middle_mtrl.png — 396 bytes (0.00 MiB)
 
 ## Limitations and interpretation
-- At least one selected embedded APK has an outer XAPK-member CRC mismatch. The bytes were analyzed as data, but the original container is not clean and must be verified before any patch/build.
+- Embedded APK outer CRC failures: APKPure/config.arm64_v8a.apk, APKPure/jp.konami.duellinks.apk; none in Platinmods. The original container is not clean and must be verified before any patch/build.
 - Entries could not be fully decompressed/hashed: APKPure main/splits=2, Platinmods=0. See the unverified-entry section below.
 - BUILD BLOCKER: the current APKPure XAPK and/or one of its embedded APK payloads fails CRC/decompression checks. Do not patch or build from this upload; replace it with a clean APKPure package and rerun the full analysis.
 - The XAPK container SHA-256 matches GitHub's release metadata, but this only confirms the downloaded bytes match the uploaded asset. It does not establish that the embedded package contents are internally valid.
 - Different entry hashes prove byte differences only, not what changed semantically.
 - APK v2/v3 signing blocks are not ordinary ZIP entries; this report does not verify signer identity or Android update compatibility.
 - For XAPK input, the comparison merges the primary APK's logical entries with unique entries from extracted splits (including native libraries), while excluding split-specific manifests/signature metadata. It does not synthesize or validate a single installable APK.
+- Current APKPure source-integrity blockers: both embedded APK outer CRC checks fail; one primary asset cannot decompress and the ARM64 libduel.so entry fails its inner CRC. Do not patch/build until a clean original XAPK is uploaded and passes analysis.
 - The current APKPure XAPK contains integrity failures in the primary APK asset data and the arm64 libduel.so entry. Treat all features depending on those entries as unknown until a clean original package is uploaded.
 - Platinmods is not the build base. Do not copy its binary components into CHATGPT MOD without independent technical review and necessary rights.
 

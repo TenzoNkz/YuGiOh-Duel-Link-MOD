@@ -1,6 +1,6 @@
 # APK Code Analysis Report
 
-**Generated:** 2026-10-27 04:19:27 UTC
+**Generated:** 2026-10-27 04:21:10 UTC
 **Method:** JADX/Apktool static analysis; the APK was not installed or executed.
 - Repository: TenzoNkz/YuGiOh-Duel-Link-MOD
 - Requested release tag: APKPure_Latest
@@ -105,10 +105,10 @@
 
 ### JADX output excerpt
     INFO  - progress: 7962 of 8855 (89%)
-    INFO  - progress: 8024 of 8855 (90%)
-    INFO  - progress: 8104 of 8855 (91%)
-    INFO  - progress: 8214 of 8855 (92%)
-    INFO  - progress: 8327 of 8855 (94%)
+    INFO  - progress: 8029 of 8855 (90%)
+    INFO  - progress: 8106 of 8855 (91%)
+    INFO  - progress: 8215 of 8855 (92%)
+    INFO  - progress: 8356 of 8855 (94%)
     INFO  - progress: 8496 of 8855 (95%)
     INFO  - progress: 8496 of 8855 (95%)
     INFO  - progress: 8496 of 8855 (95%)
@@ -124,8 +124,8 @@
     INFO  - progress: 8496 of 8855 (95%)
     INFO  - progress: 8496 of 8855 (95%)
     INFO  - progress: 8496 of 8855 (95%)
-    INFO  - progress: 8575 of 8855 (96%)
-    INFO  - progress: 8783 of 8855 (99%)
+    INFO  - progress: 8704 of 8855 (98%)
+    INFO  - progress: 8850 of 8855 (99%)
                                                                  
     ERROR - finished with errors, count: 96
 
@@ -221,7 +221,7 @@
 - jp/applilink/sdk/recommend/RecommendNetworkCore.java:1069: intent.putExtra("autoPlay", z);
 - kotlin/collections/builders/MapBuilder.java:385: throw new IllegalStateException("This cannot happen with fixed magic multiplier and grow-only hash array. Have object hashCodes changed?");
 
-## Key Platinmods menu-framework source references
+## Known reference menu-framework paths checked in APKPure DEX
 - Matching source lines found: 0; displaying context for up to 4 lines.
 - com/platinmods/FloatingModMenuService.java: not produced by JADX.
 - com/platinmods/PMLauncher.java: not produced by JADX.
