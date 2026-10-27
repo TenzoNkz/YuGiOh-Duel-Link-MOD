@@ -19,7 +19,7 @@ Branch: main
 - Both embedded APK members pass outer XAPK CRC; primary and ARM64 split pass inner ZIP CRC/decompression scans. No OBB member was found.
 - The former digest 1f2cf45f87f52217227611b1d48f83a1d3990c326a0b2a6c64fa54296237be16 belongs to the prior corrupt upload and is superseded.
 - Latest code analysis with full inner CRC checks and Activity trace: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40454946821 (success).
-- Latest checkpoint validation after report refresh: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40457665323 (success).
+- Latest checkpoint validation after the current index/report updates: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40457881877 (success).
 - Latest menu helper validation including Java-to-DEX compilation, complete preflight fixture and approval-bypass regression: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40457542823 (success).
 
 ## Current code and test artifacts
@@ -44,4 +44,4 @@ Branch: main
 5. No promise that the independently signed APK can overwrite Platinmods; without its private signing key/valid rotation chain, uninstall/reinstall may be necessary.
 
 ## NEXT ACTION
-Review and explicitly approve the bounded UI-only scope in MOD_CANDIDATES.md. If approved, set Build approval: APPROVED_FOR_IMPLEMENTATION and configure signing secrets; then run the gated build workflow to create a non-release test APK and validate it on a dedicated device. Do not represent the candidate UI as integrated until that test succeeds.
+Owner decision required: explicitly approve or decline the bounded UI-only scope in MOD_CANDIDATES.md. Approval must be represented by the exact standalone line `**Build approval: APPROVED_FOR_IMPLEMENTATION**` plus configuration of the four signing Actions secrets. Only then switch to Eksekusi Build App! for a non-release test APK and device QC. Do not represent the UI as integrated until runtime testing succeeds.
