@@ -19,7 +19,7 @@ import zlib
 from datetime import datetime, timezone
 from pathlib import Path
 
-from apk_inputs import download_and_hash, get_release, hash_zip_member, resolve_primary_apk, select_release_asset
+from apk_inputs import download_and_hash, extract_xapk_member, get_release, hash_zip_member, resolve_primary_apk, select_release_asset
 
 DEFAULT_REPO = "TenzoNkz/YuGiOh-Duel-Link-MOD"
 
@@ -48,41 +48,126 @@ def load_package(repo: str, tag: str, work: Path, role: str) -> dict:
     name = str(asset.get("name", "(unnamed)"))
     suffix = ".xapk" if name.lower().endswith(".xapk") else ".apk"
     container = work / f"{role}-container{suffix}"
-    size, digest = download_and_hash(str(asset["browser_download_url"]), container)
+    size, container_digest = download_and_hash(str(asset["browser_download_url"]), container)
     expected = str(asset.get("digest") or "")
     expected_sha = expected.split(":", 1)[1] if expected.startswith("sha256:") else ""
-    digest_ok = digest.lower() == expected_sha.lower() if expected_sha else None
-    apk_path, selected_name, inner_apks, obbs = resolve_primary_apk(
+    digest_ok = container_digest.lower() == expected_sha.lower() if expected_sha else None
+    primary_path, selected_name, inner_apks, obbs = resolve_primary_apk(
         container, name, work / f"{role}-primary.apk"
     )
+    members = []
+    if suffix == ".xapk":
+        for index, member in enumerate(inner_apks, start=1):
+            if member["name"] == selected_name:
+                members.append({
+                    **member, "path": primary_path, "is_primary": True,
+                    "container_crc_status": member.get("container_crc_status", "NOT_CHECKED"),
+                })
+                continue
+            split_path = work / f"{role}-split-{index}.apk"
+            try:
+                extracted = extract_xapk_member(container, member["name"], split_path)
+                inner_apks = [
+                    extracted if current["name"] == member["name"] else current
+                    for current in inner_apks
+                ]
+                members.append({
+                    **extracted, "path": split_path, "is_primary": False,
+                })
+            except (zipfile.BadZipFile, zlib.error, EOFError, OSError, RuntimeError, NotImplementedError) as error:
+                note = f"{type(error).__name__}: {error}"
+                inner_apks = [
+                    {**current, "analysis_error": note}
+                    if current["name"] == member["name"] else current
+                    for current in inner_apks
+                ]
+                members.append({
+                    **member, "path": None, "is_primary": False,
+                    "container_crc_status": "EXTRACTION_FAILED", "analysis_error": note,
+                })
+    else:
+        members.append({
+            "name": name, "size": size, "compressed_size": None,
+            "path": primary_path, "is_primary": True,
+            "container_crc_status": "NOT_APPLICABLE",
+        })
+
     package = {
         "tag": tag, "release": release, "asset": asset, "asset_name": name,
-        "container_size": size, "container_sha": digest, "expected_sha": expected_sha,
-        "digest_ok": digest_ok, "container": container, "apk_path": apk_path,
-        "selected_name": selected_name, "apk_size": apk_path.stat().st_size,
-        "apk_sha": sha256_file(apk_path), "inner_apks": inner_apks, "obbs": obbs,
+        "container_size": size, "container_sha": container_digest, "expected_sha": expected_sha,
+        "digest_ok": digest_ok, "container": container, "apk_path": primary_path,
+        "selected_name": selected_name, "apk_size": primary_path.stat().st_size,
+        "apk_sha": sha256_file(primary_path), "inner_apks": inner_apks, "obbs": obbs,
+        "members": members,
     }
-    with zipfile.ZipFile(apk_path, "r") as archive:
-        entries = {}
-        read_errors = {}
-        for item in archive.infolist():
-            if item.is_dir():
-                continue
-            try:
-                digest = hash_zip_member(archive, item)
-                error_note = None
-            except (zipfile.BadZipFile, zlib.error, EOFError, OSError, RuntimeError, NotImplementedError) as error:
-                digest = None
-                error_note = f"{type(error).__name__}: {error}"
-                read_errors[item.filename] = error_note
-            entries[item.filename] = {
-                "size": item.file_size,
-                "compressed": item.compress_size,
-                "sha256": digest,
-                "read_error": error_note,
-            }
+    entries: dict[str, dict] = {}
+    read_errors: dict[str, str] = {}
+    member_conflicts: list[str] = []
+    for member in members:
+        if member["path"] is None:
+            read_errors[f"{member['name']}::<container>"] = member.get("analysis_error", "member extraction failed")
+            continue
+        member_errors = []
+        try:
+            with zipfile.ZipFile(member["path"], "r") as archive:
+                member_infos = archive.infolist()
+                member["entry_count"] = sum(not info.is_dir() for info in member_infos)
+                member["native_count"] = sum(
+                    not info.is_dir() and info.filename.startswith("lib/") and info.filename.endswith(".so")
+                    for info in member_infos
+                )
+                member["dex_count"] = sum(
+                    not info.is_dir() and bool(re.fullmatch(r"classes(?:[0-9]+)?\.dex", info.filename))
+                    for info in member_infos
+                )
+                for item in member_infos:
+                    if item.is_dir():
+                        continue
+                    # A split APK's own manifest and META-INF entries describe
+                    # that split/signature, not the base app's logical resources.
+                    if not member["is_primary"] and (
+                        item.filename == "AndroidManifest.xml"
+                        or item.filename.upper().startswith("META-INF/")
+                    ):
+                        continue
+                    try:
+                        item_digest = hash_zip_member(archive, item)
+                        item_error = None
+                    except (zipfile.BadZipFile, zlib.error, EOFError, OSError, RuntimeError, NotImplementedError) as error:
+                        item_digest = None
+                        item_error = f"{type(error).__name__}: {error}"
+                        member_errors.append(f"{item.filename}: {item_error}")
+                    record = {
+                        "size": item.file_size,
+                        "compressed": item.compress_size,
+                        "sha256": item_digest,
+                        "read_error": item_error,
+                        "source_member": member["name"],
+                    }
+                    current = entries.get(item.filename)
+                    if current is None:
+                        entries[item.filename] = record
+                    elif current["sha256"] == item_digest:
+                        pass
+                    elif current["sha256"] is None and item_digest is not None and member["is_primary"]:
+                        entries[item.filename] = record
+                        member_conflicts.append(
+                            f"{item.filename}: primary failed to hash; a member also supplies a readable copy"
+                        )
+                    else:
+                        member_conflicts.append(
+                            f"{item.filename}: kept {current['source_member']}; conflicting copy in {member['name']}"
+                        )
+                    if item_error:
+                        read_errors[f"{member['name']}::{item.filename}"] = item_error
+        except (zipfile.BadZipFile, zlib.error, EOFError, OSError, RuntimeError, NotImplementedError) as error:
+            member_errors.append(f"archive read: {type(error).__name__}: {error}")
+            read_errors[f"{member['name']}::<archive>"] = member_errors[-1]
+        member["read_errors"] = member_errors
+        member["inner_crc_status"] = "FAIL" if member_errors else "PASS"
     package["entries"] = entries
     package["read_errors"] = read_errors
+    package["member_conflicts"] = member_conflicts
     package["entry_count"] = len(entries)
     package["uncompressed_size"] = sum(entry["size"] for entry in entries.values())
     package["dex"] = sorted(name for name in entries if re.fullmatch(r"classes(?:[0-9]+)?\.dex", name))
@@ -93,7 +178,6 @@ def load_package(repo: str, tag: str, work: Path, role: str) -> dict:
         if name.upper().startswith("META-INF/") and name.upper().endswith((".RSA", ".DSA", ".EC", ".SF"))
     )
     return package
-
 
 def source_lines(package: dict, role: str) -> list[str]:
     release = package["release"]
@@ -107,24 +191,27 @@ def source_lines(package: dict, role: str) -> list[str]:
         f"- Calculated container SHA-256: {package['container_sha']}",
         f"- GitHub digest comparison: {package['digest_ok'] if package['digest_ok'] is not None else 'NOT_PROVIDED'}",
         f"- Container type: {'XAPK' if package['asset_name'].lower().endswith('.xapk') else 'APK'}",
-        f"- Selected APK member: {package['selected_name']}",
-        f"- Selected APK size: {bytes_label(package['apk_size'])}",
-        f"- Selected APK SHA-256: {package['apk_sha']}",
-        f"- APK archive entries: {package['entry_count']}",
-        f"- Total uncompressed APK size: {bytes_label(package['uncompressed_size'])}",
-        f"- DEX count: {len(package['dex'])}",
-        f"- Native library count: {len(package['native'])}",
+        f"- Selected primary APK member: {package['selected_name']}",
+        f"- Selected primary APK size: {bytes_label(package['apk_size'])}",
+        f"- Selected primary APK SHA-256: {package['apk_sha']}",
+        f"- Physical APK members inventoried: {len(package['members'])}",
+        f"- Logical package entries across primary and split payloads: {package['entry_count']}",
+        f"- Aggregate uncompressed payload size (unique paths): {bytes_label(package['uncompressed_size'])}",
+        f"- DEX count across logical package: {len(package['dex'])}",
+        f"- Native library count across primary and split payloads: {len(package['native'])}",
         f"- IL2CPP metadata files found by filename: {len(package['metadata'])}",
-        f"- META-INF signature-related entries: {len(package['signature_entries'])}",
+        f"- Signature-related entries in merged payload inventory: {len(package['signature_entries'])}",
     ]
     if package["inner_apks"]:
         lines.append("- Embedded APK members:")
         lines.extend(
-            f"  - {item['name']} ({bytes_label(item['size'])}); outer-container CRC: {item.get('container_crc_status', 'NOT_SELECTED')}"
-            for item in package["inner_apks"]
+            f"  - {item['name']} ({bytes_label(item['size'])}); outer-container CRC: {item.get('container_crc_status', 'NOT_SELECTED')}; inner ZIP: {item.get('inner_crc_status', 'NOT_INVENTORIED')}"
+            for item in package["members"]
         )
-        selected_member = next((item for item in package["inner_apks"] if item["name"] == package["selected_name"]), {})
-        lines.append(f"- Selected APK member outer-container CRC: {selected_member.get('container_crc_status', 'NOT_APPLICABLE')}")
+        selected_member = next((item for item in package["members"] if item["name"] == package["selected_name"]), {})
+        lines.append(f"- Selected primary APK member outer-container CRC: {selected_member.get('container_crc_status', 'NOT_APPLICABLE')}")
+        if package["member_conflicts"]:
+            lines.append(f"- Conflicting duplicate paths across split APKs: {len(package['member_conflicts'])}")
     if package["obbs"]:
         lines.append("- OBB members:")
         lines.extend(f"  - {name}" for name in package["obbs"][:30])
