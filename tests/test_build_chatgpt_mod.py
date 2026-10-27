@@ -66,13 +66,21 @@ class SmaliInjectionTests(unittest.TestCase):
 
 
 class BuildPreconditionTests(unittest.TestCase):
-    def test_build_approval_fails_closed_until_explicit_marker(self) -> None:
+    def test_build_approval_fails_closed_even_if_marker_is_mentioned_in_prose(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             path = Path(temporary) / "MOD_CANDIDATES.md"
-            path.write_text("Build approval: PENDING_REVERSE_ENGINEERING\n", encoding="utf-8")
+            path.write_text(
+                "**Build approval: PENDING_REVERSE_ENGINEERING**\n\n"
+                "The build tool requires the exact marker "
+                "Build approval: APPROVED_FOR_IMPLEMENTATION before a build.\n",
+                encoding="utf-8",
+            )
             with self.assertRaisesRegex(BuildError, "still pending"):
                 require_approval(path)
-            path.write_text("Build approval: APPROVED_FOR_IMPLEMENTATION\n", encoding="utf-8")
+            path.write_text(
+                "**Build approval: APPROVED_FOR_IMPLEMENTATION**\n",
+                encoding="utf-8",
+            )
             require_approval(path)
 
     def test_crc_check_accepts_clean_zip_and_rejects_bad_container(self) -> None:
