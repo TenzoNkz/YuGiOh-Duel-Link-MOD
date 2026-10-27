@@ -17,7 +17,7 @@ REPOSITORY: TenzoNkz/YuGiOh-Duel-Link-MOD
 BRANCH: main
 
 MANDATORY LOAD
-Read CHAT_TRANSFER.md, CHAT_RULES.md, MEMORY_INDEX.md, PROJECT_STATE.md, HANDOVER.md, APP_ANALYSIS_REPORT.md, APK_CODE_ANALYSIS.md, IL2CPP_ANALYSIS_REPORT.md, APK_VARIANT_COMPARISON.md, CHATGPT_MOD_BUILD_REPORT.md, MOD_CANDIDATES.md, and ANALYSIS_LOG.md from the current main branch. Check current GitHub Actions, Release metadata, repository tree, and code/report evidence relevant to the discussion.
+Read CHAT_TRANSFER.md, CHAT_RULES.md, MEMORY_INDEX.md, PROJECT_STATE.md, HANDOVER.md, APP_ANALYSIS_REPORT.md, APK_CODE_ANALYSIS.md, IL2CPP_ANALYSIS_REPORT.md, APK_VARIANT_COMPARISON.md, CHATGPT_MOD_BUILD_REPORT.md, MOD_CANDIDATES.md, MOD_INTEGRATION_PLAN.md, and ANALYSIS_LOG.md from the current main branch. Check current GitHub Actions, Release metadata, repository tree, and code/report evidence relevant to the discussion.
 
 PURPOSE
 Discuss and review all relevant code: explain architecture, trace call flow, evaluate options, identify bugs and risks, propose changes, and choose the next engineering task. Continue the topic from the verified checkpoint rather than restarting the whole recap.
@@ -56,6 +56,7 @@ EXECUTION
 6. Keep generated binaries/artifacts out of Git history. Preserve the original Release APK and its digest.
 7. APKPure Original V11.1.0 is the only intended mod base. The APKPure Release is currently XAPK; analyze its embedded APK/split/OBB structure and do not assume renaming or selecting one member yields a working single APK. Do not create a standalone Gradle demo and claim it is the modified game.
 8. Do not implement live online-duel cheats or code designed to unfairly alter real-match outcomes. Safe UI/accessibility changes, defensive/compatibility fixes, and offline simulations can be implemented.
+9. Current state: APKPure XAPK integrity passes. The owned UI-only helper is in src/mod_menu/com/chatgptmod/menu/ModMenu.java; the gated APKPure patcher is tools/build_chatgpt_mod.py. CI has compiled Java to DEX and passed patcher primitive tests, but no APK has been built/installed/runtime-tested. The first-stage UI scope remains awaiting explicit owner approval in MOD_CANDIDATES.md.
 
 DONE CRITERIA
 - Code changes are committed to main and verified.
@@ -80,21 +81,21 @@ EXPECTED OUTPUT: a verified modified .apk
 MENU TITLE: CHATGPT MOD
 
 MANDATORY LOAD
-1. Read CHAT_TRANSFER.md, CHAT_RULES.md, MEMORY_INDEX.md, PROJECT_STATE.md, HANDOVER.md, CHATGPT_MOD_BUILD_REPORT.md, APP_ANALYSIS_REPORT.md, APK_CODE_ANALYSIS.md, APK_VARIANT_COMPARISON.md, MOD_CANDIDATES.md, and ANALYSIS_LOG.md from live GitHub.
+1. Read CHAT_TRANSFER.md, CHAT_RULES.md, MEMORY_INDEX.md, PROJECT_STATE.md, HANDOVER.md, CHATGPT_MOD_BUILD_REPORT.md, APP_ANALYSIS_REPORT.md, APK_CODE_ANALYSIS.md, IL2CPP_ANALYSIS_REPORT.md, APK_VARIANT_COMPARISON.md, MOD_CANDIDATES.md, MOD_INTEGRATION_PLAN.md, and ANALYSIS_LOG.md from live GitHub.
 2. Inspect latest main, current source tree, last code commit, build workflow, and Actions status.
 3. Confirm APKPure remains the sole base, Platinmods is reference-only, the latest analysis reports are complete enough for the agreed feature plan, and the custom menu title is CHATGPT MOD.
 
 BUILD / QC
 1. This mode is for packaging and build-quality control, not new feature development.
-2. Use the GitHub Actions workflow "CHATGPT Mod Build" only after an APKPure-based patch/build pipeline has been implemented and reviewed. It must create the modified game APK from APKPure input, not a standalone Gradle app.
+2. The APKPure patcher source and UI-only helper now exist. Use the GitHub Actions workflow "CHATGPT MOD APK Build / QC" only after MOD_CANDIDATES.md explicitly marks Build approval: APPROVED_FOR_IMPLEMENTATION and the required signing secrets have been configured. The output must be the modified game APK, not a standalone Gradle app.
 3. Review build logs, the generated APK artifact, file size, SHA-256, and report. Do not report success unless the run and artifact are confirmed.
 4. Fix only build/configuration blockers required to build the already-agreed safe code. New feature work must return to Eksekusi Full!.
 5. The workflow uploads the APK as a temporary GitHub Actions artifact and records CHATGPT_MOD_BUILD_REPORT.md. Do not commit APK binaries, overwrite the source Release, or publish a new Release by default.
-6. If APKPure reverse engineering is incomplete, the proposed patch is not approved, or the APK patch/build tool does not exist, mark the build BLOCKED. Never rename the XAPK or republish a source APK as a new mod. Return to Eksekusi Full! to implement the reviewed APK-based patcher.
+6. If explicit feature approval or signing secrets are missing, or if the end-to-end patcher fails any source, hook, split, signing or integrity checks, mark the build BLOCKED and do not claim an APK exists. Never rename the XAPK or copy Platinmods binaries. The patcher primitive tests and Java-to-DEX compilation are not proof that the actual game APK builds or runs.
 7. Verify the in-game menu title is exactly "CHATGPT MOD". Record base asset/container digest, selected APK digest, output APK size/SHA-256, signer verification, run URL, artifact name, test result, and limitations.
 
 SCOPE
-The build must start from APKPure Original; keep the original Release unchanged and treat Platinmods as comparison-only. The XAPK/split/OBB layout must be resolved before claiming a single APK is installable. Safe local UI/accessibility, compatibility and offline simulations may be considered; live-online-duel outcome cheating is out of scope.
+The build must start from APKPure Original; keep the original Release unchanged and treat Platinmods as comparison-only. The current patcher merges validated ARM64 native libraries into a single-APK test candidate, but the result is not yet built or runtime-tested and is ARM64-only. Safe local UI/accessibility, compatibility and offline simulations may be considered; live-online-duel outcome cheating is out of scope.
 
 DONE CRITERIA
 - APKPure base and reference-only Release identified.
