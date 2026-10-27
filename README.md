@@ -47,6 +47,7 @@ Build/QC only after the source package is clean, the feature plan is reviewed, a
 - [IL2CPP_ANALYSIS_REPORT.md](IL2CPP_ANALYSIS_REPORT.md) — type/method recovery attempt from the APKPure ARM64 library and metadata.
 - [APK_VARIANT_COMPARISON.md](APK_VARIANT_COMPARISON.md) — byte-level comparison of APKPure payloads with Platinmods reference.
 - [MOD_CANDIDATES.md](MOD_CANDIDATES.md) — feature candidates with explicit evidence/status.
+- [MOD_INTEGRATION_PLAN.md](MOD_INTEGRATION_PLAN.md) — clean Activity entry point, menu integration options, and remaining gates.
 - [CHATGPT_MOD_BUILD_REPORT.md](CHATGPT_MOD_BUILD_REPORT.md) — verified build state/blockers.
 - [ANALYSIS_LOG.md](ANALYSIS_LOG.md) — chronological verified milestones.
 
@@ -56,7 +57,8 @@ Build/QC only after the source package is clean, the feature plan is reviewed, a
 - The APKPure primary package has three DEX files and no native libraries; the ARM64 config split contains nine native libraries.
 - APKPure and Platinmods have byte-identical ARM64 libil2cpp.so and global-metadata.dat entries in the current comparison. The native inputs in the current APKPure package pass CRC checks; byte identity or difference does not prove feature behavior.
 - AndroidManifest.xml and all three DEX files differ at the byte level. These differences do not, by themselves, explain semantic changes.
-- The current analysis is partial, not full. Source integrity is verified; remaining blockers are call-flow/feature validation and the genuine patch/build pipeline.
+- The current analysis is partial, not full. APKTool decoded the primary APK; JADX reports 96 errors but produced partial source. The Activity trace maps YgomMainActivity and its Unity lifecycle/purchase bridge, but no ready-made floating-menu service or overlay hook was found in the Activity/manifest.
+- Review MOD_INTEGRATION_PLAN.md before implementing an owned menu. Source integrity is verified; remaining blockers are approved feature scope, call-flow/feature validation, packaging strategy and the genuine patch/build pipeline.
 
 ## Scope and interpretation
 
