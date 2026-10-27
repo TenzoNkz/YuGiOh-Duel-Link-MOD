@@ -116,7 +116,7 @@ def require_approval(candidates_path: Path) -> None:
     # The approval must be the exact current checkpoint line, not merely a mention
     # of the required marker in explanatory prose elsewhere in the file.
     approved_line = re.compile(
-        r"(?m)^\\s*\\*\\*Build approval:\\s*APPROVED_FOR_IMPLEMENTATION\\s*\\*\\*\\s*$"
+        r"(?m)^\s*\*\*Build approval:\s*APPROVED_FOR_IMPLEMENTATION\s*\*\*\s*$"
     )
     if not approved_line.search(candidates):
         raise BuildError(
