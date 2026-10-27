@@ -19,7 +19,8 @@ Canonical branch: main
 - Both embedded APK members passed their XAPK outer CRC checks. The primary APK and ARM64 split passed full inner ZIP CRC/decompression scans. No OBB member was identified.
 - Static source inventory passed: 3,368 primary APK entries, three DEX files, nine ARM64 native libraries across the split. This validates archive integrity, not runtime correctness or mod feasibility.
 - Verified static archive workflow: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40453605293.
-- Current successful full code-analysis workflow after correcting the IL2CPP report generator and authenticating Release API requests: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40453733126. A follow-up run containing explicit inner-CRC reporting and tests is also tracked at https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40454023712.
+- Latest APK Code Analysis, with full inner ZIP CRC scans and YgomMainActivity lifecycle/native/window trace: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40454946821 (success).
+- Latest Checkpoint Validation, including Activity-trace and archive-integrity tests: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40454946814 (success).
 
 ## Reverse-engineering findings — static only
 - APKTool successfully decoded the current primary APK (exit code 0). JADX produced partial Java output but reported 96 decompilation errors and returned exit code 3; the report status is CODE_ANALYSIS_PARTIAL. This is a decompiler limitation, not evidence that the current APK archive is corrupt.
@@ -28,6 +29,7 @@ Canonical branch: main
 - These names are declarations/static metadata, not proof of feature behavior, hook availability, an external menu callback, hidden-card access, damage modification or an effective AutoPlay Bot. Damage getter signatures are read-only evidence unless a separate writable path is demonstrated.
 - Current IL2CPP report: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/blob/main/IL2CPP_ANALYSIS_REPORT.md.
 - Current APKPure-versus-Platinmods comparison report: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/blob/main/APK_VARIANT_COMPARISON.md. The two releases are compared at entry level; byte differences do not establish semantic changes.
+- Android entry-point and UI integration analysis: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/blob/main/MOD_INTEGRATION_PLAN.md.
 
 ## Analysis tooling and validation
 - tools/apk_inputs.py: authenticated GitHub Release API headers, digesting, safe APK/XAPK extraction and outer CRC reporting.
@@ -38,8 +40,14 @@ Canonical branch: main
 - tests/test_apk_inputs.py, tests/test_analyze_apk_code.py, tests/test_analyze_il2cpp.py and tests/test_compare_apk_variants.py cover input selection, CRC behavior, API authentication, dumper classification and source-integrity reporting.
 - Checkpoint Validation passed for the latest unit-test correction at https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40454118233.
 
+## Android integration evidence
+- The current decoded primary manifest identifies jp.konami.duellinks.plugins.YgomMainActivity as the exported Activity. JADX recovered a 581-line class extending com.google.firebase.MessagingUnityPlayerActivity and implementing BillingClientStateListener and PurchasesUpdatedListener.
+- onCreate(Bundle) sets a fullscreen no-action-bar theme, calls super.onCreate, initializes a Logger, then processes the launch Intent/re-engagement URI. onResume/onPause delegate to super; onDestroy tears down the billing client; onNewIntent updates Intent/URI state.
+- UnityPlayer.UnitySendMessage appears in purchase/billing callback flows (e.g. PurchaseBehaviour), not as a mod-menu callback. The APKPure DEX output contains no com.platinmods classes. The manifest does not declare SYSTEM_ALERT_WINDOW or a Platinmods-style floating-menu service, and the Activity trace found no direct WindowManager overlay hook or addContentView call.
+- Interpretation: there is no ready-made Platinmods overlay to enable. An independently implemented same-Activity View attached after super.onCreate is only a prototype hypothesis; Unity fullscreen rendering/touch interaction and lifecycle must be tested on a real patched app. Details: MOD_INTEGRATION_PLAN.md.
+
 ## Feature feasibility — current assessment
-- Highest conceptual feasibility: an independently implemented CHATGPT MOD menu shell, controls and local preference persistence. Integration into the original game's Activity/window lifecycle still needs a verified attachment strategy and APK patcher.
+- Highest conceptual feasibility: an independently implemented CHATGPT MOD menu shell, controls and local preference persistence. The Android Activity entry point is mapped; same-window attachment is not yet implemented or runtime-tested.
 - Unconfirmed: Show Monster/status display, card-face queries and AutoPlay control. Their types, call sites, state visibility and allowable modes still need investigation.
 - Read-only damage inspection or an offline damage-rule simulator can be evaluated separately. No writable damage multiplier or working CHEATCARD invocation has been proven.
 - Live-online-duel outcome manipulation and hidden-opponent-information features are not implementation targets.
@@ -51,4 +59,4 @@ Canonical branch: main
 - Do not use a standalone Gradle demo or rename/copy an APK and claim it is the modified game. Do not promise overwriting Platinmods unless the signing/update constraints are actually satisfied.
 
 ## NEXT ACTION
-Trace the clean primary APK's manifest and jp.konami.duellinks.plugins.YgomMainActivity DEX entry points, together with the relevant IL2CPP method callers, and record a source-grounded integration plan for the safe CHATGPT MOD menu. Keep packaging blocked until that plan and a real APKPure-based patcher are reviewed.
+Review and approve a bounded first feature scope—recommended: independently implemented CHATGPT MOD menu shell plus local preference persistence only, with no gameplay callbacks yet. Then implement a genuine APKPure-based patch/build tool and a non-release test build; verify Activity attachment, Unity touch/lifecycle behavior, XAPK/split packaging and signing before considering release packaging.
