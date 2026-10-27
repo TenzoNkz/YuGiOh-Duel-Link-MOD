@@ -1,6 +1,6 @@
 # APK Code Analysis Report
 
-**Generated:** 2026-10-27 04:06:31 UTC
+**Generated:** 2026-10-27 04:09:27 UTC
 **Method:** JADX/Apktool static analysis; the APK was not installed or executed.
 - Repository: TenzoNkz/YuGiOh-Duel-Link-MOD
 - Requested release tag: APKPure_Latest
@@ -60,11 +60,11 @@
     	... 3 more
 
 ### JADX output excerpt
-    INFO  - progress: 7937 of 8855 (89%)
-    INFO  - progress: 7973 of 8855 (90%)
-    INFO  - progress: 8098 of 8855 (91%)
-    INFO  - progress: 8177 of 8855 (92%)
-    INFO  - progress: 8314 of 8855 (93%)
+    INFO  - progress: 7962 of 8855 (89%)
+    INFO  - progress: 8072 of 8855 (91%)
+    INFO  - progress: 8110 of 8855 (91%)
+    INFO  - progress: 8178 of 8855 (92%)
+    INFO  - progress: 8335 of 8855 (94%)
     INFO  - progress: 8496 of 8855 (95%)
     INFO  - progress: 8496 of 8855 (95%)
     INFO  - progress: 8496 of 8855 (95%)
@@ -80,8 +80,8 @@
     INFO  - progress: 8496 of 8855 (95%)
     INFO  - progress: 8496 of 8855 (95%)
     INFO  - progress: 8496 of 8855 (95%)
-    INFO  - progress: 8713 of 8855 (98%)
-    INFO  - progress: 8850 of 8855 (99%)
+    INFO  - progress: 8594 of 8855 (97%)
+    INFO  - progress: 8843 of 8855 (99%)
                                                                  
     ERROR - finished with errors, count: 96
 

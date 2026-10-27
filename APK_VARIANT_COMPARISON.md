@@ -1,6 +1,6 @@
 # APKPure Original vs Platinmods — Static Variant Comparison
 
-Generated: 2026-10-27 04:07:37 UTC
+Generated: 2026-10-27 04:10:33 UTC
 Purpose: APKPure Original is the sole intended mod base. Platinmods is a comparison reference only.
 Method: Release digest checks, primary APK resolution, archive entry inventory, and per-entry SHA-256 comparison. No app was installed or executed.
 
@@ -14,19 +14,20 @@ Method: Release digest checks, primary APK resolution, archive entry inventory, 
 - Calculated container SHA-256: 1f2cf45f87f52217227611b1d48f83a1d3990c326a0b2a6c64fa54296237be16
 - GitHub digest comparison: True
 - Container type: XAPK
-- Selected APK member: jp.konami.duellinks.apk
-- Selected APK size: 55,854,706 bytes (53.27 MiB)
-- Selected APK SHA-256: 7d3066040677461792a1d83c752adadc8d6bdb8b2be816e745920881b1eedd57
-- APK archive entries: 3368
-- Total uncompressed APK size: 98,705,262 bytes (94.13 MiB)
-- DEX count: 3
-- Native library count: 0
+- Selected primary APK member: jp.konami.duellinks.apk
+- Selected primary APK size: 55,854,706 bytes (53.27 MiB)
+- Selected primary APK SHA-256: 7d3066040677461792a1d83c752adadc8d6bdb8b2be816e745920881b1eedd57
+- Physical APK members inventoried: 2
+- Logical package entries across primary and split payloads: 3377
+- Aggregate uncompressed payload size (unique paths): 211,539,350 bytes (201.74 MiB)
+- DEX count across logical package: 3
+- Native library count across primary and split payloads: 9
 - IL2CPP metadata files found by filename: 1
-- META-INF signature-related entries: 2
+- Signature-related entries in merged payload inventory: 2
 - Embedded APK members:
-  - config.arm64_v8a.apk (36,869,159 bytes (35.16 MiB)); outer-container CRC: NOT_SELECTED
-  - jp.konami.duellinks.apk (55,854,706 bytes (53.27 MiB)); outer-container CRC: FAIL
-- Selected APK member outer-container CRC: FAIL
+  - config.arm64_v8a.apk (36,869,159 bytes (35.16 MiB)); outer-container CRC: FAIL; inner ZIP: FAIL
+  - jp.konami.duellinks.apk (55,854,706 bytes (53.27 MiB)); outer-container CRC: FAIL; inner ZIP: FAIL
+- Selected primary APK member outer-container CRC: FAIL
 
 ### Platinmods — reference only
 - Release page: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/releases/tag/Latest
@@ -37,25 +38,26 @@ Method: Release digest checks, primary APK resolution, archive entry inventory, 
 - Calculated container SHA-256: dc18ce334c18577195904b1461f9dfe68cf912182a06d85ee3e63fe6f1575c31
 - GitHub digest comparison: True
 - Container type: APK
-- Selected APK member: Yu-Gi-Oh.Duel.Links.Platinmods.V11.1.0.apk
-- Selected APK size: 127,838,704 bytes (121.92 MiB)
-- Selected APK SHA-256: dc18ce334c18577195904b1461f9dfe68cf912182a06d85ee3e63fe6f1575c31
-- APK archive entries: 3398
-- Total uncompressed APK size: 322,975,546 bytes (308.01 MiB)
-- DEX count: 3
-- Native library count: 20
+- Selected primary APK member: Yu-Gi-Oh.Duel.Links.Platinmods.V11.1.0.apk
+- Selected primary APK size: 127,838,704 bytes (121.92 MiB)
+- Selected primary APK SHA-256: dc18ce334c18577195904b1461f9dfe68cf912182a06d85ee3e63fe6f1575c31
+- Physical APK members inventoried: 1
+- Logical package entries across primary and split payloads: 3398
+- Aggregate uncompressed payload size (unique paths): 322,975,546 bytes (308.01 MiB)
+- DEX count across logical package: 3
+- Native library count across primary and split payloads: 20
 - IL2CPP metadata files found by filename: 1
-- META-INF signature-related entries: 2
+- Signature-related entries in merged payload inventory: 2
 
 ## Comparison summary
-- Shared entry paths: 3072
-- Shared entries with identical SHA-256: 2866
+- Shared entry paths: 3081
+- Shared entries with identical SHA-256: 2874
 - Shared entries with different SHA-256: 205
-- Shared entries with at least one unreadable/corrupt member: 1
-- Unreadable/corrupt entries in APKPure primary APK: 1
+- Shared entries with at least one unreadable/corrupt member: 2
+- Unreadable/corrupt entries in APKPure primary APK: 2
 - Unreadable/corrupt entries in Platinmods APK: 0
 - APKPure-only entries: 296
-- Platinmods-only entries: 326
+- Platinmods-only entries: 317
 
 ## Key package and executable entries
 | Entry path | APKPure bytes | Platinmods bytes | Result |
@@ -66,9 +68,9 @@ Method: Release digest checks, primary APK resolution, archive entry inventory, 
 | classes3.dex | 2076 | 82316 | DIFFERENT |
 | lib/arm64-v8a/libplatinmods.so | — | 9502424 | PLATINMODS_ONLY |
 | lib/armeabi-v7a/libplatinmods.so | — | 8956032 | PLATINMODS_ONLY |
-| lib/arm64-v8a/libduel.so | — | 22315680 | PLATINMODS_ONLY |
+| lib/arm64-v8a/libduel.so | 22315680 | 22315680 | UNVERIFIED_CORRUPT_ENTRY |
 | lib/armeabi-v7a/libduel.so | — | 19084176 | PLATINMODS_ONLY |
-| lib/arm64-v8a/libil2cpp.so | — | 64335248 | PLATINMODS_ONLY |
+| lib/arm64-v8a/libil2cpp.so | 64335248 | 64335248 | IDENTICAL |
 | lib/armeabi-v7a/libil2cpp.so | — | 54632964 | PLATINMODS_ONLY |
 | assets/bin/Data/Managed/Metadata/global-metadata.dat | 11183816 | 11183816 | IDENTICAL |
 
@@ -178,6 +180,7 @@ Method: Release digest checks, primary APK resolution, archive entry inventory, 
 
 ## Shared entries with unreadable/corrupt content (first 60)
 - assets/bin/Data/e1f73dc34613ec042897cc46749d448c: APKPure=error: Error -3 while decompressing data: invalid literal/length code, Platinmods=readable
+- lib/arm64-v8a/libduel.so: APKPure=BadZipFile: Bad CRC-32 for file 'lib/arm64-v8a/libduel.so', Platinmods=readable
 
 ## APKPure-only entries (first 60)
 - res/color-v23/abc_btn_colored_borderless_text_material.xml — 500 bytes (0.00 MiB)
@@ -253,16 +256,7 @@ Method: Release digest checks, primary APK resolution, archive entry inventory, 
 - META-INF/lifecycle-viewmodel_release.kotlin_module — 154 bytes (0.00 MiB)
 - META-INF/savedstate_release.kotlin_module — 80 bytes (0.00 MiB)
 - assets/platinmodsRB.png — 4,775 bytes (0.00 MiB)
-- lib/arm64-v8a/libFirebaseCppAnalytics.so — 51,296 bytes (0.05 MiB)
-- lib/arm64-v8a/libFirebaseCppApp-13_4_0.so — 4,139,608 bytes (3.95 MiB)
-- lib/arm64-v8a/libFirebaseCppMessaging.so — 67,760 bytes (0.06 MiB)
-- lib/arm64-v8a/lib_burst_generated.so — 37,104 bytes (0.04 MiB)
-- lib/arm64-v8a/libdatastore_shared_counter.so — 7,112 bytes (0.01 MiB)
-- lib/arm64-v8a/libduel.so — 22,315,680 bytes (21.28 MiB)
-- lib/arm64-v8a/libil2cpp.so — 64,335,248 bytes (61.35 MiB)
-- lib/arm64-v8a/libmain.so — 6,696 bytes (0.01 MiB)
 - lib/arm64-v8a/libplatinmods.so — 9,502,424 bytes (9.06 MiB)
-- lib/arm64-v8a/libunity.so — 21,873,584 bytes (20.86 MiB)
 - lib/armeabi-v7a/libFirebaseCppAnalytics.so — 50,804 bytes (0.05 MiB)
 - lib/armeabi-v7a/libFirebaseCppApp-13_4_0.so — 3,299,184 bytes (3.15 MiB)
 - lib/armeabi-v7a/libFirebaseCppMessaging.so — 50,864 bytes (0.05 MiB)
@@ -302,10 +296,19 @@ Method: Release digest checks, primary APK resolution, archive entry inventory, 
 - res/drawable-hdpi/abc_menu_hardkey_panel_mtrl_mult.9.png — 738 bytes (0.00 MiB)
 - res/drawable-hdpi/abc_popup_background_mtrl_mult.9.png — 1,098 bytes (0.00 MiB)
 - res/drawable-hdpi/abc_scrubber_control_off_mtrl_alpha.png — 201 bytes (0.00 MiB)
+- res/drawable-hdpi/abc_scrubber_control_to_pressed_mtrl_000.png — 196 bytes (0.00 MiB)
+- res/drawable-hdpi/abc_scrubber_control_to_pressed_mtrl_005.png — 272 bytes (0.00 MiB)
+- res/drawable-hdpi/abc_scrubber_primary_mtrl_alpha.9.png — 205 bytes (0.00 MiB)
+- res/drawable-hdpi/abc_scrubber_track_mtrl_alpha.9.png — 196 bytes (0.00 MiB)
+- res/drawable-hdpi/abc_spinner_mtrl_am_alpha.9.png — 345 bytes (0.00 MiB)
+- res/drawable-hdpi/abc_switch_track_mtrl_alpha.9.png — 484 bytes (0.00 MiB)
+- res/drawable-hdpi/abc_tab_indicator_mtrl_alpha.9.png — 190 bytes (0.00 MiB)
+- res/drawable-hdpi/abc_text_select_handle_left_mtrl.png — 278 bytes (0.00 MiB)
+- res/drawable-hdpi/abc_text_select_handle_middle_mtrl.png — 396 bytes (0.00 MiB)
 
 ## Limitations and interpretation
 - At least one selected embedded APK has an outer XAPK-member CRC mismatch. The bytes were analyzed as data, but the original container is not clean and must be verified before any patch/build.
-- Entries could not be fully decompressed/hashed: APKPure=1, Platinmods=0. See the unverified-entry section below.
+- Entries could not be fully decompressed/hashed: APKPure=2, Platinmods=0. See the unverified-entry section below.
 - Different entry hashes prove byte differences only, not what changed semantically.
 - APK v2/v3 signing blocks are not ordinary ZIP entries; this report does not verify signer identity or Android update compatibility.
 - For XAPK input, the selected primary APK is compared. Other split APKs and OBBs are listed but are not merged into a single installable APK here.
