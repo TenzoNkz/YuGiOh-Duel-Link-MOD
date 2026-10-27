@@ -1,6 +1,6 @@
 # APK Code Analysis Report
 
-**Generated:** 2026-10-27 04:04:51 UTC
+**Generated:** 2026-10-27 04:06:31 UTC
 **Method:** JADX/Apktool static analysis; the APK was not installed or executed.
 - Repository: TenzoNkz/YuGiOh-Duel-Link-MOD
 - Requested release tag: APKPure_Latest
@@ -20,8 +20,9 @@
 - APK selected for code analysis: jp.konami.duellinks.apk
 - Selected APK size: 55854706 bytes
 - Embedded APK members: 2
-- Embedded APK member: config.arm64_v8a.apk (36869159 bytes)
-- Embedded APK member: jp.konami.duellinks.apk (55854706 bytes)
+- Embedded APK member: config.arm64_v8a.apk (36869159 bytes); outer CRC: FAIL; scan: EXTRACTED
+- Embedded APK member: jp.konami.duellinks.apk (55854706 bytes); outer CRC: FAIL; scan: EXTRACTED
+- Embedded APKs extracted for static inventory: 2
 - OBB members in XAPK: 0
 - No OBB member detected.
 - Selected APK member CRC in outer XAPK: FAIL
@@ -59,12 +60,11 @@
     	... 3 more
 
 ### JADX output excerpt
-    INFO  - progress: 7819 of 8855 (88%)
-    INFO  - progress: 7962 of 8855 (89%)
-    INFO  - progress: 7990 of 8855 (90%)
-    INFO  - progress: 8095 of 8855 (91%)
-    INFO  - progress: 8150 of 8855 (92%)
-    INFO  - progress: 8229 of 8855 (92%)
+    INFO  - progress: 7937 of 8855 (89%)
+    INFO  - progress: 7973 of 8855 (90%)
+    INFO  - progress: 8098 of 8855 (91%)
+    INFO  - progress: 8177 of 8855 (92%)
+    INFO  - progress: 8314 of 8855 (93%)
     INFO  - progress: 8496 of 8855 (95%)
     INFO  - progress: 8496 of 8855 (95%)
     INFO  - progress: 8496 of 8855 (95%)
@@ -80,12 +80,29 @@
     INFO  - progress: 8496 of 8855 (95%)
     INFO  - progress: 8496 of 8855 (95%)
     INFO  - progress: 8496 of 8855 (95%)
-    INFO  - progress: 8734 of 8855 (98%)
+    INFO  - progress: 8713 of 8855 (98%)
+    INFO  - progress: 8850 of 8855 (99%)
                                                                  
     ERROR - finished with errors, count: 96
 
-## Selected native/IL2CPP inventory
+## APK split inventory
+- config.arm64_v8a.apk (config/split APK): 14 entries, 9 native libraries, 0 IL2CPP metadata file(s), outer XAPK CRC=FAIL.
+- jp.konami.duellinks.apk (primary APK): 3368 entries, 0 native libraries, 1 IL2CPP metadata file(s), outer XAPK CRC=FAIL.
+
+## Native/IL2CPP inventory across readable APK members
+- [config.arm64_v8a.apk] lib/arm64-v8a/libFirebaseCppAnalytics.so: 51296 bytes
+- [config.arm64_v8a.apk] lib/arm64-v8a/libFirebaseCppApp-13_4_0.so: 4139608 bytes
+- [config.arm64_v8a.apk] lib/arm64-v8a/libFirebaseCppMessaging.so: 67760 bytes
+- [config.arm64_v8a.apk] lib/arm64-v8a/lib_burst_generated.so: 37104 bytes
+- [config.arm64_v8a.apk] lib/arm64-v8a/libdatastore_shared_counter.so: 7112 bytes
+- [config.arm64_v8a.apk] lib/arm64-v8a/libduel.so: 22315680 bytes
+- [config.arm64_v8a.apk] lib/arm64-v8a/libil2cpp.so: 64335248 bytes
+- [config.arm64_v8a.apk] lib/arm64-v8a/libmain.so: 6696 bytes
+- [config.arm64_v8a.apk] lib/arm64-v8a/libunity.so: 21873584 bytes
 - assets/bin/Data/Managed/Metadata/global-metadata.dat: 11183816 bytes
+
+## APK/split read warnings
+- [config.arm64_v8a.apk] lib/arm64-v8a/libduel.so: read failed (BadZipFile: Bad CRC-32 for file 'lib/arm64-v8a/libduel.so')
 
 ## Search hits in decompiled Java
 - Matching lines found: 31; displaying up to 31.
@@ -133,8 +150,10 @@
 - No matching term was found in the scanned decoded resource XML/text.
 
 ## Focused strings: feature labels, menu callbacks, and duel damage
-- Focused string matches found: 9.
-### assets/bin/Data/Managed/Metadata/global-metadata.dat
+- Focused string matches found: 10.
+### [config.arm64_v8a.apk] lib/arm64-v8a/libil2cpp.so
+- DLL_DuelGetDamageValue
+### [jp.konami.duellinks.apk] assets/bin/Data/Managed/Metadata/global-metadata.dat
 - URORAIDS_CARD.PROCESS_BLAZEIDS_CARD.PROCESS_CRYSTALIDS_CARD.PROCESS_DAMAGEIDS_CARD.PROCESS_DARKNESSIDS_CARD.PROCESS_FULLSTARLIGHTIDS_C
 - CHEATCARD
 - PROCESS_DAMAGE
@@ -146,8 +165,33 @@
 - showMonster
 
 ## Search hits in selected native/IL2CPP strings
-- Total matching printable strings: 244.
-### assets/bin/Data/Managed/Metadata/global-metadata.dat
+- Total matching printable strings: 267.
+### [config.arm64_v8a.apk] lib/arm64-v8a/libil2cpp.so
+- DLL_DuelGetDamageDstPosition
+- DLL_DuelGetDamageSrcPosition
+- UnityEngine.Rendering.CommandBuffer::SetInstanceMultiplier_Injected(System.IntPtr,System.UInt32)
+- DLL_DuelGetDamageValue
+- UnityEngine.ParticleSystem/MainModule::get_startDelayMultiplier()
+- UnityEngine.ParticleSystem/MainModule::get_startLifetimeMultiplier()
+- UnityEngine.ParticleSystem/MainModule::set_startDelayMultiplier(System.Single)
+### [config.arm64_v8a.apk] lib/arm64-v8a/libunity.so
+- SetInstanceMultiplier
+- octaveMultiplier
+- ExternalForcesModule.multiplierCurve.scalar
+- multiplierCurve
+- UnityEngine.Rendering.CommandBuffer::SetInstanceMultiplier_Injected
+- multiplier
+- widthMultiplier
+- UnityEngine.ParticleSystem/MainModule::get_startDelayMultiplier
+- NoiseModule.octaveMultiplier
+- damaged LZ stream
+- downscaleMultiplier
+- m_Parameters.widthMultiplier
+- UnityEngine.ParticleSystem/MainModule::set_startDelayMultiplier
+- UnityEngine.ParticleSystem/MainModule::get_startLifetimeMultiplier
+- m_IntensityMultiplier
+- ExternalForcesModule.multiplierCurve.minScalar
+### [jp.konami.duellinks.apk] assets/bin/Data/Managed/Metadata/global-metadata.dat
 - )$WhiteIn$WhiteIn_1$WhiteOut$WhiteOut_1$__BindingManager--ClearAllBindings%% #% #-% -#%#%#-%)%-#%20%26%2C%3D%a%backspace%bannerid%%basepath%%c%d%down%f%left%right%s%subloop%%subloop0%%subloop00%%subloop000%%subloop000...
 - -END-HERO-Infinity-_.!~*'()-bar-buildsrc-container-handle-image-inf-infinity-item-label-underline-unity-background-image-tint-color-unity-background-scale-mode-unity-editor-text-rendering-mode-unity-font-unity-font-de...
 - AssignmentCharacter_001AssignmentCharacter_002AssignmentCharacter_003Async: AsyncGPUReadback cannot use Temp memory as input since the result may only become available at an unspecified point in the future.AsyncMiniJS...
