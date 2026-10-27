@@ -1,6 +1,6 @@
 # CHATGPT MOD Build Report
 
-**Status:** BLOCKED_REVERSE_ENGINEERING_AND_PATCH_PIPELINE  
+**Status:** BLOCKED_FEATURE_APPROVAL_AND_END_TO_END_TESTING  
 **Last updated:** 2026-10-27  
 **Canonical repository:** TenzoNkz/YuGiOh-Duel-Link-MOD  
 **Mod base:** APKPure Original V11.1.0 — Release tag APKPure_Latest  
@@ -17,8 +17,9 @@
 - Both embedded members pass outer XAPK CRC validation. Both the primary APK and ARM64 split pass their inner ZIP CRC/decompression scans. No OBB member was detected.
 - Static archive inventory run: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40453605293 (success).
 - Latest full Code Analysis with inner ZIP CRC scans and YgomMainActivity entry-point trace: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40454946821 (success; code report remains partial because JADX emitted 96 decompilation errors).
-- Latest Checkpoint Validation including Activity-trace and archive-integrity tests: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40454946814 (success).
-- Activity/menu integration decision record: [MOD_INTEGRATION_PLAN.md](https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/blob/main/MOD_INTEGRATION_PLAN.md).
+- Latest Checkpoint Validation including patcher primitive tests and required records: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40456599833 (success).
+- Menu helper validation, including Java-to-DEX compilation and patcher unit tests: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40456595296 (success).
+- Integration and gated patcher record: [MOD_INTEGRATION_PLAN.md](https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/blob/main/MOD_INTEGRATION_PLAN.md).
 
 ## Actual analysis state
 - APKTool exits 0 and decoded the current primary APK manifest/resources.
@@ -27,15 +28,16 @@
 - Metadata includes ShowMonster, card-face query declarations, the CHEATCARD enum, damage-value getters, and DuelMenu autoplay state/control names. This is static metadata only and does not prove any feature can be wired to a new menu or works at runtime.
 - APKPure versus Platinmods byte comparison is available in APK_VARIANT_COMPARISON.md. Differences in manifest, DEX or resources do not independently tell us the semantic purpose of those changes.
 - The decoded Activity is YgomMainActivity, extending Firebase's MessagingUnityPlayerActivity. The current APKPure base has no com.platinmods DEX classes, no SYSTEM_ALERT_WINDOW permission or Platinmods-style floating-menu service, and no direct WindowManager/addContentView menu hook in the Activity trace. An independently owned same-Activity UI is a candidate integration approach, but still needs a real patch and device test.
-- No CHATGPT MOD APK has been built, signed, installed or runtime-tested.
+- Owned UI source now exists at src/mod_menu/com/chatgptmod/menu/ModMenu.java: launcher/panel, open/close, bounded dragging and a persisted local preference. It intentionally has no gameplay callbacks.
+- tools/build_chatgpt_mod.py implements a gated APKPure-only patch path: require explicit approval, verify Release digest and nested APK CRCs, decode the base, inject a single Activity hook, merge required ARM64 split libraries, compile/append the menu DEX, rebuild, align, sign with an explicit keystore and verify the output.
+- CI passed patcher primitive tests and compiled the helper to DEX. **The end-to-end patcher has not been run against the actual XAPK; no CHATGPT MOD APK has been produced, installed or runtime-tested.**
 
 ## Remaining blockers — not source integrity
-1. Complete source-grounded call-flow analysis for the Android Activity/DEX entry points and relevant IL2CPP declarations. Trace exact enclosing types and callers; do not infer functionality from method names alone.
-2. Approve a bounded safe feature scope. Local UI/preferences and offline simulation can be considered; live-online-duel outcome manipulation and hidden-opponent-information features are excluded.
-3. Implement and review a genuine APKPure-based patch/build tool. A standalone Gradle demo, renamed XAPK, copied Platinmods binary, or repackaged unmodified source APK is not an acceptable deliverable.
-4. Resolve XAPK/split packaging: the source includes a primary APK plus an ARM64 configuration split. Do not assume the primary APK alone is complete or that blindly merging splits creates an installable output.
-5. Validate package ID, version, Android signing identity and installation/update behavior. Without the relevant private signing key or a valid signing-certificate rotation chain, an independently signed APK cannot be assumed to overwrite an installed Platinmods build.
-6. Build only after the above points and the feature plan are reviewed. Verify artifact bytes, SHA-256, signer, install behavior and the in-game menu title.
+1. Approve the bounded UI-only feature scope in MOD_CANDIDATES.md. The build approval marker remains PENDING_REVERSE_ENGINEERING, so the build tool/workflow must block.
+2. Run the end-to-end APKPure XAPK patch build only after approval and after configuring a controlled signing key through Actions secrets. Confirm the Release digest, nested CRCs, Activity hook, helper DEX and merged ARM64 library set.
+3. Inspect the signed output APK's package/version, DEX entries, libraries, signer and SHA-256. The helper-source CI is not a substitute for a real APK build.
+4. Install on a dedicated test device/emulator and validate launch/crash logs, Activity lifecycle, Unity touch passthrough, drag bounds and preference persistence.
+5. Do not promise that the result overwrites Platinmods; signer compatibility is unknown without its private key or valid certificate rotation chain.
 
 ## Partial reverse-engineering evidence
 - ShowMonster signature: ShowMonster(bool immediate, bool showAura, Action onFinished).
@@ -53,4 +55,4 @@ A public certificate is not the private signing key. Unless the required Platinm
 Safe local UI/accessibility/settings, compatibility changes, independent preferences and offline simulations may be considered. A successful archive, static-analysis workflow or packaging step is not proof that a gameplay feature works.
 
 ## NEXT ACTION
-Review and approve a bounded first feature scope—recommended: independent CHATGPT MOD menu shell and local preference persistence only, without gameplay callbacks. Then implement a genuine APKPure-based patch tool and a non-release test prototype. Verify Activity/Unity lifecycle, touch handling, split packaging and signing before considering final release packaging.
+Review and explicitly approve the proposed UI-only scope: CHATGPT MOD launcher/panel, open/close, dragging and one persisted local UI preference, with no gameplay callbacks. Then configure the Actions signing secrets and trigger the gated non-release test build; test the resulting APK on a dedicated device before any release packaging.
