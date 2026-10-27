@@ -281,7 +281,10 @@ def main() -> int:
         if base_member.get("container_crc_status") == "FAIL" or reference_member.get("container_crc_status") == "FAIL":
             warnings.append("- At least one selected embedded APK has an outer XAPK-member CRC mismatch. The bytes were analyzed as data, but the original container is not clean and must be verified before any patch/build.")
         if base["read_errors"] or reference["read_errors"]:
-            warnings.append(f"- Entries could not be fully decompressed/hashed: APKPure={len(base['read_errors'])}, Platinmods={len(reference['read_errors'])}. See the unverified-entry section below.")
+            warnings.append(f"- Entries could not be fully decompressed/hashed: APKPure main/splits={len(base['read_errors'])}, Platinmods={len(reference['read_errors'])}. See the unverified-entry section below.")
+            warnings.append("- BUILD BLOCKER: the current APKPure XAPK and/or one of its embedded APK payloads fails CRC/decompression checks. Do not patch or build from this upload; replace it with a clean APKPure package and rerun the full analysis.")
+        if base["digest_ok"] is True and (base["read_errors"] or any(member.get("container_crc_status") == "FAIL" for member in base["members"])):
+            warnings.append("- The XAPK container SHA-256 matches GitHub's release metadata, but this only confirms the downloaded bytes match the uploaded asset. It does not establish that the embedded package contents are internally valid.")
         if base["digest_ok"] is False or reference["digest_ok"] is False:
             warnings.append("- One or both container downloads did not match GitHub's declared SHA-256. Resolve before patching.")
         if base["apk_sha"] == reference["apk_sha"]:
@@ -339,7 +342,8 @@ def main() -> int:
             *warnings,
             "- Different entry hashes prove byte differences only, not what changed semantically.",
             "- APK v2/v3 signing blocks are not ordinary ZIP entries; this report does not verify signer identity or Android update compatibility.",
-            "- For XAPK input, the selected primary APK is compared. Other split APKs and OBBs are listed but are not merged into a single installable APK here.",
+            "- For XAPK input, the comparison merges the primary APK's logical entries with unique entries from extracted splits (including native libraries), while excluding split-specific manifests/signature metadata. It does not synthesize or validate a single installable APK.",
+            "- The current APKPure XAPK contains integrity failures in the primary APK asset data and the arm64 libduel.so entry. Treat all features depending on those entries as unknown until a clean original package is uploaded.",
             "- Platinmods is not the build base. Do not copy its binary components into CHATGPT MOD without independent technical review and necessary rights.",
             "",
             "## Next reverse-engineering actions",
