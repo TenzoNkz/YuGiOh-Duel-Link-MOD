@@ -4,15 +4,16 @@ on:
   workflow_dispatch:
     inputs:
       release_tag:
-        description: Existing public GitHub Release tag to inspect
+        description: APK or XAPK Release tag to inspect (APKPure is the default)
         required: true
-        default: Platinmods_V11.0.0
+        default: APKPure_Latest
   push:
     branches:
       - main
     paths:
       - .github/workflows/apk-static-analysis.yml
       - tools/analyze_release_apk.py
+      - tools/apk_inputs.py
 
 permissions:
   contents: write
@@ -23,7 +24,7 @@ concurrency:
 
 jobs:
   inspect-release-apk:
-    name: Download and inspect APK as data
+    name: Download APKPure APK/XAPK and inspect primary APK as data
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -36,7 +37,7 @@ jobs:
         id: analyze
         continue-on-error: true
         env:
-          RELEASE_TAG: ${{ github.event.inputs.release_tag || 'Platinmods_V11.0.0' }}
+          RELEASE_TAG: ${{ github.event.inputs.release_tag || 'APKPure_Latest' }}
           GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
           python3 tools/analyze_release_apk.py \
