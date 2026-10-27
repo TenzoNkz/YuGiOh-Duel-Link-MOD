@@ -27,7 +27,7 @@ Canonical branch: main
 - APK Static Analysis: .github/workflows/apk-static-analysis.yml — defaults to APKPure_Latest; inventories primary APK and embedded split APKs.
 - APK Code Analysis (APKPure Base): .github/workflows/apk-code-analysis.yml — runs Apktool/JADX on the primary APK, inventories native libraries in readable splits, compares aggregate package entries against Platinmods, and attempts pinned IL2CPP metadata recovery.
 - Checkpoint Validation: .github/workflows/checkpoint-validation.yml — compiles tools and runs local unit tests.
-- CHATGPT MOD Build: .github/workflows/build-chatgpt-mod.yml — remains blocked until a clean base package, approved feature plan and actual APKPure-based patch/build tool are present.
+- CHATGPT MOD Build: .github/workflows/build-chatgpt-mod.yml — source integrity now passes; final build remains blocked until call-flow review, approved safe feature scope, XAPK/split plan and a genuine APKPure-based patch/build tool are present.
 
 ## Scripts and reports
 - tools/apk_inputs.py — Release API, asset download, safe primary/split member extraction and CRC reporting.
@@ -35,7 +35,10 @@ Canonical branch: main
 - tools/analyze_apk_code.py — Apktool/JADX and native/IL2CPP string analysis for the APKPure primary APK and readable splits.
 - tools/analyze_il2cpp.py — pinned Il2CppDumper attempt using the APKPure ARM64 library and metadata.
 - tools/compare_apk_variants.py — aggregate primary + split APK payload comparison: APKPure base versus Platinmods reference.
-- tests/test_apk_inputs.py — APK/XAPK selection, split extraction, OBB inventory, and CRC mismatch handling.
+- tests/test_apk_inputs.py — APK/XAPK selection, split extraction, OBB inventory, CRC mismatch handling and GitHub API token headers.
+- tests/test_analyze_apk_code.py — full inner APK CRC scan and YgomMainActivity lifecycle/native/window trace.
+- tests/test_analyze_il2cpp.py — archive integrity and Il2CppDumper output/status classification.
+- tests/test_compare_apk_variants.py — dynamic APKPure source integrity assessment.
 - APP_ANALYSIS_REPORT.md — archive, checksum and split-integrity inventory.
 - APK_CODE_ANALYSIS.md — manifest, DEX/Java, split-native and string-analysis report.
 - IL2CPP_ANALYSIS_REPORT.md — type/method metadata recovery attempt and focused symbols.
