@@ -1,38 +1,50 @@
-# YuGiOh-Duel-Link-MOD — GitHub Analysis Workspace
+# YuGiOh-Duel-Link-MOD — GitHub Source of Truth
 
-This repository is the durable source of truth for static APK analysis, candidate evaluation, and chat-limit recovery. The APK stays on GitHub Releases rather than in Git history.
+This repository uses GitHub for durable engineering state and chat-limit recovery. Three primary modes follow the JE X FYZ-style workflow: discussion, code execution, and app build/QC.
 
-## Canonical source
+## Canonical source APK
 - Repository: TenzoNkz/YuGiOh-Duel-Link-MOD
 - Branch: main
 - Release: [Platinmods Original — Platinmods_V11.0.0](https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/releases/tag/Platinmods_V11.0.0)
 - APK asset: Yu-Gi-Oh.Duel.Links.Platinmods.V11.0.0.apk
 - Verified SHA-256: d7855754afbfe8e6b0a5db51ba47e4cefcd3079631190c11478d6556e06c56fb
 
-## Durable records
-- [CHAT_TRANSFER.md](CHAT_TRANSFER.md) — prompts for Diskusi!, Eksekusi Analisa APK!, Eksekusi Full!, and Chat Stuck!.
-- [CHAT_RULES.md](CHAT_RULES.md) — modes, evidence standards, boundaries.
-- [MEMORY_INDEX.md](MEMORY_INDEX.md) — read order and file index.
-- [PROJECT_STATE.md](PROJECT_STATE.md) — current verified state and next step.
-- [HANDOVER.md](HANDOVER.md) — exact checkpoint and next action.
-- [APP_ANALYSIS_REPORT.md](APP_ANALYSIS_REPORT.md) — measured archive inventory.
-- [APK_CODE_ANALYSIS.md](APK_CODE_ANALYSIS.md) — manifest/JADX/native-string findings; status is partial.
-- [MOD_CANDIDATES.md](MOD_CANDIDATES.md) — evidence-based candidate register.
-- [ANALYSIS_LOG.md](ANALYSIS_LOG.md) — verified chronological record.
+## Three primary modes
+
+### Diskusi!
+Discuss and review all relevant code, dependencies, architecture, risks, and next steps. No source edits, commits, builds, or workflow runs. Copy the prompt from [CHAT_TRANSFER.md](CHAT_TRANSFER.md).
+
+### Eksekusi Full!
+Execute the agreed code task: edit source, implement scoped changes, run relevant tests/checks, fix regressions, verify GitHub Actions, and update project checkpoints. APK packaging is kept separate. Copy the prompt from [CHAT_TRANSFER.md](CHAT_TRANSFER.md).
+
+### Eksekusi Build App!
+Build/QC only for the latest agreed source and require the user-visible Android application label **CHATGPT Mod**. The build workflow validates chatgpt-mod/, produces a Debug APK artifact, records size/SHA-256/run URL, and commits [CHATGPT_MOD_BUILD_REPORT.md](CHATGPT_MOD_BUILD_REPORT.md).
+
+**Current build blocker:** at this checkpoint the tracked repository has no Android Gradle source project under chatgpt-mod/. Consequently, no new CHATGPT Mod APK has yet been built. The build workflow will report this blocker instead of relabeling the original Release binary and claiming it was rebuilt. Use Eksekusi Full! to establish an authorized, safe source project first.
 
 ## GitHub Actions
-- [APK Static Analysis](../../actions/workflows/apk-static-analysis.yml) downloads the APK from the public Release, computes SHA-256, checks archive integrity, inventories DEX/native libraries, and commits APP_ANALYSIS_REPORT.md. Successful run: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40272870450.
-- [APK Code Analysis](../../actions/workflows/apk-code-analysis.yml) downloads the same Release asset as data, decodes its manifest, decompiles DEX with JADX, captures key Platinmods UI source lines, scans selected native/IL2CPP strings, and commits APK_CODE_ANALYSIS.md. It never executes or installs the APK. Latest successful run: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40274382469. The report remains CODE_ANALYSIS_PARTIAL because JADX emitted 96 errors.
-- [Checkpoint Validation](../../actions/workflows/checkpoint-validation.yml) checks that required durable records and recovery markers exist. It does not prove feature behavior.
+- [APK Static Analysis](../../actions/workflows/apk-static-analysis.yml) — checksum, ZIP integrity, archive/DEX/native inventory. [Successful inventory run](https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40272870450).
+- [APK Code Analysis](../../actions/workflows/apk-code-analysis.yml) — manifest, DEX/JADX, menu framework, and selected native/IL2CPP strings. [Latest successful job](https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40274382469); its report is still CODE_ANALYSIS_PARTIAL due to 96 JADX errors.
+- [Checkpoint Validation](../../actions/workflows/checkpoint-validation.yml) — validates persistent files and prompt markers.
+- [CHATGPT Mod Build](../../actions/workflows/build-chatgpt-mod.yml) — manually validates source/label, builds Debug APK, uploads an artifact, and updates the build report. It does not run automatically on doc changes.
+
+## Durable records
+- [CHAT_TRANSFER.md](CHAT_TRANSFER.md) — copy-ready prompts for the three modes and auxiliary Chat Stuck! recovery.
+- [CHAT_RULES.md](CHAT_RULES.md) — mode behavior and boundaries.
+- [MEMORY_INDEX.md](MEMORY_INDEX.md) — read order.
+- [PROJECT_STATE.md](PROJECT_STATE.md) — verified state and next task.
+- [HANDOVER.md](HANDOVER.md) — last verified step and one NEXT ACTION.
+- [APP_ANALYSIS_REPORT.md](APP_ANALYSIS_REPORT.md) — measured APK inventory.
+- [APK_CODE_ANALYSIS.md](APK_CODE_ANALYSIS.md) — partial code-level static findings.
+- [CHATGPT_MOD_BUILD_REPORT.md](CHATGPT_MOD_BUILD_REPORT.md) — build status, artifact metadata, and blockers.
+- [MOD_CANDIDATES.md](MOD_CANDIDATES.md) — candidate evidence/status.
+- [ANALYSIS_LOG.md](ANALYSIS_LOG.md) — chronological record.
 
 ## Chat-limit recovery
 1. Open [CHAT_TRANSFER.md](CHAT_TRANSFER.md).
-2. Copy the prompt matching the work mode.
-3. Paste it into a new ChatGPT chat.
-4. The new chat must reload live GitHub reports, Release metadata, and current Actions state. Do not re-upload the same APK if the public Release is available.
+2. Copy the prompt for the desired mode.
+3. Paste it into the new chat.
+4. The new chat must reload live main, current reports, Release metadata, and latest Actions status before continuing. Do not upload the same APK again if its canonical public Release is available.
 
-## Current analysis boundary
-Checksum and archive integrity are verified. Generic menu callbacks are visible in decompiled Java. Exact native feature dispatch and full IL2CPP control flow remain untraced; runtime behavior and server authority are untested.
-
-## Scope
-The workflow treats APK as data. Candidates must be evidence-based and tested separately. No online-match damage-changing cheat is being implemented; offline simulation and UI-only experiments can be assessed separately.
+## Build and scope limitations
+The source Release is a binary analysis input, not a buildable Gradle project. An authorized Android source project must exist under chatgpt-mod/ for the build workflow to produce an APK. The build artifact is not published as a new Release by default. Safe local UI/accessibility and offline/sandbox work may be considered; live online-duel cheats intended to alter match outcomes are out of scope.
