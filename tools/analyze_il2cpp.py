@@ -30,12 +30,17 @@ DUMPER_URL = "https://github.com/Perfare/Il2CppDumper/releases/download/v6.7.46/
 USER_AGENT = "YuGiOh-Duel-Link-MOD-il2cpp-analysis/1.0"
 METADATA_PATH = "assets/bin/Data/Managed/Metadata/global-metadata.dat"
 ARM64_IL2CPP_PATH = "lib/arm64-v8a/libil2cpp.so"
-FOCUSED_TERMS = re.compile(
-    r"ShowMonster|showMonster|CHEATCARD|PROCESS_DAMAGE|DLL_DuelGetDamageValue|"
-    r"DuelGetDamageValue|DuelComCheatCard|DamageSrcPosition|DamageDstPosition|"
-    r"AutoPlay|RevealCard|MonsterStatus|DamageValue",
-    re.IGNORECASE,
-)
+FOCUSED_TERM_GROUPS = {
+    "ShowMonster": re.compile(r"ShowMonster|showMonster", re.IGNORECASE),
+    "Reveal Card": re.compile(r"RevealCard|Reveal_Card|CardFace|ShowCardFace", re.IGNORECASE),
+    "CHEATCARD": re.compile(r"\bCHEATCARD\b|DuelComCheatCard", re.IGNORECASE),
+    "PROCESS_DAMAGE": re.compile(r"\bPROCESS_DAMAGE[0-9]*\b", re.IGNORECASE),
+    "Damage getter": re.compile(r"DLL_DuelGetDamageValue|DuelGetDamageValue", re.IGNORECASE),
+    "Damage positions": re.compile(r"DamageSrcPosition|DamageDstPosition", re.IGNORECASE),
+    "AutoPlay": re.compile(r"AutoPlay|autoPlay|GetAutoPlay|SetAutoPlay|ChangeAutoPlay", re.IGNORECASE),
+    "Monster/status": re.compile(r"MonsterStatus|StatusDetails|ShowMonster", re.IGNORECASE),
+}
+CLASS_DECLARATION = re.compile(r"^\s*(?:public|private|internal|protected|abstract|sealed|static|partial|enum|struct|class|interface|\[)", re.IGNORECASE)
 
 
 def sha256_bytes(data: bytes) -> str:
@@ -74,27 +79,43 @@ def get_member_bytes(apk_path: Path, member_name: str) -> bytes:
         return archive.read(member)
 
 
-def focused_dump_hits(dump_path: Path, limit: int = 100) -> tuple[list[str], int]:
+def focused_dump_hits(dump_path: Path, limit_per_group: int = 3) -> tuple[list[str], dict[str, int]]:
+    """Summarize useful symbol neighborhoods without letting generic AutoPlay hits dominate."""
     if not dump_path.is_file():
-        return [], 0
+        return [], {}
     lines = dump_path.read_text(encoding="utf-8", errors="replace").splitlines()
-    hits: list[str] = []
-    seen: set[tuple[int, str]] = set()
-    total = 0
-    for index, line in enumerate(lines):
-        if not FOCUSED_TERMS.search(line):
-            continue
-        total += 1
-        start = max(0, index - 2)
-        end = min(len(lines), index + 3)
-        for context_index in range(start, end):
-            key = (context_index, lines[context_index])
-            if key in seen or len(hits) >= limit:
-                continue
-            seen.add(key)
-            hits.append(f"- dump.cs:{context_index + 1}: {lines[context_index].strip()[:260]}")
-    return hits, total
+    output: list[str] = []
+    counts: dict[str, int] = {}
+    emitted: set[int] = set()
 
+    for group, pattern in FOCUSED_TERM_GROUPS.items():
+        matches = [index for index, line in enumerate(lines) if pattern.search(line)]
+        counts[group] = len(matches)
+        if not matches:
+            output.append(f"- {group}: 0 matching dump.cs lines.")
+            continue
+        output.append(f"- {group}: {len(matches)} matching dump.cs line(s); showing up to {limit_per_group} context(s).")
+        selected = matches[:limit_per_group]
+        for index in selected:
+            # Include the nearest enclosing class/struct/enum declaration when possible.
+            declaration = None
+            for previous in range(index, max(-1, index - 250), -1):
+                line = lines[previous]
+                if re.search(r"^\s*(?:public|private|internal|protected).*\b(class|struct|enum|interface)\b", line):
+                    declaration = previous
+                    break
+            context_indices = set(range(max(0, index - 1), min(len(lines), index + 2)))
+            if declaration is not None:
+                context_indices.add(declaration)
+            for context_index in sorted(context_indices):
+                if context_index in emitted or len(output) >= 100:
+                    continue
+                emitted.add(context_index)
+                marker = "MATCH" if context_index == index else "CONTEXT"
+                output.append(
+                    f"  - [{marker}] dump.cs:{context_index + 1}: {lines[context_index].strip()[:260]}"
+                )
+    return output, counts
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
@@ -166,7 +187,8 @@ def main() -> int:
             dump_path = next(iter(output_dir.rglob("dump.cs")), None)
             script_path = next(iter(output_dir.rglob("script.json")), None)
             string_path = next(iter(output_dir.rglob("stringliteral.json")), None)
-            focused_hits, focused_count = focused_dump_hits(dump_path) if dump_path else ([], 0)
+            focused_hits, focused_counts = focused_dump_hits(dump_path) if dump_path else ([], {})
+            focused_count = sum(focused_counts.values())
 
             selected_outer_crc = next(
                 (item.get("container_crc_status", "NOT_CHECKED") for item in inner_members if item["name"] == primary_name),
@@ -199,6 +221,8 @@ def main() -> int:
                 f"- script.json generated: {'YES' if script_path else 'NO'}",
                 f"- stringliteral.json generated: {'YES' if string_path else 'NO'}",
                 f"- Focused dump.cs match lines: {focused_count}",
+                "- Match count by term group:",
+                *[f"  - {group}: {count}" for group, count in focused_counts.items()],
                 "",
                 "### Focused type/method context",
                 *(focused_hits or ["- No focused method/type name was recovered by the current dump."]),
@@ -212,11 +236,30 @@ def main() -> int:
                 "- Native library and metadata outputs are temporary; only this summary report is persisted.",
                 "",
             ])
-            status = "IL2CPP_DUMP_COMPLETE" if result.returncode == 0 and dump_path else "IL2CPP_DUMP_PARTIAL"
+            outputs_generated = bool(dump_path and script_path and string_path)
+            generated_output_marker = "Generate dummy dll" in log and "Dumping..." in log
+            post_dump_console_error = (
+                result.returncode != 0
+                and outputs_generated
+                and generated_output_marker
+                and ("Console.ReadKey" in log or "Press any key to exit" in log)
+            )
+            if result.returncode == 0 and outputs_generated:
+                status = "IL2CPP_DUMP_COMPLETE"
+            elif outputs_generated and generated_output_marker:
+                status = "IL2CPP_OUTPUTS_GENERATED_WITH_POST_DUMP_CONSOLE_ERROR" if post_dump_console_error else "IL2CPP_OUTPUTS_GENERATED_WITH_TOOL_WARNING"
+            else:
+                status = "IL2CPP_DUMP_PARTIAL"
+            lines.extend([
+                f"- Output generation confirmed from log: {'YES' if generated_output_marker else 'NO'}",
+                f"- Final console-input exception after generation: {'YES' if post_dump_console_error else 'NO'}",
+            ])
+            if post_dump_console_error:
+                lines.append("- Interpretation of non-zero exit: the dumper generated all three output files, then failed in its final Console.ReadKey prompt because stdin was redirected; this is not a clean exit, but the generated dump outputs are present.")
             lines.insert(3, f"**Status:** {status}")
             output_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
             print(f"Wrote {output_path} with status {status}")
-            return 0 if status == "IL2CPP_DUMP_COMPLETE" else 2
+            return 0 if outputs_generated and generated_output_marker else 2
     except (urllib.error.URLError, TimeoutError, OSError, RuntimeError, ValueError, json.JSONDecodeError,
             zipfile.BadZipFile, zipfile.LargeZipFile, KeyError, subprocess.SubprocessError, zlib.error) as error:
         lines.extend([
