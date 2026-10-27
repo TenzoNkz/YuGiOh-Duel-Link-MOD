@@ -20,6 +20,7 @@ on:
       - ANALYSIS_LOG.md
       - .github/workflows/*.yml
       - tools/*.py
+      - tests/*.py
   workflow_dispatch:
 
 permissions:
