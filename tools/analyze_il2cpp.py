@@ -97,14 +97,16 @@ def focused_dump_hits(dump_path: Path, limit_per_group: int = 3) -> tuple[list[s
         matches = [index for index, line in enumerate(lines) if pattern.search(line)]
         # Prioritize methods/fields specific to the feature over generic Unity
         # timeline parameters such as "autoPlay".
-        if group == "AutoPlay":
+        if group in ("AutoPlay", "DuelMenu/AutoPlay settings"):
             def autoplay_priority(match_index: int) -> tuple[int, int]:
                 line = lines[match_index]
-                if re.search(r"GetAutoPlay|SetAutoPlay|ChangeAutoPlay|autoPlayEnable|fastAutoEnable|reqAutoPlay|autoPlayState|OnChangeAutoPlay", line, re.IGNORECASE):
+                if re.search(r"GetAutoPlay|SetAutoPlay|ChangeAutoPlay|OnChangeAutoPlay", line, re.IGNORECASE):
                     return (0, match_index)
-                if re.search(r"isAutoPlay|enabledAutoPlay|fastAuto", line, re.IGNORECASE):
+                if re.search(r"reqAutoPlay|autoPlayState|isAutoPlay|enabledAutoPlay", line, re.IGNORECASE):
                     return (1, match_index)
-                return (2, match_index)
+                if re.search(r"autoPlayEnable|fastAutoEnable|manualChainEnable|fastAuto", line, re.IGNORECASE):
+                    return (2, match_index)
+                return (3, match_index)
             matches = sorted(matches, key=autoplay_priority)
         counts[group] = len(matches)
         if not matches:
