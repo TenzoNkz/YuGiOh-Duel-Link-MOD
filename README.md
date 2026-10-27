@@ -1,6 +1,6 @@
 # YuGiOh-Duel-Link-MOD — GitHub Source of Truth
 
-This repository follows the JE X FYZ-style recovery workflow. **APKPure Original V11.1.0 is the sole intended mod base. Platinmods V11.1.0 is a comparison reference only.** The project is still in reverse-engineering and feasibility analysis; no CHATGPT MOD APK has been built.
+This repository follows the JE X FYZ-style recovery workflow. **APKPure Original V11.1.0 is the sole intended mod base. Platinmods V11.1.0 is comparison-only reference.** The intended output is a real modified APK with an in-game menu titled CHATGPT MOD. No modified APK has been built.
 
 ## Canonical inputs
 
@@ -11,50 +11,58 @@ This repository follows the JE X FYZ-style recovery workflow. **APKPure Original
 - Reference only: [Platinmods Original Release — Latest](https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/releases/tag/Latest)
 - Platinmods asset: Yu-Gi-Oh.Duel.Links.Platinmods.V11.1.0.apk
 
-The XAPK is not renamed to APK. The analysis tools inventory the container, select a likely primary APK, list other embedded APKs/OBB payloads, and keep the container SHA-256 separate from the selected APK SHA-256. A final single-APK output is not assumed possible until split/OBB compatibility is assessed.
+## Critical source-integrity finding
+
+The APKPure XAPK container SHA-256 matches the digest declared by GitHub, but both embedded APK member CRC checks fail. Static inventory also reports a compressed asset decompression error in the primary APK at assets/bin/Data/e1f73dc34613ec042897cc46749d448c, and a bad CRC for lib/arm64-v8a/libduel.so in the ARM64 split. This means the uploaded file bytes match GitHub metadata, but the package contents are not internally clean. **Do not patch or build from this upload. Replace it with a clean original APKPure package and rerun analysis.**
 
 ## Three primary modes
 
 ### Diskusi!
-Review the current repository, reports, release metadata, relevant code and workflow outcomes. This mode does not edit files, commit, trigger workflows, patch APKs, or build.
+Review the live repository, reports, Release metadata, relevant code and Actions outcomes. No edits, commits, workflow triggers, patches or builds.
 
 ### Eksekusi Full!
-Implement the agreed engineering work, run code checks and tests, update durable reports/checkpoints, and verify Actions results. Current task: build a reliable APKPure-XAPK analysis and variant comparison pipeline before selecting CHATGPT MOD features.
+Implement the agreed engineering work, run code checks/tests, update durable reports, and verify actual Actions. The current task is APKPure-first reverse engineering and feature feasibility—not APK packaging.
 
 ### Eksekusi Build App!
-Build/QC the agreed mod based on APKPure Original only. Platinmods must remain comparison-only. The final user-facing menu title is CHATGPT MOD. Do not run a build until the reverse-engineering evidence identifies an approved patch plan and a real APK patch/build pipeline exists.
+Build/QC only after the source package is clean, the feature plan is reviewed, and a real APKPure-based patch/build tool exists. Do not build a separate Gradle demo and call it a modified Duel Links APK.
 
 ## GitHub Actions
 
-- APK Static Analysis — downloads the selected Release APK/XAPK as data, validates the reported container digest, inventories the selected APK, and reports embedded XAPK members.
-- APK Code Analysis (APKPure Base) — runs Apktool/JADX against the selected APKPure primary APK and creates APK_CODE_ANALYSIS.md.
-- APK variant comparison — tools/compare_apk_variants.py creates APK_VARIANT_COMPARISON.md by comparing APKPure entry paths and hashes against Platinmods. It does not patch either package.
-- Checkpoint Validation — compiles Python tools and runs local unit tests for APK/XAPK input handling.
-- CHATGPT Mod Build — must remain blocked until the approved APKPure-based patch/build tooling is implemented. The previous Gradle-demo approach is not the intended product and must not be reported as a modified Duel Links APK.
+- [APK Static Analysis](../../actions/workflows/apk-static-analysis.yml) — container digest, XAPK primary/split inventory and CRC checks.
+- [APK Code Analysis (APKPure Base)](../../actions/workflows/apk-code-analysis.yml) — Apktool/JADX, split-native inventory, package comparison, and pinned Il2CppDumper metadata recovery.
+- [Checkpoint Validation](../../actions/workflows/checkpoint-validation.yml) — Python syntax and unit tests.
+- [CHATGPT MOD Build](../../actions/workflows/build-chatgpt-mod.yml) — gated until a clean APKPure base and real patch/build tool exist.
 
 ## Durable project records
 
-- CHAT_TRANSFER.md — copy-ready prompts for Diskusi!, Eksekusi Full!, and Eksekusi Build App!.
-- CHAT_RULES.md — operating rules and scope boundaries.
-- MEMORY_INDEX.md — authoritative reading order and tool index.
-- PROJECT_STATE.md — verified current state and next step.
-- HANDOVER.md — exact continuation point.
-- APP_ANALYSIS_REPORT.md — static archive inventory.
-- APK_CODE_ANALYSIS.md — Apktool/JADX/DEX/native static findings.
-- APK_VARIANT_COMPARISON.md — APKPure-versus-Platinmods path/hash comparison.
-- MOD_CANDIDATES.md — feature candidates, evidence, unknowns and status.
-- CHATGPT_MOD_BUILD_REPORT.md — build status and blockers.
-- ANALYSIS_LOG.md — chronological verified milestones.
+- [CHAT_TRANSFER.md](CHAT_TRANSFER.md) — copy-ready prompts for the three primary modes.
+- [CHAT_RULES.md](CHAT_RULES.md) — mode behavior and scope boundaries.
+- [MEMORY_INDEX.md](MEMORY_INDEX.md) — authoritative read order and tools.
+- [PROJECT_STATE.md](PROJECT_STATE.md) — verified state and next step.
+- [HANDOVER.md](HANDOVER.md) — exact continuation point.
+- [APP_ANALYSIS_REPORT.md](APP_ANALYSIS_REPORT.md) — container, member and structural inventory.
+- [APK_CODE_ANALYSIS.md](APK_CODE_ANALYSIS.md) — manifest, DEX/JADX, native split and string analysis.
+- [IL2CPP_ANALYSIS_REPORT.md](IL2CPP_ANALYSIS_REPORT.md) — type/method recovery attempt from the APKPure ARM64 library and metadata.
+- [APK_VARIANT_COMPARISON.md](APK_VARIANT_COMPARISON.md) — byte-level comparison of APKPure payloads with Platinmods reference.
+- [MOD_CANDIDATES.md](MOD_CANDIDATES.md) — feature candidates with explicit evidence/status.
+- [CHATGPT_MOD_BUILD_REPORT.md](CHATGPT_MOD_BUILD_REPORT.md) — verified build state/blockers.
+- [ANALYSIS_LOG.md](ANALYSIS_LOG.md) — chronological verified milestones.
 
-## Interpretation and scope
+## Current comparison findings
 
-A string or native symbol is a lead, not proof that an option works. Reports must separate directly observed facts, hypotheses, and runtime-tested behavior. Static analysis must not execute or install the APKs. Safe local UI/accessibility, settings, compatibility and offline simulations may be considered. Live-online-duel modifications intended to unfairly alter outcomes are out of scope.
+- APKPure XAPK contains a primary package plus config.arm64_v8a.apk; no OBB member was detected.
+- The APKPure primary package has three DEX files and no native libraries; the ARM64 config split contains nine native libraries.
+- APKPure and Platinmods have byte-identical ARM64 libil2cpp.so and global-metadata.dat entries in the current comparison. The ARM64 libduel.so entry is unreadable/corrupt in APKPure, so it cannot be compared reliably.
+- AndroidManifest.xml and all three DEX files differ at the byte level. These differences do not, by themselves, explain the semantic changes.
+- The current analysis is partial, not full; tool results and source integrity remain blockers.
 
-Do not claim signer identity from ordinary META-INF entries alone: APK v2/v3 signing blocks are not normal ZIP entries. Before promising installation over an existing Platinmods installation, verify package identity and signer certificate compatibility. Keep generated APK binaries out of Git history and never overwrite the original Release assets.
+## Scope and interpretation
+
+A string or native symbol is a lead, not proof that a feature works. Static reports separate observed bytes, hypotheses and runtime-tested behavior. Safe local UI/accessibility/settings and compatibility changes, plus offline simulations, may be considered. Do not implement live-online-duel outcome manipulation. Verify the signer before promising in-place installation; a signing certificate is not the private key.
 
 ## Chat-limit recovery
 
 1. Open CHAT_TRANSFER.md.
 2. Copy the prompt for the required mode.
 3. Paste it into the new chat.
-4. Reload the live main branch, current Release metadata, reports and latest Actions results. Continue from HANDOVER.md without asking for the same public Release files again.
+4. Reload the live main branch, current reports and latest Actions results. Continue from HANDOVER.md without asking for the same public Release files again.
