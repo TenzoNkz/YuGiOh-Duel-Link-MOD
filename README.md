@@ -11,9 +11,11 @@ This repository follows the JE X FYZ-style recovery workflow. **APKPure Original
 - Reference only: [Platinmods Original Release — Latest](https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/releases/tag/Latest)
 - Platinmods asset: Yu-Gi-Oh.Duel.Links.Platinmods.V11.1.0.apk
 
-## Critical source-integrity finding
+## Current source-integrity status — PASS
 
-The APKPure XAPK container SHA-256 matches the digest declared by GitHub, but both embedded APK member CRC checks fail. Static inventory also reports a compressed asset decompression error in the primary APK at assets/bin/Data/e1f73dc34613ec042897cc46749d448c, and a bad CRC for lib/arm64-v8a/libduel.so in the ARM64 split. This means the uploaded file bytes match GitHub metadata, but the package contents are not internally clean. **Do not patch or build from this upload. Replace it with a clean original APKPure package and rerun analysis.**
+The APKPure XAPK was updated and the current asset passes verification. Current XAPK size is 92,726,986 bytes; expected and calculated SHA-256 match at 66ba31c32fbba03b5fe0f75ef27dd9fa875978de7921a0c4ee8b93b878ce64eb. Both embedded APK members pass outer CRC checks, and the primary APK plus ARM64 split pass inner ZIP CRC/decompression scans. The old digest 1f2cf45f87f52217227611b1d48f83a1d3990c326a0b2a6c64fa54296237be16 belonged to the previous corrupt upload and is superseded.
+
+Source integrity is no longer the blocker. **Do not package the final APK yet**: the code analysis is still partial (JADX returned 96 decompilation errors), feature call paths are not proven, no safe feature scope has been approved, and no genuine APKPure-based patch/build pipeline or verified XAPK/split installation strategy exists. Review PROJECT_STATE.md and HANDOVER.md for the current checkpoint.
 
 ## Three primary modes
 
@@ -31,7 +33,7 @@ Build/QC only after the source package is clean, the feature plan is reviewed, a
 - [APK Static Analysis](../../actions/workflows/apk-static-analysis.yml) — container digest, XAPK primary/split inventory and CRC checks.
 - [APK Code Analysis (APKPure Base)](../../actions/workflows/apk-code-analysis.yml) — Apktool/JADX, split-native inventory, package comparison, and pinned Il2CppDumper metadata recovery.
 - [Checkpoint Validation](../../actions/workflows/checkpoint-validation.yml) — Python syntax and unit tests.
-- [CHATGPT MOD Build](../../actions/workflows/build-chatgpt-mod.yml) — gated until a clean APKPure base and real patch/build tool exist.
+- [CHATGPT MOD Build](../../actions/workflows/build-chatgpt-mod.yml) — gated until call-flow analysis, a reviewed safe feature scope, and a real APKPure-based patch/build tool exist.
 
 ## Durable project records
 
@@ -52,9 +54,9 @@ Build/QC only after the source package is clean, the feature plan is reviewed, a
 
 - APKPure XAPK contains a primary package plus config.arm64_v8a.apk; no OBB member was detected.
 - The APKPure primary package has three DEX files and no native libraries; the ARM64 config split contains nine native libraries.
-- APKPure and Platinmods have byte-identical ARM64 libil2cpp.so and global-metadata.dat entries in the current comparison. The ARM64 libduel.so entry is unreadable/corrupt in APKPure, so it cannot be compared reliably.
-- AndroidManifest.xml and all three DEX files differ at the byte level. These differences do not, by themselves, explain the semantic changes.
-- The current analysis is partial, not full; tool results and source integrity remain blockers.
+- APKPure and Platinmods have byte-identical ARM64 libil2cpp.so and global-metadata.dat entries in the current comparison. The native inputs in the current APKPure package pass CRC checks; byte identity or difference does not prove feature behavior.
+- AndroidManifest.xml and all three DEX files differ at the byte level. These differences do not, by themselves, explain semantic changes.
+- The current analysis is partial, not full. Source integrity is verified; remaining blockers are call-flow/feature validation and the genuine patch/build pipeline.
 
 ## Scope and interpretation
 
