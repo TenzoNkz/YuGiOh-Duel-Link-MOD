@@ -22,37 +22,11 @@ from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 
+from apk_inputs import download_and_hash, resolve_primary_apk, select_release_asset, get_release
+
 USER_AGENT = "YuGiOh-Duel-Link-MOD-static-analysis/1.0"
 MAX_MEMBERS_FOR_CRC = 100_000
 MAX_UNCOMPRESSED_BYTES_FOR_CRC = 5 * 1024 * 1024 * 1024
-
-
-def request_json(url: str) -> dict:
-    req = urllib.request.Request(
-        url,
-        headers={
-            "Accept": "application/vnd.github+json",
-            "X-GitHub-Api-Version": "2022-11-28",
-            "User-Agent": USER_AGENT,
-        },
-    )
-    with urllib.request.urlopen(req, timeout=60) as response:
-        return json.load(response)
-
-
-def download_and_hash(url: str, destination: Path) -> tuple[int, str]:
-    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-    digest = hashlib.sha256()
-    total = 0
-    with urllib.request.urlopen(req, timeout=120) as response, destination.open("wb") as output:
-        while True:
-            chunk = response.read(1024 * 1024)
-            if not chunk:
-                break
-            output.write(chunk)
-            digest.update(chunk)
-            total += len(chunk)
-    return total, digest.hexdigest()
 
 
 def human_bytes(value: int) -> str:
@@ -81,7 +55,7 @@ def main() -> int:
         default=os.environ.get("GITHUB_REPOSITORY", "TenzoNkz/YuGiOh-Duel-Link-MOD"),
         help="Repository in owner/name form",
     )
-    parser.add_argument("--asset-name", default="", help="Exact APK asset name; required if multiple APK assets exist")
+    parser.add_argument("--asset-name", default="", help="Exact APK or XAPK asset name; useful when a Release has multiple package assets")
     parser.add_argument("--output", default="APP_ANALYSIS_REPORT.md", help="Markdown report output path")
     args = parser.parse_args()
 
@@ -90,39 +64,27 @@ def main() -> int:
     if not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", args.repo):
         parser.error("repository must be in owner/name form")
 
-    api_url = (
-        "https://api.github.com/repos/"
-        + args.repo
-        + "/releases/tags/"
-        + urllib.parse.quote(args.release_tag, safe="")
-    )
-    release = request_json(api_url)
-    assets = [
-        item for item in release.get("assets", [])
-        if item.get("name", "").lower().endswith(".apk")
-    ]
-    if args.asset_name:
-        assets = [item for item in assets if item.get("name") == args.asset_name]
-    if len(assets) != 1:
-        names = ", ".join(item.get("name", "(unnamed)") for item in assets) or "none"
-        raise RuntimeError(
-            "Expected exactly one matching APK asset; found "
-            + str(len(assets))
-            + ". Matching names: "
-            + names
-            + ". Pass --asset-name if this Release contains multiple APK files."
-        )
-
-    asset = assets[0]
+    release = get_release(args.repo, args.release_tag)
+    asset = select_release_asset(release, args.asset_name)
     asset_name = asset.get("name", "(unnamed)")
     output_path = Path(args.output)
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     with tempfile.TemporaryDirectory(prefix="apk-static-analysis-") as temporary:
-        apk_path = Path(temporary) / "source.apk"
+        work = Path(temporary)
+        suffix = ".xapk" if asset_name.lower().endswith(".xapk") else ".apk"
+        container_path = work / ("source-container" + suffix)
         downloaded_bytes, actual_sha256 = download_and_hash(
-            asset["browser_download_url"], apk_path
+            asset["browser_download_url"], container_path
         )
+        apk_path = container_path
+        embedded_apk_name = asset_name
+        nested_apks = []
+        obb_names = []
+        if suffix == ".xapk":
+            apk_path, embedded_apk_name, nested_apks, obb_names = resolve_primary_apk(
+                container_path, asset_name, work / "source-primary.apk"
+            )
         expected_digest = asset.get("digest") or ""
         expected_sha256 = (
             expected_digest.split(":", 1)[1]
@@ -240,7 +202,16 @@ def main() -> int:
             f"- Calculated SHA-256: {actual_sha256}",
             f"- SHA-256 comparison: {status_text(digest_matches)}",
             "",
-            "## Archive integrity",
+            "## Selected APK and XAPK container",
+            f"- Input type: {'XAPK container with embedded APK' if suffix == '.xapk' else 'APK'}",
+            f"- APK analyzed: {embedded_apk_name}",
+            f"- Analyzed APK size: {apk_path.stat().st_size} bytes",
+            f"- Embedded APK members: {len(nested_apks)}",
+            *([f"- Embedded APK member: {item['name']} ({item['size']} bytes)" for item in nested_apks] or ["- No nested APK members; the Release asset itself is the APK."]),
+            f"- OBB members in container: {len(obb_names)}",
+            *([f"- OBB member: {name}" for name in obb_names[:20]] or ["- No .obb member found in the XAPK container."]),
+            "",
+            "## Selected APK archive integrity",
             f"- ZIP/APK opened: {status_text(archive_opened)}",
             f"- Central-directory entry count: {len(infos)}",
             f"- Total uncompressed size: {total_uncompressed} bytes ({human_bytes(total_uncompressed)})",
@@ -274,6 +245,7 @@ def main() -> int:
             "- It does not validate Android APK signatures or identify a trusted signer.",
             "- It does not decompile DEX/native code, trace feature callbacks, or prove that any toggle works.",
             "- Filename indicators are heuristics only; they are not definitive engine identification.",
+            "- For XAPK input, this report inventories the selected primary APK and lists embedded APK/OBB members; it does not install the split set or prove that a single APK alone is sufficient.",
             "- It does not execute, install, patch, or rebuild the APK.",
             "",
             "## Recommended next step",
