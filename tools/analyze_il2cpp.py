@@ -124,7 +124,7 @@ def focused_dump_hits(dump_path: Path, limit_per_group: int = 3) -> tuple[list[s
             if declaration is not None:
                 context_indices.add(declaration)
             for context_index in sorted(context_indices):
-                if context_index in emitted or len(output) >= 100:
+                if context_index in emitted or len(output) >= 180:
                     continue
                 emitted.add(context_index)
                 marker = "MATCH" if context_index == index else "CONTEXT"
@@ -238,7 +238,7 @@ def main() -> int:
                 f"- stringliteral.json generated: {'YES' if string_path else 'NO'}",
                 f"- Focused dump.cs match lines: {focused_count}",
                 f"- Output generation confirmed from log: {'YES' if ('Generate dummy dll' in log and 'Dumping...' in log) else 'NO'}",
-                f"- Final console-input exception after generation: {'YES' if (result.returncode != 0 and dump_path and script_path and string_path and 'Console.ReadKey' in log and 'Press any key to exit' in log) else 'NO'}",
+                f"- Final console-input exception after generation: {'YES' if post_dump_console_error else 'NO'}",
                 "- Match count by term group:",
                 *[f"  - {group}: {count}" for group, count in focused_counts.items()],
                 "",
