@@ -8,7 +8,7 @@ Branch: main
 - APKPure Original V11.1.0, Release tag APKPure_Latest, remains the sole intended mod base.
 - Platinmods V11.1.0, Release tag Latest, is comparison-only reference.
 - Target output is a genuine modified APK with in-game menu title CHATGPT MOD.
-- Do not package the final APK until the safe feature scope and a genuine APKPure-based patch/build tool are in place.
+- Do not package the final APK until a bounded safe feature scope and a genuine APKPure-based patch/build tool exist.
 
 ## Latest verified source package
 - Current XAPK asset: Yu-Gi-Oh.Duel.Links.APKPure.V11.1.0.xapk, size 92,726,986 bytes.
@@ -18,31 +18,34 @@ Branch: main
 - Both embedded APK members pass outer XAPK CRC, and the primary APK and ARM64 split pass inner ZIP CRC/decompression scans. No OBB member is present.
 - The older digest 1f2cf45f87f52217227611b1d48f83a1d3990c326a0b2a6c64fa54296237be16 belongs to the previous corrupt upload and is superseded.
 - Static archive workflow succeeded: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40453605293.
-- Full code/IL2CPP report refresh completed successfully: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40453733126.
-- A follow-up code-analysis run adds complete inner ZIP CRC checking to each APK member and is being verified here: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40454023712.
-- Checkpoint validation with the new tests has passed: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40454118233.
+- Latest Code Analysis with full inner ZIP CRC scans and YgomMainActivity lifecycle/native/window trace succeeded: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40454946821.
+- Latest Checkpoint Validation with Activity-trace and archive-integrity tests succeeded: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40454946814.
 
 ## Analysis state
-- APKTool exit code 0; JADX partial output with exit code 3 and 96 decompilation errors. Keep CODE_ANALYSIS_PARTIAL rather than claiming complete reverse engineering.
-- Il2CppDumper v6.7.46 creates dump.cs, script.json and stringliteral.json, then returns -6 at the final Console.ReadKey prompt. The report generator has been fixed to classify this accurately before rendering the report, and archive-integrity results now state the actual clean CRC scans.
-- Static metadata includes ShowMonster, card-face query APIs, PvP.Command.CHEATCARD = 9, PROCESS_DAMAGE enum constants, damage-value getters, and DuelMenu autoplay state/control names. No call path from a CHATGPT MOD overlay to these declarations is proven. The getters do not establish writable damage modification; face-query names do not prove hidden-opponent-card access.
-- APKPure and Platinmods differ in shared manifest/DEX/resources and entry counts; byte differences alone do not explain feature behavior.
+- APKTool exit code 0; JADX produced partial Java output with exit code 3 and 96 decompilation errors. Keep CODE_ANALYSIS_PARTIAL; this is not a source CRC failure.
+- Static Activity trace: jp/konami/duellinks/plugins/YgomMainActivity.java (581 lines), extending Firebase's MessagingUnityPlayerActivity and implementing BillingClientStateListener and PurchasesUpdatedListener.
+- onCreate(Bundle) sets a fullscreen no-action-bar theme, calls super, initializes a Logger and handles launch-intent/re-engagement URI state. onResume/onPause delegate to super; onDestroy tears down billing; onNewIntent updates Intent/URI.
+- UnityPlayer.UnitySendMessage references in this class belong to purchase/billing callback paths such as PurchaseBehaviour, not a mod-menu callback.
+- APKPure DEX output has no com.platinmods classes. The manifest does not declare SYSTEM_ALERT_WINDOW or a Platinmods-style floating-menu service; the Activity trace has no direct WindowManager overlay hook or addContentView call. The APK therefore has no ready-made Platinmods overlay to enable.
+- Il2CppDumper v6.7.46 generates dump.cs, script.json and stringliteral.json, then returns -6 at the final Console.ReadKey prompt. The report generator classifies this after-output exception and confirms clean inner archive scans.
+- Static metadata includes ShowMonster, card-face query APIs, PvP.Command.CHEATCARD = 9, PROCESS_DAMAGE enum constants, damage-value getters and DuelMenu autoplay state/control names. No call path from a CHATGPT MOD menu to these declarations is proven. Getter signatures do not establish writable damage modification; card-face names do not prove hidden-opponent access.
+- Current details: [APK_CODE_ANALYSIS.md](https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/blob/main/APK_CODE_ANALYSIS.md), [IL2CPP_ANALYSIS_REPORT.md](https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/blob/main/IL2CPP_ANALYSIS_REPORT.md), [MOD_CANDIDATES.md](https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/blob/main/MOD_CANDIDATES.md).
 
 ## Engineering changes in the current execution
-- Added GitHub API token support to release API requests and passed the Actions token into APK static/code-analysis jobs to reduce anonymous API rate-limit failures.
-- Fixed IL2CPP report-generation ordering that previously caused UnboundLocalError after dumping. Added result-classification and archive-integrity unit tests.
-- Added full inner ZIP CRC/decompression checking to APK code analysis and removed the inaccurate old fallback warning.
-- Updated variant comparison to derive APKPure integrity conclusions from actual findings rather than hard-coded stale corruption statements.
-- Added unit tests for XAPK/APK CRCs, authenticated API headers, IL2CPP report classification, and source-integrity assessment.
-- Latest Checkpoint Validation link above confirms the suite passed after correcting the ZIP-signature fixture.
+- Added GitHub API token support to Release API requests and passed the Actions token into APK static/code-analysis jobs to reduce anonymous API rate-limit failures.
+- Fixed IL2CPP report-generation ordering; added dumper-result classification and archive-integrity tests.
+- Added full inner ZIP CRC/decompression checking to APK code analysis, removed obsolete hard-coded corruption warnings, and made variant comparison conclusions depend on current package evidence.
+- Added tests for XAPK/APK CRCs, authenticated API headers, IL2CPP report classification, source-integrity assessment, and Android Activity tracing.
+- Added [MOD_INTEGRATION_PLAN.md](https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/blob/main/MOD_INTEGRATION_PLAN.md), documenting the Activity entry point and safe menu integration options.
+- Checkpoint Validation passed at https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40454946814.
 
 ## Remaining blockers
-1. Complete the current follow-up analysis run and check the refreshed APK_CODE_ANALYSIS.md, APK_VARIANT_COMPARISON.md, and IL2CPP_ANALYSIS_REPORT.md.
-2. Trace the clean primary APK's AndroidManifest.xml and jp.konami.duellinks.plugins.YgomMainActivity DEX entry points; map any proposed menu integration route against the IL2CPP/native architecture.
-3. Select and approve a bounded safe feature scope. No gameplay feature is proven working merely from a method name.
-4. Implement and review a real APKPure-based patch/build tool and XAPK/split packaging strategy.
+1. Gameplay feature call-flow and runtime behavior are not proven; a method or enum name is not a working cheat.
+2. Approve a bounded safe feature scope. Recommended first scope: independently owned CHATGPT MOD menu shell, presentation controls, and local preference persistence only—no gameplay callbacks yet.
+3. Implement a genuine APKPure-based patch/build tool and preserve or correctly handle the XAPK primary/split relationship.
+4. Prototype on the actual game build and test Activity lifecycle, z-order, Unity touch interaction, display scaling, preferences, stability and logs.
 5. Confirm signing/install/update compatibility. Do not promise that an independently signed package will overwrite Platinmods.
-6. Keep final APK packaging blocked until the patcher and feature plan are reviewed.
+6. Keep final APK release packaging blocked until the patcher, feature scope and test evidence are reviewed.
 
 ## NEXT ACTION
-Inspect the final result of https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40454023712, then trace the Activity/DEX entry point and define an evidence-based integration plan for the safe CHATGPT MOD menu. Do not run final APK packaging in Eksekusi Full mode.
+Review and approve the first safe scope in MOD_CANDIDATES.md and MOD_INTEGRATION_PLAN.md. Then implement the real APKPure-based patch pipeline and a non-release test prototype; do not run final APK packaging during Eksekusi Full.
