@@ -1,50 +1,54 @@
-# Chat Rules — Yu-Gi-Oh! Duel Links MOD Workspace
+# Chat Rules — Yu-Gi-Oh! Duel Links CHATGPT MOD
 
-## Source of truth
-- Canonical repository: TenzoNkz/YuGiOh-Duel-Link-MOD
-- Canonical branch: main
-- Durable state comes from committed GitHub files, the source Release, and verified Actions runs—not from chat transcript assumptions.
-- Read CHAT_TRANSFER.md, CHAT_RULES.md, MEMORY_INDEX.md, PROJECT_STATE.md, HANDOVER.md, APP_ANALYSIS_REPORT.md, APK_CODE_ANALYSIS.md, CHATGPT_MOD_BUILD_REPORT.md, and MOD_CANDIDATES.md before substantial work.
+## Canonical source of truth
+- Repository: TenzoNkz/YuGiOh-Duel-Link-MOD
+- Branch: main
+- Intended mod base: APKPure Original V11.1.0, Release tag APKPure_Latest.
+- Comparison-only reference: Platinmods V11.1.0, Release tag Latest.
+- Eventual output: a tested modified APK (.apk) with an in-game menu titled CHATGPT MOD.
+- Do not use Platinmods as the build base or copy its binary components without separate evidence/review.
 
-## Three primary modes
-- **Diskusi!** — discuss/review all relevant code and architecture, trace evidence, plan changes. No edits, commits, builds, patches, or workflow triggers.
-- **Eksekusi Full!** — execute the agreed source-code task end-to-end: edit files, implement features within scope, run tests/checks, fix regressions, commit, and update durable records. APK packaging is separate.
-- **Eksekusi Build App!** — build/QC only for the latest agreed source. Validate the Android project, require the app label "CHATGPT Mod", run the build workflow, verify artifact/digest, and update CHATGPT_MOD_BUILD_REPORT.md. Only minimum build fixes are allowed; new feature work returns to Eksekusi Full!.
-- **Chat Stuck!** is an auxiliary checkpoint command, not a replacement for the three modes.
+## Mode behavior
+- **Diskusi!** — inspect the live repository, Releases, reports, code, and Actions; explain facts and unknowns; do not edit, commit, trigger workflows, patch binaries, or build.
+- **Eksekusi Full!** — implement agreed scripts, tests, analysis workflow, docs, and safe feature work; run checks; update durable reports and handover. Current engineering priority is complete APKPure XAPK analysis and comparison with Platinmods before selecting features.
+- **Eksekusi Build App!** — package/QC only after the chosen safe feature plan and an actual APKPure-based patch/build pipeline exist. It must not build a separate Gradle demo and describe it as modified Duel Links.
+- **Chat Stuck!** — auxiliary checkpoint-only command.
 
-## Durable record contract
-- CHAT_TRANSFER.md contains copy-ready load-and-continue prompts.
-- MEMORY_INDEX.md defines the authoritative read order.
-- PROJECT_STATE.md records verified project status.
-- HANDOVER.md records the exact last verified step and one NEXT ACTION.
-- ANALYSIS_LOG.md is chronological; append new verified milestones rather than rewriting history.
-- APP_ANALYSIS_REPORT.md records static archive inventory.
-- APK_CODE_ANALYSIS.md records Apktool/JADX/native-string findings and tooling limitations.
-- CHATGPT_MOD_BUILD_REPORT.md records build state, artifact metadata, and build blockers.
-- MOD_CANDIDATES.md records per-feature evidence and status.
+## Analysis input rules
+- Treat APK/XAPK as data only in static analysis; do not install or execute them in analysis workflows.
+- Verify the Release's reported digest, calculate the downloaded container SHA-256, and calculate the selected primary APK SHA-256 separately.
+- APKPure XAPK handling must list all embedded APKs and OBB payloads. Do not assume the primary APK alone represents a complete installable game.
+- Compare APKPure and Platinmods at the archive-member level. File hashes indicate byte differences only; trace code/resources/symbols to understand semantics.
+- Retain original Release files. Do not silently overwrite or republish them.
+- Static reports must state exactly which version/tag was analyzed. Old Platinmods V11.0.0 findings must not be presented as confirmed V11.1.0 facts.
+- A string, JNI name, symbol, resource label, or successful workflow does not prove feature behavior. Distinguish facts, hypotheses, and isolated test results.
 
-## GitHub workflow contract
-- APK Static Analysis treats the source Release APK as data and produces APP_ANALYSIS_REPORT.md.
-- APK Code Analysis uses Apktool/JADX for static inspection and produces APK_CODE_ANALYSIS.md. A successful Actions job does not mean decompilation is complete if the report says PARTIAL.
-- Checkpoint Validation checks required files and recovery-prompt markers.
-- CHATGPT Mod Build validates a source project under chatgpt-mod/, requires Android application label "CHATGPT Mod", builds a Debug APK, uploads it as a workflow artifact, and updates CHATGPT_MOD_BUILD_REPORT.md.
-- Always inspect actual job conclusion, report commit, and artifact. Never invent a successful build or test result.
+## Build rules
+- APKPure Original is the sole base for all CHATGPT MOD implementation.
+- Final output should be a real modified .apk, not a renamed .xapk or independent demo application.
+- The build remains blocked until reverse-engineering reports support an approved patch plan and an APK-based patch/build tool exists.
+- Never claim the Platinmods signing identity can be reused without the required private signing key or a valid signing-certificate rotation chain. Check package ID, signer, versionCode, and split/OBB compatibility before promising in-place installation.
+- Keep generated APK binaries/artifacts out of Git history; store deliverables as workflow artifacts unless publishing is explicitly agreed.
 
-## Build preconditions
-- The source Release APK is a binary analysis input, not a Gradle source tree.
-- A buildable Android project must exist under chatgpt-mod/ before a new app APK can be built. If it is absent, record BLOCKED_SOURCE_PROJECT_MISSING and do not relabel/re-upload the existing APK as a new build.
-- Keep built APKs out of Git history. Artifact upload is the default; no public Release is created automatically.
-- Any build must be tied to the exact source commit, Android label, workflow URL, file size, and SHA-256.
+## Scope boundaries
+- Safe local UI, accessibility, appearance, compatibility and settings persistence may be considered.
+- Offline/sandbox simulations may be implemented and unit-tested.
+- Do not implement features intended to unfairly manipulate outcomes in live online duels or expose hidden opponent information.
 
-## Safety and scope
-- Static analysis must inspect the APK as data; never execute/install it in the analysis runner.
-- Preserve the original APK asset and its evidence.
-- Do not claim functionality based only on labels, strings, or symbols.
-- Live online-match modifications intended to unfairly alter duel outcomes are out of implementation scope. Safe UI/accessibility changes, compatibility fixes, and isolated/offline simulations may be considered.
-- Do not redistribute modified proprietary game binaries without the necessary rights.
+## Durable checkpoint contract
+- CHAT_TRANSFER.md contains copy-ready prompts for the three primary modes.
+- MEMORY_INDEX.md defines the read order.
+- PROJECT_STATE.md records verified state and one next action.
+- HANDOVER.md records the exact continuation point.
+- ANALYSIS_LOG.md is chronological and must add only verified findings.
+- APP_ANALYSIS_REPORT.md, APK_CODE_ANALYSIS.md and APK_VARIANT_COMPARISON.md must identify their exact input assets and limitations.
+- MOD_CANDIDATES.md tracks each candidate's evidence and status.
+- CHATGPT_MOD_BUILD_REPORT.md records the true build outcome and blockers.
 
 ## Definition of done
-1. The requested code/workflow/docs exist on GitHub.
-2. Relevant checks and builds have verified outcomes or clearly marked blockers.
-3. Reports and checkpoints agree with the actual latest run.
-4. HANDOVER.md contains one precise next action.
+1. Correct repository files/workflow/scripts exist on main.
+2. Python syntax checks and unit tests pass.
+3. Current GitHub Actions runs and generated reports are inspected.
+4. APKPure stays the source base; Platinmods stays comparison-only.
+5. Build is never called successful without a confirmed modified APK artifact and documented tests.
+6. HANDOVER.md contains one precise NEXT ACTION.
