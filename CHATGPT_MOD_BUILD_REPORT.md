@@ -17,8 +17,8 @@
 - Both embedded members pass outer XAPK CRC validation. Both the primary APK and ARM64 split pass their inner ZIP CRC/decompression scans. No OBB member was detected.
 - Static archive inventory run: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40453605293 (success).
 - Latest full Code Analysis with inner ZIP CRC scans and YgomMainActivity entry-point trace: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40454946821 (success; code report remains partial because JADX emitted 96 decompilation errors).
-- Latest Checkpoint Validation including patcher primitive tests and required records: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40456599833 (success).
-- Menu helper validation, including Java-to-DEX compilation and patcher unit tests: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40456595296 (success).
+- Latest Checkpoint Validation after strict-gate/tooling changes: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40457406860 (success before the latest regression test addition); another current checkpoint run is tracked at https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40457598014.
+- Latest menu helper validation including Java-to-DEX compilation, full report preflight and explicit approval-bypass regression: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40457542823 (success).
 - Integration and gated patcher record: [MOD_INTEGRATION_PLAN.md](https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/blob/main/MOD_INTEGRATION_PLAN.md).
 
 ## Actual analysis state
@@ -33,7 +33,7 @@
 - CI passed patcher primitive tests and compiled the helper to DEX. **The end-to-end patcher has not been run against the actual XAPK; no CHATGPT MOD APK has been produced, installed or runtime-tested.**
 
 ## Remaining blockers — not source integrity
-1. Approve the bounded UI-only feature scope in MOD_CANDIDATES.md. The build approval marker remains PENDING_REVERSE_ENGINEERING, so the build tool/workflow must block.
+1. Approve the bounded UI-only feature scope in MOD_CANDIDATES.md. The build gate now requires the exact standalone line `**Build approval: APPROVED_FOR_IMPLEMENTATION**`; the current checkpoint remains `**Build approval: PENDING_REVERSE_ENGINEERING**`, so the build tool/workflow must block.
 2. Run the end-to-end APKPure XAPK patch build only after approval and after configuring a controlled signing key through Actions secrets. Confirm the Release digest, nested CRCs, Activity hook, helper DEX and merged ARM64 library set.
 3. Inspect the signed output APK's package/version, DEX entries, libraries, signer and SHA-256. The helper-source CI is not a substitute for a real APK build.
 4. Install on a dedicated test device/emulator and validate launch/crash logs, Activity lifecycle, Unity touch passthrough, drag bounds and preference persistence.
