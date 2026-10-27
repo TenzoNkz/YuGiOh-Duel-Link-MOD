@@ -1,51 +1,37 @@
 # Project State
 
-Last checkpoint: 2026-10-26  
+Last checkpoint: 2026-10-27  
 Canonical repository: TenzoNkz/YuGiOh-Duel-Link-MOD  
-Canonical branch: main  
-Status: APK archive inventory passed; the latest deeper static-analysis job succeeded, but its report remains partial because JADX reported 96 decompilation errors.
+Canonical branch: main
 
-## Verified Release
+## Workflow design status
+- Three primary JE X FYZ-style modes are defined in CHAT_TRANSFER.md:
+  - Diskusi! = discuss and review all relevant code; no changes/builds.
+  - Eksekusi Full! = execute agreed source-code work, tests, and durable checkpoint updates.
+  - Eksekusi Build App! = build/QC only, with visible Android label "CHATGPT Mod".
+- Added .github/workflows/build-chatgpt-mod.yml.
+- Added tools/validate_chatgpt_mod_source.py.
+- Added CHATGPT_MOD_BUILD_REPORT.md with initial status BLOCKED_SOURCE_PROJECT_MISSING.
+- The build workflow is manual-only; it does not run on ordinary documentation changes. It builds only a checked-in Android Gradle source tree under chatgpt-mod/, uploads the output as a GitHub Actions artifact, and does not publish a new public Release.
+
+## Important current blocker — no app source project
+- The tracked repository presently contains APK-analysis scripts, reports, docs, and workflows, but no chatgpt-mod/ Gradle project.
+- The public Release Platinmods_V11.0.0 is an APK binary; it is not source code and cannot be treated as an Android Gradle project.
+- Therefore, no new CHATGPT Mod APK has been built yet. The workflow has been scaffolded and must not be reported as a successful build until a valid source project exists and a real run produces an artifact.
+- The build preflight requires the manifest's resolved application label to be exactly CHATGPT Mod.
+
+## Canonical source APK and verified inventory
 - Release: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/releases/tag/Platinmods_V11.0.0
-- Release title: Platinmods Original
-- APK asset: Yu-Gi-Oh.Duel.Links.Platinmods.V11.0.0.apk
-- Size: 127,424,878 bytes (about 121.52 MiB)
-- GitHub-reported and independently calculated SHA-256: d7855754afbfe8e6b0a5db51ba47e4cefcd3079631190c11478d6556e06c56fb
-- Successful archive inventory: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40272870450
+- Asset: Yu-Gi-Oh.Duel.Links.Platinmods.V11.0.0.apk
+- Size: 127,424,878 bytes.
+- SHA-256: d7855754afbfe8e6b0a5db51ba47e4cefcd3079631190c11478d6556e06c56fb.
+- Archive inventory passed: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40272870450.
+- APK_CODE_ANALYSIS.md remains partial because JADX reported 96 decompilation errors; latest successful analysis run: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40274382469.
 
-## Verified archive inventory
-- Downloaded size matched Release metadata; SHA-256 matched; ZIP/APK CRC scan passed.
-- 3,397 archive entries and about 307.33 MiB uncompressed.
-- Three DEX files; 20 native .so libraries (10 per ABI).
-- Unity/IL2CPP indicators include assets/bin/Data/, libunity.so, libil2cpp.so, and global-metadata.dat.
-- Relevant native library names include libduel.so and libplatinmods.so.
-- META-INF signature-related entries exist, but their presence alone does not validate the APK signature or signer trust.
-
-## Latest code-analysis findings
-- Latest successful run: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40274382469
-- Report: APK_CODE_ANALYSIS.md. Its status is CODE_ANALYSIS_PARTIAL despite the workflow job succeeding.
-- Apktool 3.0.3 decoded the manifest to package jp.konami.duellinks and generated 18,765 output entries.
-- JADX 1.5.6 generated 8,194 Java sources but exited with code 3 and reported 96 decompilation errors.
-- com/platinmods/FloatingModMenuService.java contains generic menu widgets and toggle callbacks that invoke Preferences.changeFeatureBoolean(...) and localChanges(...).
-- com/platinmods/Preferences.java declares native Changes(Context, int, int, boolean, String), routes changes to it, and stores preferences.
-- com/platinmods/PMLauncher.java declares native initialize(Context) and loads the platinmods library.
-- libplatinmods.so contains JNI string names including getFeatureList, settingsList, and Preferences_Changes.
-- libduel.so / IL2CPP metadata strings include DLL_DuelGetDamageValue, DLL_DuelGetDamageSrcPosition, DLL_DuelGetDamageDstPosition, DLL_DuelComCheatCard, CHEATCARD, PROCESS_DAMAGE variants, and ShowMonster/showMonster.
-- These are source/symbol/string clues only. They do not prove an in-game effect, exact mapping from overlay labels to feature IDs, native call flow, ownership filtering, or server behavior.
-
-## Current evidence boundary
-- APK integrity and archive inventory are verified.
-- Generic Platinmods overlay and native callback architecture are visible in static output.
-- Feature-specific native dispatch and full Unity/IL2CPP control flow remain untraced.
-- APK has not been installed or executed; no runtime, live-match, or server-authority behavior has been tested.
-
-## User objective
-Use GitHub as the durable source of truth for the APK, analysis reports, candidate register, workflow status, and copy-ready chat recovery prompts. Evaluate existing Platinmods toggles and candidate modifications one by one. The original requested idea was a Damage Multiplier affecting only the user's own cards.
+## Safety and scope
+- The public Release APK remains an immutable analysis input.
+- Build artifacts must stay outside Git history and are uploaded as Actions artifacts only.
+- Safe UI/accessibility and offline simulation work can be evaluated. A live online-duel change intended to unfairly alter match outcomes is not an implementation target.
 
 ## Next action
-Inspect the newest Checkpoint Validation run triggered by report commit 9215f3d8e28713b76753f169fc96c00654194128. Then continue static tracing of the native menu dispatch: relate getFeatureList/settingsList to Preferences.Changes and the displayed feature IDs. Update MOD_CANDIDATES.md only with evidence-backed conclusions. Do not implement a live online damage-changing cheat; an isolated offline simulation is a separate possible task.
-
-## Known boundaries
-- No APK patch/rebuilt APK has been produced.
-- No live match, game account, or server behavior has been tested.
-- Do not mark any candidate as working until a safe, reproducible test supports it.
+Use Eksekusi Full! to establish or implement an authorized, safe Android source project under chatgpt-mod/ if that is the agreed product direction. Verify its application label is CHATGPT Mod, run relevant tests and Checkpoint Validation, then use Eksekusi Build App! to produce and inspect a real APK artifact. Do not run the build workflow while the required source project is absent and then describe the result as successful.
