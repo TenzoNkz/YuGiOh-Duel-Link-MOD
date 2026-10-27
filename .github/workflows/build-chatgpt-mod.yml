@@ -83,7 +83,7 @@ jobs:
           if "- Primary APK inner CRC scan: PASS" not in il2cpp or "- ARM64 split inner CRC scan: PASS" not in il2cpp:
               blockers.append("IL2CPP input APKs have not both passed inner CRC checks.")
           if not re.search(
-              r"(?m)^\\s*\\*\\*Build approval:\\s*APPROVED_FOR_IMPLEMENTATION\\s*\\*\\*\\s*$",
+              r"(?m)^\s*\*\*Build approval:\s*APPROVED_FOR_IMPLEMENTATION\s*\*\*\s*$",
               candidates,
           ):
               blockers.append("No exact standalone Build approval: APPROVED_FOR_IMPLEMENTATION marker is set in MOD_CANDIDATES.md.")
