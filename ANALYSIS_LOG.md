@@ -45,3 +45,19 @@ Verify the latest APK Code Analysis and Checkpoint Validation outcomes, inspect 
 - Static symbols do not prove runtime behavior or a mod-menu call path. No implementation candidate is upgraded to proven-working from these names alone.
 - APKPure XAPK still has failing outer member CRCs, an unreadable/decompression-failing primary asset, and a CRC-failing ARM64 `libduel.so`; final patch/build remains blocked until a clean original package replaces the upload.
 
+## 2026-10-27 — APKPure Release refresh, integrity recovery, and tool fixes
+- User updated the APKPure Original V11.1.0 Release asset. The current XAPK is 92,726,986 bytes and the expected and calculated SHA-256 now match at 66ba31c32fbba03b5fe0f75ef27dd9fa875978de7921a0c4ee8b93b878ce64eb. The prior 1f2cf45f87f52217227611b1d48f83a1d3990c326a0b2a6c64fa54296237be16 hash was the previous internally corrupt upload and is superseded.
+- The current primary APK is jp.konami.duellinks.apk (55,854,706 bytes; SHA-256 e2f38c25eb8d32c66f6b2a036cbe1eeb44164841f6cb684073d9f5ea1ac0c11d). The ARM64 split is config.arm64_v8a.apk (36,869,159 bytes; SHA-256 d2bb8f75605e457b1680b2c428ba653840aed11ca49644d9ad5d10bd649dacf4). No OBB was found.
+- Fresh checks pass: the container digest matches the Release digest, both embedded APKs pass outer XAPK CRC validation, and both the primary APK and ARM64 split pass inner ZIP CRC/decompression scans. Static archive inventory succeeded at https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40453605293.
+- Successful current Release code/IL2CPP analysis completed at https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40453733126. APKTool exit code is 0; JADX returns 3 with 96 decompilation errors and partial source. Keep status CODE_ANALYSIS_PARTIAL, but do not mislabel that as an archive-integrity failure.
+- Current IL2CPP report records that dump.cs, script.json, and stringliteral.json were produced. Il2CppDumper then exits -6 at a final Console.ReadKey prompt; tools/analyze_il2cpp.py now calculates this state before report rendering and verifies the inner CRCs instead of emitting a stale corruption warning.
+- The comparison report now calculates APKPure integrity from the current source rather than hard-coding old CRC/decompression failures. Current recorded comparison reported 2,876 identical shared paths and 205 differing shared paths; hash differences are structural evidence only, not proof of feature semantics.
+- Added GitHub API token support to Release API callers and passed GITHUB_TOKEN to both static and code-analysis workflows after earlier anonymous GitHub API requests hit HTTP 403 rate limits.
+- Added tests for authentication headers, archive CRC scans, IL2CPP dump-result classification, and dynamic APKPure integrity assessment. Fixed a ZIP-signature test fixture after the first test run exposed its incorrectly escaped signature. Checkpoint Validation subsequently passed at https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40454118233.
+- Added full inner ZIP CRC scans to APK code analysis and replaced the obsolete fallback message that implied a corrupt primary APK when no read errors existed. A follow-up analysis run is tracked at https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40454023712.
+- The source-integrity blocker is now resolved. Final build remains blocked by incomplete source-grounded call-flow analysis, no approved feature scope, no real APKPure-based patch/build tool, XAPK/split packaging, and signer/update compatibility.
+- No CHATGPT MOD APK has been built, signed, installed, or runtime-tested.
+
+## NEXT
+Inspect the final outcome and refreshed reports from https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40454023712. Then map the clean primary APK manifest and jp.konami.duellinks.plugins.YgomMainActivity DEX entry points to a safe menu integration plan. Do not start final packaging during Eksekusi Full.
+
