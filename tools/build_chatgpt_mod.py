@@ -22,11 +22,8 @@ from xml.etree import ElementTree
 
 from apk_inputs import download_and_hash, extract_xapk_member, get_release, resolve_primary_apk, select_release_asset
 
-APKTOOL_VERSION = "3.0.3"
 APKTOOL_URL = "https://github.com/iBotPeaches/Apktool/releases/download/v3.0.3/apktool_3.0.3.jar"
-ANDROID_NS = "{http://schemas.android.com/apk/res/android}"
 EXPECTED_PACKAGE = "jp.konami.duellinks"
-MENU_CLASS = "Lcom/chatgptmod/menu/ModMenu;"
 MENU_CALL = "invoke-static {p0}, Lcom/chatgptmod/menu/ModMenu;->install(Landroid/app/Activity;)V"
 ACTIVITY_SMALI = "YgomMainActivity.smali"
 
@@ -344,10 +341,13 @@ def build(args: argparse.Namespace) -> dict[str, str]:
             raise BuildError(
                 f"Downloaded XAPK size {download_size} does not match Release metadata {expected_size}."
             )
-        if expected_digest:
-            normalized = expected_digest.removeprefix("sha256:").lower()
-            if not re.fullmatch(r"[0-9a-f]{64}", normalized) or container_hash != normalized:
-                raise BuildError("Downloaded APKPure XAPK SHA-256 does not match the Release digest.")
+        if not expected_digest:
+            raise BuildError(
+                "The APKPure Release API did not provide a SHA-256 digest; refusing to build without a source digest."
+            )
+        normalized = expected_digest.removeprefix("sha256:").lower()
+        if not re.fullmatch(r"[0-9a-f]{64}", normalized) or container_hash != normalized:
+            raise BuildError("Downloaded APKPure XAPK SHA-256 does not match the Release digest.")
         verify_zip(container, "APKPure XAPK container")
 
         primary, primary_name, members, obbs = resolve_primary_apk(container, asset_name, work / "primary.apk")
