@@ -20,7 +20,7 @@
 - Latest Checkpoint Validation after index/report updates: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40457881877 (success).
 - Integration and gated patcher record: [MOD_INTEGRATION_PLAN.md](https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/blob/main/MOD_INTEGRATION_PLAN.md).
 
-- Latest source/patche r validation (Java 21 workflow setup, Java-to-DEX, preflight fixtures and approval-bypass regression): https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40458144076 (success).
+- Latest menu-source validation (Java 21-compatible tooling, Java-to-DEX compilation, preflight fixtures and approval-bypass regression): https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40458144076 (success).
 - Latest checkpoint validation after those code/workflow changes: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40458144071 (success).
 
 ## Actual analysis state
