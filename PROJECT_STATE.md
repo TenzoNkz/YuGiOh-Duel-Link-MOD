@@ -20,7 +20,6 @@ Canonical branch: main
 - Static source inventory passed: 3,368 primary APK entries, three DEX files, nine ARM64 native libraries across the split. This validates archive integrity, not runtime correctness or mod feasibility.
 - Verified static archive workflow: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40453605293.
 - Latest APK Code Analysis, with full inner ZIP CRC scans and YgomMainActivity lifecycle/native/window trace: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40454946821 (success).
-- Latest menu-source validation (Java-to-DEX, full report preflight, approval-bypass regression): https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40457542823 (success).
 
 ## Reverse-engineering findings — static only
 - APKTool successfully decoded the current primary APK (exit code 0). JADX produced partial Java output but reported 96 decompilation errors and returned exit code 3; the report status is CODE_ANALYSIS_PARTIAL. This is a decompiler limitation, not evidence that the current APK archive is corrupt.
@@ -30,6 +29,9 @@ Canonical branch: main
 - Current IL2CPP report: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/blob/main/IL2CPP_ANALYSIS_REPORT.md.
 - Current APKPure-versus-Platinmods comparison report: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/blob/main/APK_VARIANT_COMPARISON.md. The two releases are compared at entry level; byte differences do not establish semantic changes.
 - Android entry-point and UI integration analysis: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/blob/main/MOD_INTEGRATION_PLAN.md.
+
+- Latest menu helper + patcher validation (Java-to-DEX compilation, report preflight and approval-bypass regression): https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40458144076 (success).
+- Latest durable-record validation on the patched tooling/docs: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40458144071 (success).
 
 ## Analysis tooling and validation
 - tools/apk_inputs.py: authenticated GitHub Release API headers, digesting, safe APK/XAPK extraction and outer CRC reporting.
