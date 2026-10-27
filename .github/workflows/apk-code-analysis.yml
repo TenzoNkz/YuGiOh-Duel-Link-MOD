@@ -54,8 +54,8 @@ jobs:
       - name: Enforce APKPure-only base and Platinmods-only comparison
         id: source_check
         env:
-          RELEASE_TAG: §{{ github.event.inputs.release_tag || 'APKPure_Latest' }}
-          REFERENCE_TAG: §{{ github.event.inputs.reference_release_tag || 'Latest' }}
+          RELEASE_TAG: ${{ github.event.inputs.release_tag || 'APKPure_Latest' }}
+          REFERENCE_TAG: ${{ github.event.inputs.reference_release_tag || 'Latest' }}
         run: |
           set -euo pipefail
           if [ "$RELEASE_TAG" != "APKPure_Latest" ]; then
