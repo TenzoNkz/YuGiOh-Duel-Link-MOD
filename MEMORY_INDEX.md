@@ -43,8 +43,14 @@ Canonical branch: main
 - MOD_CANDIDATES.md — candidate evidence and feasibility status.
 - CHATGPT_MOD_BUILD_REPORT.md — true build state and blockers.
 
-## Current integrity warning
-The currently uploaded APKPure XAPK container digest matches GitHub metadata, but embedded APK member CRCs fail. The primary APK has an invalid compressed asset entry and the ARM64 config split has an unreadable libduel.so entry. Do not patch/build from this upload until a clean original package replaces it and the analysis passes.
+## Current source integrity and build status
+The current APKPure XAPK (92,726,986 bytes) has SHA-256 66ba31c32fbba03b5fe0f75ef27dd9fa875978de7921a0c4ee8b93b878ce64eb. Its embedded primary APK and ARM64 split both pass outer CRC checks and full inner ZIP CRC/decompression scans. The former digest 1f2cf45f87f52217227611b1d48f83a1d3990c326a0b2a6c64fa54296237be16 refers to the previous corrupt upload and is superseded. Current report status is CODE_ANALYSIS_PARTIAL because JADX returns partial output with 96 decompilation errors; APKTool now returns exit code 0. The source-integrity blocker is resolved, but build remains blocked by incomplete call-flow validation, no approved safe feature scope, no genuine APKPure-based patcher, split/install strategy and signer/update compatibility.
+
+## Latest workflow checkpoints
+- Static archive integrity: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40453605293 — success.
+- Full code-analysis report and metadata recovery: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40453733126 — success, with the corrected current Release digest and inner archive CRC checks in the IL2CPP report.
+- Checkpoint/unit validation: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40454118233 — success after the ZIP-signature regression-test correction.
+- The enhanced APK Code Analysis run at https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40454023712 refreshes the report with full inner ZIP CRC checks and should be checked for its final result before the next checkpoint is declared complete.
 
 ## Persistence contract
 Committed GitHub records, Release metadata and verified Actions outputs are durable project state. New chats must reload live main, latest reports and Actions outcomes, then continue from HANDOVER.md. Never report a test/build as successful without checking its real output.
