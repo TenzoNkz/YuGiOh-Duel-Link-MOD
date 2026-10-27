@@ -31,6 +31,11 @@ jobs:
         continue-on-error: true
         env:
           BASE_TAG: ${{ github.event.inputs.base_release_tag || 'APKPure_Latest' }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SIGNING_KEYSTORE_B64: ${{ secrets.MOD_SIGNING_KEYSTORE_B64 }}
+          SIGNING_KEY_ALIAS: ${{ secrets.MOD_SIGNING_KEY_ALIAS }}
+          SIGNING_STORE_PASSWORD: ${{ secrets.MOD_SIGNING_STORE_PASSWORD }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.MOD_SIGNING_KEY_PASSWORD }}
         run: |
           set -euo pipefail
           test "$BASE_TAG" = "APKPure_Latest" || {
@@ -42,9 +47,11 @@ jobs:
           test -f IL2CPP_ANALYSIS_REPORT.md
           test -f APK_VARIANT_COMPARISON.md
           test -f MOD_CANDIDATES.md
+          test -f MOD_INTEGRATION_PLAN.md
+          test -f src/mod_menu/com/chatgptmod/menu/ModMenu.java
+          test -f tools/build_chatgpt_mod.py
           python3 - <<'PY'
           from pathlib import Path
-          import re
           static = Path("APP_ANALYSIS_REPORT.md").read_text(encoding="utf-8")
           code = Path("APK_CODE_ANALYSIS.md").read_text(encoding="utf-8")
           il2cpp = Path("IL2CPP_ANALYSIS_REPORT.md").read_text(encoding="utf-8")
@@ -56,16 +63,27 @@ jobs:
               blockers.append("APK static inventory is not clean: require INVENTORY_COMPLETE (no CRC/decompression warnings).")
           if "- CRC scan: PASS" not in static:
               blockers.append("Primary APK ZIP CRC/decompression scan must pass.")
-          if "**Status:** CODE_ANALYSIS_COMPLETE" not in code:
-              blockers.append("APK code analysis is partial or failed.")
+          code_status_complete = "**Status:** CODE_ANALYSIS_COMPLETE" in code
+          code_status_partial_with_valid_entrypoint = (
+              "**Status:** CODE_ANALYSIS_PARTIAL" in code
+              and "- Apktool exit code: 0" in code
+              and "- Full inner ZIP CRC/decompression scans passed for every extracted APK member." in code
+              and "## Android Activity entry-point trace" in code
+          )
+          if not code_status_complete and not code_status_partial_with_valid_entrypoint:
+              blockers.append("APK code analysis lacks a usable Activity trace or clean integrity checks.")
           if "outer CRC: FAIL" in code or "outer XAPK CRC=FAIL" in code or "read failed (" in code:
               blockers.append("APK code report contains an unreadable split/CRC failure.")
           if "BUILD BLOCKER:" in comparison or "unreadable/corrupt member: 2" in comparison:
               blockers.append("APKPure-versus-reference comparison reports source corruption.")
           if "Primary APK outer CRC: FAIL" in il2cpp or "ARM64 split outer CRC: FAIL" in il2cpp:
               blockers.append("IL2CPP inputs fail outer XAPK member CRC.")
+          if "- Primary APK inner CRC scan: PASS" not in il2cpp or "- ARM64 split inner CRC scan: PASS" not in il2cpp:
+              blockers.append("IL2CPP input APKs have not both passed inner CRC checks.")
           if "Build approval: APPROVED_FOR_IMPLEMENTATION" not in candidates:
               blockers.append("No reviewed feature scope is approved in MOD_CANDIDATES.md.")
+          if not SIGNING_KEYSTORE_B64 or not SIGNING_KEY_ALIAS or not SIGNING_STORE_PASSWORD or not SIGNING_KEY_PASSWORD:
+              blockers.append("Signing secrets are not configured; supply a stable test signing keystore and passwords in repository Actions secrets.")
           if blockers:
               print("Preflight blocked:")
               for blocker in blockers:
@@ -73,11 +91,25 @@ jobs:
               raise SystemExit(1)
           print("Integrity/reverse-engineering reports satisfy build preconditions.")
           PY
-          test -f tools/build_chatgpt_mod.py || {
-            echo "The APKPure-based patch/build tool has not been implemented."
-            exit 1
-          }
-          echo "Reverse-engineering and patcher preconditions passed."
+          echo "Integrity, integration-point, approval and signing preconditions passed."
+
+      - name: Set up Android SDK
+        if: steps.preflight.outcome == 'success'
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android build tools
+        if: steps.preflight.outcome == 'success'
+        run: sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Prepare signing keystore
+        if: steps.preflight.outcome == 'success'
+        env:
+          SIGNING_KEYSTORE_B64: ${{ secrets.MOD_SIGNING_KEYSTORE_B64 }}
+        run: |
+          set -euo pipefail
+          printf '%s' "$SIGNING_KEYSTORE_B64" | base64 --decode > "$RUNNER_TEMP/chatgpt-mod-signing.jks"
+          test -s "$RUNNER_TEMP/chatgpt-mod-signing.jks"
+          chmod 600 "$RUNNER_TEMP/chatgpt-mod-signing.jks"
 
       - name: Build modified APK from APKPure input
         id: build
@@ -86,6 +118,15 @@ jobs:
         env:
           BASE_TAG: ${{ github.event.inputs.base_release_tag || 'APKPure_Latest' }}
           GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ANDROID_JAR: ${{ env.ANDROID_HOME }}/platforms/android-35/android.jar
+          D8: ${{ env.ANDROID_HOME }}/build-tools/35.0.0/d8
+          ZIPALIGN: ${{ env.ANDROID_HOME }}/build-tools/35.0.0/zipalign
+          APKSIGNER: ${{ env.ANDROID_HOME }}/build-tools/35.0.0/apksigner
+          MOD_SIGNING_KEYSTORE: ${{ runner.temp }}/chatgpt-mod-signing.jks
+          MOD_SIGNING_KEY_ALIAS: ${{ secrets.MOD_SIGNING_KEY_ALIAS }}
+          MOD_SIGNING_STORE_PASSWORD: ${{ secrets.MOD_SIGNING_STORE_PASSWORD }}
+          MOD_SIGNING_KEY_PASSWORD: ${{ secrets.MOD_SIGNING_KEY_PASSWORD }}
         run: |
           set -euo pipefail
           mkdir -p dist
