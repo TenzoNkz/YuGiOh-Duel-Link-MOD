@@ -17,7 +17,7 @@ REPOSITORY: TenzoNkz/YuGiOh-Duel-Link-MOD
 BRANCH: main
 
 MANDATORY LOAD
-Read CHAT_TRANSFER.md, CHAT_RULES.md, MEMORY_INDEX.md, PROJECT_STATE.md, HANDOVER.md, APP_ANALYSIS_REPORT.md, APK_CODE_ANALYSIS.md, APK_VARIANT_COMPARISON.md, CHATGPT_MOD_BUILD_REPORT.md, MOD_CANDIDATES.md, and ANALYSIS_LOG.md from the current main branch. Check current GitHub Actions, Release metadata, repository tree, and code/report evidence relevant to the discussion.
+Read CHAT_TRANSFER.md, CHAT_RULES.md, MEMORY_INDEX.md, PROJECT_STATE.md, HANDOVER.md, APP_ANALYSIS_REPORT.md, APK_CODE_ANALYSIS.md, IL2CPP_ANALYSIS_REPORT.md, APK_VARIANT_COMPARISON.md, CHATGPT_MOD_BUILD_REPORT.md, MOD_CANDIDATES.md, and ANALYSIS_LOG.md from the current main branch. Check current GitHub Actions, Release metadata, repository tree, and code/report evidence relevant to the discussion.
 
 PURPOSE
 Discuss and review all relevant code: explain architecture, trace call flow, evaluate options, identify bugs and risks, propose changes, and choose the next engineering task. Continue the topic from the verified checkpoint rather than restarting the whole recap.
@@ -52,7 +52,7 @@ EXECUTION
 2. Inspect relevant call sites and dependencies before making changes; keep the patch focused and explain assumptions in the code/report.
 3. Run relevant unit tests, static checks, validation scripts, and applicable GitHub Actions. Fix failures introduced by the change and verify the actual outcome.
 4. Do not package/build the APK in this mode unless the task explicitly requires a build test; final APK packaging belongs to Eksekusi Build App!.
-5. Update APP_ANALYSIS_REPORT.md, APK_CODE_ANALYSIS.md, APK_VARIANT_COMPARISON.md, MOD_CANDIDATES.md, PROJECT_STATE.md, HANDOVER.md, MEMORY_INDEX.md, and append ANALYSIS_LOG.md when applicable. Record exact test results and run URLs.
+5. Update APP_ANALYSIS_REPORT.md, APK_CODE_ANALYSIS.md, IL2CPP_ANALYSIS_REPORT.md, APK_VARIANT_COMPARISON.md, MOD_CANDIDATES.md, PROJECT_STATE.md, HANDOVER.md, MEMORY_INDEX.md, and append ANALYSIS_LOG.md when applicable. Record exact test results and run URLs.
 6. Keep generated binaries/artifacts out of Git history. Preserve the original Release APK and its digest.
 7. APKPure Original V11.1.0 is the only intended mod base. The APKPure Release is currently XAPK; analyze its embedded APK/split/OBB structure and do not assume renaming or selecting one member yields a working single APK. Do not create a standalone Gradle demo and claim it is the modified game.
 8. Do not implement live online-duel cheats or code designed to unfairly alter real-match outcomes. Safe UI/accessibility changes, defensive/compatibility fixes, and offline simulations can be implemented.
