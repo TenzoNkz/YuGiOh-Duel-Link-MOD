@@ -46,7 +46,7 @@ Status meanings:
 
 | Candidate | Current feasibility | Evidence | Next validation | Boundary |
 |---|---|---|---|---|
-| Custom CHATGPT MOD floating menu | High for UI concept; integration risk high/unknown | APKPure lacks the exact Platinmods libplatinmods.so path; old reference has a generic menu architecture, but its implementation is not part of APKPure | Trace the clean manifest and YgomMainActivity DEX lifecycle; determine whether an owned menu can attach cleanly without importing Platinmods code | Own implementation on APKPure base; do not copy Platinmods binary components blindly |
+| Custom CHATGPT MOD floating menu | High for UI concept; runtime integration risk unknown | Owned Java menu shell exists at src/mod_menu/com/chatgptmod/menu/ModMenu.java; source compiles to DEX in CI. tools/build_chatgpt_mod.py injects one Activity call and handles the ARM64 split in a gated test-build pipeline, but no APK has been built or run yet. | After explicit UI-only scope approval, run the gated APKPure-based test build, inspect/signature-check the output, then test the menu and Unity touch/lifecycle behavior on a dedicated device. | UI/presentation and independent preferences only; no gameplay hook or Platinmods binary copying |
 | Menu drag/minimize/restore, size, opacity and theme | High for UI behavior; not yet integrated | Standard Android UI concept; no runtime test yet | Implement an isolated menu layer and verify window/lifecycle behavior on target Android versions | Local presentation/accessibility only |
 | Toggle, slider, dropdown, text input | High for UI controls; no game action proven | Generic controls appeared in historical Platinmods V11.0.0 code | Create owned controls, persistence and state tests; map gameplay callback separately if one is approved | A visible toggle does not imply an active gameplay feature |
 | Persist own menu settings | High | Android preference storage is a straightforward independent design; historical reference used SharedPreferences | Define namespace, defaults, reset and migration tests | Keep CHATGPT MOD preferences independent |
@@ -83,10 +83,10 @@ Status meanings:
 
 ## Current decision
 
-The refreshed APKPure source passes container and inner-package integrity checks, so source corruption is no longer the blocker. Final packaging remains blocked because reverse engineering is partial, no bounded feature scope has been approved, XAPK/split install strategy and signing compatibility are unresolved, and a genuine APKPure-based patch/build tool does not yet exist. Do not treat any candidate as a working cheat based only on names or strings.
+The refreshed APKPure source passes container and inner-package integrity checks. An owned UI-only Java helper and gated patcher source are now implemented; CI compiled the helper to DEX and passed the patcher primitive tests. However, the end-to-end APKPure XAPK download/decode/inject/rebuild/align/sign path has not been run, the UI has not been integrated into an APK or runtime-tested, no bounded feature scope has been approved, and signing/install compatibility remains unverified. Do not treat any candidate as a working cheat based only on names or strings.
 
 ## Build approval checkpoint
 
 **Build approval: PENDING_REVERSE_ENGINEERING**
 
-No feature scope is approved for final APK packaging yet. The build workflow requires the exact marker Build approval: APPROVED_FOR_IMPLEMENTATION before it can proceed.
+No feature scope is approved for an APK build yet. The build tool and workflow require the exact marker Build approval: APPROVED_FOR_IMPLEMENTATION before any APK patch/build can proceed. The recommended first scope is the owned CHATGPT MOD UI shell and saved presentation preference only; gameplay callbacks remain excluded until separately evidenced and reviewed.
