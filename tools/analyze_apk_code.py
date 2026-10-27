@@ -23,7 +23,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from xml.etree import ElementTree
 
-from apk_inputs import extract_xapk_member, resolve_primary_apk, select_release_asset, get_release
+from apk_inputs import extract_xapk_member, github_api_headers, resolve_primary_apk, select_release_asset, get_release
 
 USER_AGENT = "YuGiOh-Duel-Link-MOD-code-analysis/1.0"
 JADX_VERSION = "1.5.6"
@@ -77,16 +77,21 @@ FOCUSED_BINARY_TERMS = re.compile(
 
 
 def request_json(url: str) -> dict:
-    request = urllib.request.Request(
-        url,
-        headers={
-            "Accept": "application/vnd.github+json",
-            "X-GitHub-Api-Version": "2022-11-28",
-            "User-Agent": USER_AGENT,
-        },
-    )
+    request = urllib.request.Request(url, headers=github_api_headers())
     with urllib.request.urlopen(request, timeout=60) as response:
         return json.load(response)
+
+
+def archive_crc_status(archive: zipfile.ZipFile) -> tuple[str, str]:
+    """Fully read each ZIP member and return an explicit CRC/decompression status."""
+    try:
+        bad_member = archive.testzip()
+        if bad_member:
+            return "FAIL", f"first failing entry: {bad_member}"
+        return "PASS", "all archive entries passed"
+    except (zipfile.BadZipFile, zipfile.LargeZipFile, zlib.error, EOFError,
+            OSError, RuntimeError, NotImplementedError) as error:
+        return "FAIL", f"{type(error).__name__}: {error}"
 
 
 def download(url: str, path: Path) -> tuple[int, str]:
@@ -493,19 +498,28 @@ def main() -> int:
             inventory: list[str] = []
             split_inventory: list[str] = []
             split_read_errors: list[str] = []
+            inner_crc_failures = False
             for package_item in analysis_apks:
                 package_path = package_item["path"]
                 package_name = package_item["name"]
                 try:
                     with zipfile.ZipFile(package_path, "r") as archive:
                         names = archive.namelist()
+                        inner_crc, inner_crc_detail = archive_crc_status(archive)
+                        if inner_crc != "PASS":
+                            inner_crc_failures = True
+                            split_read_errors.append(
+                                f"- Package {package_name}: inner ZIP CRC/decompression scan {inner_crc} ({inner_crc_detail})"
+                            )
                         so_names = sorted(name for name in names if name.endswith(".so"))
                         metadata_names = sorted(name for name in names if name.endswith("global-metadata.dat"))
                         split_inventory.append(
                             f"- {package_name} ({'primary APK' if package_item['is_primary'] else 'config/split APK'}): "
                             f"{len(names)} entries, {len(so_names)} native libraries, "
                             f"{len(metadata_names)} IL2CPP metadata file(s), "
-                            f"outer XAPK CRC={package_item['container_crc_status']}."
+                            f"outer XAPK CRC={package_item['container_crc_status']}, inner ZIP CRC={inner_crc}"
+                            + (f" ({inner_crc_detail})" if inner_crc != "PASS" else "")
+                            + "."
                         )
                         if not package_item["is_primary"]:
                             for split_name in sorted(name for name in names if name.endswith((".so", "global-metadata.dat"))):
@@ -557,6 +571,7 @@ def main() -> int:
                 or jadx_result["returncode"] != 0
                 or selected_container_crc == "FAIL"
                 or any_split_crc_failure
+                or inner_crc_failures
                 or split_read_errors
             ):
                 status = "CODE_ANALYSIS_PARTIAL"
@@ -589,7 +604,7 @@ def main() -> int:
                 *(inventory or ["- No targeted native libraries/metadata were read successfully."]),
                 "",
                 "## APK/split read warnings",
-                *(split_read_errors or ["- No per-entry split inventory read errors were recorded; the selected primary APK CRC warning above still applies."]),
+                *(split_read_errors or ["- Full inner ZIP CRC/decompression scans passed for every extracted APK member."]),
                 "",
                 "## Search hits in decompiled Java",
                 f"- Matching lines found: {source_hit_count}; displaying up to {len(source_hits)}.",
