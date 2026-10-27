@@ -23,7 +23,7 @@ from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 
-from apk_inputs import download_and_hash, resolve_primary_apk, select_release_asset, get_release
+from apk_inputs import download_and_hash, extract_xapk_member, resolve_primary_apk, select_release_asset, get_release
 
 USER_AGENT = "YuGiOh-Duel-Link-MOD-static-analysis/1.0"
 MAX_MEMBERS_FOR_CRC = 100_000
@@ -172,7 +172,7 @@ def main() -> int:
         abi_lines = [
             f"- {abi}: {count} shared library file(s)"
             for abi, count in sorted(abi_counts.items())
-        ] or ["- No native libraries under lib/<ABI>/ were detected."]
+        ] or ["- No native libraries under lib/<ABI>/ were detected in the primary APK; inspect the split APK inventory above."]
         engine_lines = []
         for engine, hits in sorted(engine_hits.items()):
             engine_lines.append(f"- **{engine}:** " + ", ".join(hits[:8]))
@@ -186,11 +186,85 @@ def main() -> int:
             for item in largest
         ] or ["- No archive entries could be listed."]
 
+        split_analysis_lines: list[str] = []
+        split_crc_failure = False
+        split_member_paths: list[str] = []
+        if suffix == ".xapk":
+            for split_index, member in enumerate(nested_apks, start=1):
+                if member["name"] == embedded_apk_name:
+                    continue
+                split_path = work / f"static-split-{split_index}.apk"
+                try:
+                    split_info = extract_xapk_member(container_path, member["name"], split_path)
+                    nested_apks = [
+                        split_info if current["name"] == member["name"] else current
+                        for current in nested_apks
+                    ]
+                    with zipfile.ZipFile(split_path, "r") as split_archive:
+                        split_entries = split_archive.infolist()
+                        split_names = [item.filename for item in split_entries]
+                        split_libs = sorted(
+                            item.filename for item in split_entries
+                            if item.filename.startswith("lib/") and item.filename.endswith(".so")
+                        )
+                        split_dex = sorted(
+                            item.filename for item in split_entries
+                            if re.fullmatch(r"classes(?:[0-9]+)?\.dex", item.filename)
+                        )
+                        split_manifest = "AndroidManifest.xml" in split_names
+                        split_uncompressed = sum(item.file_size for item in split_entries)
+                        if (
+                            len(split_entries) <= MAX_MEMBERS_FOR_CRC
+                            and split_uncompressed <= MAX_UNCOMPRESSED_BYTES_FOR_CRC
+                        ):
+                            try:
+                                inner_bad = split_archive.testzip() or ""
+                                inner_crc = "PASS" if not inner_bad else "FAIL"
+                            except (zipfile.BadZipFile, OSError, RuntimeError, NotImplementedError, zlib.error, EOFError) as crc_error:
+                                inner_bad = f"{type(crc_error).__name__}: {crc_error}"
+                                inner_crc = "FAIL"
+                        else:
+                            inner_bad = ""
+                            inner_crc = "SKIPPED_RESOURCE_LIMIT"
+                        if inner_crc == "FAIL" or split_info["container_crc_status"] == "FAIL":
+                            split_crc_failure = True
+                        split_analysis_lines.extend([
+                            f"### {member['name']}",
+                            "- Extracted/inventoried: PASS",
+                            f"- Extracted size: {split_path.stat().st_size} bytes",
+                            f"- SHA-256: {hashlib.sha256(split_path.read_bytes()).hexdigest()}",
+                            f"- Outer XAPK member CRC: {split_info['container_crc_status']}",
+                            f"- Inner ZIP opened: PASS",
+                            f"- AndroidManifest.xml present: {'YES' if split_manifest else 'NO'}",
+                            f"- Entry count: {len(split_entries)}",
+                            f"- DEX file count: {len(split_dex)}",
+                            f"- Native library count: {len(split_libs)}",
+                            f"- Inner CRC scan: {inner_crc}",
+                        ])
+                        if inner_bad:
+                            split_analysis_lines.append(f"- First inner CRC/decompression error: {inner_bad}")
+                        split_analysis_lines.extend(
+                            f"- Native library: {name}" for name in split_libs[:80]
+                        )
+                        split_member_paths.append(member["name"])
+                except (zipfile.BadZipFile, OSError, RuntimeError, NotImplementedError, zlib.error, EOFError) as split_error:
+                    split_crc_failure = True
+                    split_analysis_lines.extend([
+                        f"### {member['name']}",
+                        "- Extracted/inventoried: FAIL",
+                        f"- Error: {type(split_error).__name__}: {split_error}",
+                    ])
+                    nested_apks = [
+                        {**current, "analysis_error": f"{type(split_error).__name__}: {split_error}"}
+                        if current["name"] == member["name"] else current
+                        for current in nested_apks
+                    ]
+
         timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
         lines = [
             "# APK Static Analysis Report",
             "",
-            f"**Status:** {'INVENTORY_COMPLETE_WITH_WARNINGS' if (digest_matches is False or crc_result == 'FAIL' or selected_container_crc == 'FAIL') else 'INVENTORY_COMPLETE'}",
+            f"**Status:** {'INVENTORY_COMPLETE_WITH_WARNINGS' if (digest_matches is False or crc_result == 'FAIL' or selected_container_crc == 'FAIL' or split_crc_failure) else 'INVENTORY_COMPLETE'}",
             f"**Generated:** {timestamp}",
             "**Method:** static archive inspection only; the APK was not executed or installed.",
             "",
@@ -212,7 +286,7 @@ def main() -> int:
             f"- APK analyzed: {embedded_apk_name}",
             f"- Analyzed APK size: {apk_path.stat().st_size} bytes",
             f"- Embedded APK members: {len(nested_apks)}",
-            *([f"- Embedded APK member: {item['name']} ({item['size']} bytes)" for item in nested_apks] or ["- No nested APK members; the Release asset itself is the APK."]),
+            *([f"- Embedded APK member: {item['name']} ({item['size']} bytes); outer CRC: {item.get('container_crc_status', 'NOT_SELECTED')}" for item in nested_apks] or ["- No nested APK members; the Release asset itself is the APK."]),
             f"- OBB members in container: {len(obb_names)}",
             *([f"- OBB member: {name}" for name in obb_names[:20]] or ["- No .obb member found in the XAPK container."]),
             "",
@@ -229,12 +303,15 @@ def main() -> int:
             lines.append(f"- Archive error: {archive_error}")
         lines.extend([
             "",
-            "## Structural inventory",
+            "## Embedded config/split APK inventory",
+            *(split_analysis_lines or ["- No additional embedded APK split exists in this package."]),
+            "",
+            "## Structural inventory (selected primary APK only)",
             f"- AndroidManifest.xml present: {'YES' if manifest_present else 'NO'}",
             f"- DEX file count: {len(dex_infos)}",
             *dex_lines,
             "",
-            f"- Native library count (.so): {len(native_infos)}",
+            f"- Native library count (.so) in primary APK only: {len(native_infos)}",
             *abi_lines,
             "",
             "## Common engine indicators",
