@@ -86,5 +86,4 @@ Inspect the final outcome and refreshed reports from https://github.com/TenzoNkz
 - Actual modified APK status remains NOT BUILT / NOT INSTALLED / NOT RUNTIME-TESTED. Remaining blockers: explicit owner approval of bounded UI-only scope, configured signing secrets, end-to-end patch/build validation, and on-device Unity/lifecycle/touch testing. Do not describe the UI prototype as already integrated into the game.
 
 ## NEXT ACTION
-Verify the latest menu-source validation and checkpoint workflow after the new full preflight regression test. Keep the feature-approval marker pending until the owner explicitly approves the UI-only scope; only then proceed to Eksekusi Build App! and a signed non-release test APK.
-
+Latest menu-source validation passed at https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40457542823 and latest durable-record validation passed at https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40457881877. The sole next gate is the owner's explicit decision on the UI-only scope in MOD_CANDIDATES.md. Keep approval pending until explicitly approved; then switch to Eksekusi Build App! for a signed non-release test APK and device QC.
