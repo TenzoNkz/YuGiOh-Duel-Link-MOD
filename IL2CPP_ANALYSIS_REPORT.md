@@ -1,6 +1,6 @@
 # APKPure IL2CPP Analysis
 
-**Generated:** 2026-10-27 04:23:42 UTC
+**Generated:** 2026-10-27 04:25:29 UTC
 **Status:** IL2CPP_OUTPUTS_GENERATED_WITH_POST_DUMP_CONSOLE_ERROR
 **Tool:** Perfare Il2CppDumper 6.7.46
 **Source rule:** APKPure Original is the input; Platinmods is not used by this stage.
@@ -32,6 +32,8 @@
 - script.json generated: YES
 - stringliteral.json generated: YES
 - Focused dump.cs match lines: 81
+- Output generation confirmed from log: YES
+- Final console-input exception after generation: NO
 - Match count by term group:
   - ShowMonster: 2
   - Reveal Card: 10
@@ -127,10 +129,8 @@
        at Il2CppDumper.Program.Main(String[] args) in C:\projects\il2cppdumper\Il2CppDumper\Program.cs:line 109
 
 ## Interpretation
+- Interpretation of non-zero exit: the dumper generated all three output files, then failed in its final Console.ReadKey prompt because stdin was redirected; this is not a clean exit, but the generated dump outputs are present.
 - Method names/type declarations recovered by Il2CppDumper are static metadata evidence; they do not prove a menu callback invokes the method or that behavior works at runtime.
 - The APKPure XAPK and selected entries have reported CRC/decompression problems. Even successful metadata extraction does not clear those integrity warnings.
 - Native library and metadata outputs are temporary; only this summary report is persisted.
 
-- Output generation confirmed from log: YES
-- Final console-input exception after generation: YES
-- Interpretation of non-zero exit: the dumper generated all three output files, then failed in its final Console.ReadKey prompt because stdin was redirected; this is not a clean exit, but the generated dump outputs are present.
