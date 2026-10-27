@@ -19,8 +19,8 @@ Branch: main
 - Both embedded APK members pass outer XAPK CRC; primary and ARM64 split pass inner ZIP CRC/decompression scans. No OBB member was found.
 - The former digest 1f2cf45f87f52217227611b1d48f83a1d3990c326a0b2a6c64fa54296237be16 belongs to the prior corrupt upload and is superseded.
 - Latest code analysis with full inner CRC checks and Activity trace: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40454946821 (success).
-- Latest checkpoint validation: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40456599833 (success; includes current Python/tool/document checks).
-- Latest menu helper validation: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40456595296 (success; patcher primitive tests plus Java-to-DEX compilation).
+- Latest checkpoint validation after report refresh: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40457665323 (success).
+- Latest menu helper validation including Java-to-DEX compilation, complete preflight fixture and approval-bypass regression: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40457542823 (success).
 
 ## Current code and test artifacts
 - Owned UI helper source: src/mod_menu/com/chatgptmod/menu/ModMenu.java. It displays a CHATGPT MOD launcher/panel, supports open/close and bounded dragging, and persists a local “keep panel open after restart” preference. It contains no gameplay action hooks.
