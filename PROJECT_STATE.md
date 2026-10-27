@@ -20,7 +20,8 @@ Canonical branch: main
 - Static source inventory passed: 3,368 primary APK entries, three DEX files, nine ARM64 native libraries across the split. This validates archive integrity, not runtime correctness or mod feasibility.
 - Verified static archive workflow: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40453605293.
 - Latest APK Code Analysis, with full inner ZIP CRC scans and YgomMainActivity lifecycle/native/window trace: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40454946821 (success).
-- Latest Checkpoint Validation, including Activity-trace and archive-integrity tests: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40454946814 (success).
+- Latest menu-source validation with Java-to-DEX compilation, preflight fixtures and approval-bypass regression: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40457542823 (success).
+- Checkpoint validation after refreshed reports: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40457665323 (success).
 
 ## Reverse-engineering findings — static only
 - APKTool successfully decoded the current primary APK (exit code 0). JADX produced partial Java output but reported 96 decompilation errors and returned exit code 3; the report status is CODE_ANALYSIS_PARTIAL. This is a decompiler limitation, not evidence that the current APK archive is corrupt.
@@ -38,7 +39,7 @@ Canonical branch: main
 - tools/analyze_il2cpp.py: pinned Il2CppDumper run, result classification and primary/split archive integrity assessment.
 - tools/compare_apk_variants.py: aggregate primary/split entry comparison and dynamic, package-specific integrity assessment.
 - tests/test_apk_inputs.py, tests/test_analyze_apk_code.py, tests/test_analyze_il2cpp.py and tests/test_compare_apk_variants.py cover input selection, CRC behavior, API authentication, dumper classification and source-integrity reporting.
-- Latest Checkpoint Validation with Activity-trace and archive-integrity tests passed at https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40454946814.
+- Latest Checkpoint Validation after the menu patcher and approval gate was updated: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40457665323 (success).
 
 ## Android integration evidence
 - The current decoded primary manifest identifies jp.konami.duellinks.plugins.YgomMainActivity as the exported Activity. JADX recovered a 581-line class extending com.google.firebase.MessagingUnityPlayerActivity and implementing BillingClientStateListener and PurchasesUpdatedListener.
