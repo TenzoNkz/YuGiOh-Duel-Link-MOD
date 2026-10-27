@@ -28,7 +28,7 @@ Canonical branch: main
 - APK Static Analysis: .github/workflows/apk-static-analysis.yml — defaults to APKPure_Latest; inventories primary APK and embedded split APKs.
 - APK Code Analysis (APKPure Base): .github/workflows/apk-code-analysis.yml — runs Apktool/JADX on the primary APK, inventories native libraries in readable splits, compares aggregate package entries against Platinmods, and attempts pinned IL2CPP metadata recovery.
 - Checkpoint Validation: .github/workflows/checkpoint-validation.yml — compiles tools and runs local unit tests.
-- CHATGPT MOD Build: .github/workflows/build-chatgpt-mod.yml — gated on clean integrity reports, explicit scope approval, explicit signing secrets, and a non-release test workflow.
+- CHATGPT MOD Build: .github/workflows/build-chatgpt-mod.yml — gated on clean integrity reports, exact standalone scope approval, explicit signing secrets, and a non-release test workflow.
 - CHATGPT MOD Menu Source Validation: .github/workflows/menu-source-validation.yml — compiles owned menu Java source to DEX and tests patcher primitives without packaging the game APK.
 
 ## Scripts and reports
@@ -58,8 +58,8 @@ The current APKPure XAPK (92,726,986 bytes) has SHA-256 66ba31c32fbba03b5fe0f75e
 ## Latest workflow checkpoints
 - Static archive integrity: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40453605293 — success.
 - Full code-analysis report, full inner ZIP CRC scans and Activity entry-point trace: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40454946821 — success.
-- Checkpoint validation including patcher and required-record checks: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40456599833 — success.
-- Menu helper validation (Java-to-DEX compilation and patcher primitive tests): https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40456595296 — success.
+- Menu helper validation (Java-to-DEX compilation, preflight and approval-bypass regression): https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40457542823 — success.
+- Checkpoint validation after transfer/report update: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40457598014 — final result to verify.
 - MOD_INTEGRATION_PLAN.md records the Activity evidence, UI-only helper, gated patcher and remaining gates.
 
 ## Persistence contract
