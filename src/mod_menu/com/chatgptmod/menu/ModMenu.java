@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.graphics.PixelFormat;
 import android.graphics.drawable.GradientDrawable;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -204,8 +203,18 @@ public final class ModMenu {
                         moved = true;
                     }
                     if (moved) {
-                        view.setX(startX + dx);
-                        view.setY(startY + dy);
+                        ViewGroup parent = view.getParent() instanceof ViewGroup
+                                ? (ViewGroup) view.getParent() : null;
+                        float targetX = startX + dx;
+                        float targetY = startY + dy;
+                        if (parent != null) {
+                            targetX = Math.max(0.0f, Math.min(targetX,
+                                    Math.max(0.0f, parent.getWidth() - view.getWidth())));
+                            targetY = Math.max(0.0f, Math.min(targetY,
+                                    Math.max(0.0f, parent.getHeight() - view.getHeight())));
+                        }
+                        view.setX(targetX);
+                        view.setY(targetY);
                     }
                     return true;
                 case MotionEvent.ACTION_UP:
