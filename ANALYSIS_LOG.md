@@ -8,28 +8,32 @@ This is the durable chronological record of verified findings, decisions, workfl
 - SHA-256: d7855754afbfe8e6b0a5db51ba47e4cefcd3079631190c11478d6556e06c56fb.
 - Successful archive inventory: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40272870450. Downloaded size and SHA-256 matched; ZIP CRC scan passed.
 - Historical archive contained 3,397 entries, three DEX files, 20 native libraries, Unity/IL2CPP indicators, libduel.so, and libplatinmods.so.
-- Historical Apktool/JADX report was partial: JADX generated 8,194 Java source files but reported 96 decompilation errors. This evidence is for V11.0.0 and must not be presented as verified V11.1.0 behavior.
+- Historical Apktool/JADX report was partial: JADX generated 8,194 Java source files but reported 96 decompilation errors. This evidence is V11.0.0 only.
 
-## 2026-10-27 — Project source direction corrected
-- Locked APKPure Original V11.1.0 (Release tag APKPure_Latest) as the sole intended mod base.
-- Locked Platinmods V11.1.0 (Release tag Latest) as comparison-only reference. Do not build from Platinmods or treat its libraries as implementation source.
-- Target deliverable is a modified APK, not an independent Gradle demo or a renamed XAPK. Final output package layout and split/OBB requirements need evidence.
-- User-facing in-game menu title is CHATGPT MOD.
+## 2026-10-27 — Source direction locked
+- APKPure Original V11.1.0 (tag APKPure_Latest) is the sole intended mod base.
+- Platinmods V11.1.0 (tag Latest) is comparison-only. Do not use its binary as the mod base.
+- Intended result is a modified APK with in-game menu title CHATGPT MOD; a renamed XAPK or independent Gradle demo is not an acceptable deliverable.
 
-## 2026-10-27 — APKPure/XAPK analysis pipeline changes
-- Added tools/apk_inputs.py for Release retrieval, digesting, and primary APK selection from XAPK containers without extracting arbitrary archive paths.
-- Updated tools/analyze_release_apk.py to select an embedded APK from XAPK input and report selected primary package information alongside container integrity.
-- Updated tools/analyze_apk_code.py to use the APKPure Release by default and pass the selected primary APK through Apktool/JADX.
-- Added tools/compare_apk_variants.py to compare APKPure primary APK archive members with the Platinmods reference by path, size, and SHA-256. This is a byte-level comparison, not a semantic reverse-engineering conclusion.
-- Added tests/test_apk_inputs.py for asset choice, XAPK main-APK selection over config splits, OBB listing, and plain APK passthrough.
-- Changed analysis workflow defaults to APKPure_Latest; deep analysis uses Latest only for reference comparison.
-- Added APK_VARIANT_COMPARISON.md placeholder marked PENDING_ANALYSIS; it must be overwritten by a real Actions report before drawing conclusions.
-- Updated durable project prompts/docs to ensure APKPure is the source base and Platinmods remains comparison-only.
+## 2026-10-27 — APKPure V11.1.0 static inventory and comparison
+- GitHub Release asset: Yu-Gi-Oh.Duel.Links.APKPure.V11.1.0.xapk, 92,726,986 bytes.
+- Downloaded container SHA-256 exactly matches GitHub metadata: 1f2cf45f87f52217227611b1d48f83a1d3990c326a0b2a6c64fa54296237be16.
+- XAPK contains jp.konami.duellinks.apk (55,854,706 bytes) and config.arm64_v8a.apk (36,869,159 bytes); no OBB member found.
+- Both embedded APK members report an outer-container CRC mismatch.
+- The primary APK lists 3,368 entries and three DEX files, but its ZIP CRC/decompression scan fails at assets/bin/Data/e1f73dc34613ec042897cc46749d448c with “invalid literal/length code”.
+- The ARM64 split lists nine native libraries; lib/arm64-v8a/libduel.so fails CRC on read. The other readable ARM64 libraries include libil2cpp.so and libunity.so.
+- Aggregate package comparison (main + split payloads) reported 2,874 identical readable paths, 205 different readable shared paths, 296 APKPure-only paths, 317 Platinmods-only paths, and two shared paths with unreadable APKPure content.
+- ARM64 libil2cpp.so and global-metadata.dat have identical SHA-256 values between APKPure and Platinmods. AndroidManifest.xml and all three DEX files differ by bytes. This is structural evidence only, not an explanation of their code changes.
+- The current APKPure upload must not be patched/built until replaced with a clean source package. The container hash match only means it matches the bytes uploaded to GitHub.
 
-## Verification checkpoint
-- At the time of this log entry, the newly updated static/deep analysis and checkpoint runs must still be inspected directly. No result is claimed here until the actual Actions conclusion and generated reports are checked.
+## 2026-10-27 — Analysis tooling improvements
+- Added tools/apk_inputs.py for safe APK/XAPK asset handling and outer CRC reporting.
+- Updated tools/analyze_release_apk.py to inventory primary plus embedded split APKs and report integrity warnings.
+- Updated tools/analyze_apk_code.py to run Apktool/JADX on APKPure's primary APK and scan native/metadata entries across readable splits. The report is partial because the package is malformed and JADX reports decompilation errors.
+- Added tools/compare_apk_variants.py to combine primary payload with unique split entries and compare APKPure against Platinmods reference.
+- Added tools/analyze_il2cpp.py and a pinned Perfare Il2CppDumper v6.7.46 workflow stage for additional method/type metadata recovery. Its latest result must be read before feature conclusions.
+- Added tests for asset selection, main/config split selection, OBB inventory, and malformed outer XAPK CRC handling. Checkpoint Validation passed on the earlier revisions; current IL2CPP report/workflow must still be checked.
 - No CHATGPT MOD APK was built.
-- Build remains blocked until APKPure V11.1.0 reports support a reviewed feature/patch plan and a genuine APK-based patch/build pipeline exists.
 
 ## NEXT
-Verify current Actions for APK Static Analysis, APK Code Analysis (APKPure Base), and Checkpoint Validation. Review reports, fix failures, and only then approve a candidate for implementation.
+Verify the latest APK Code Analysis and Checkpoint Validation outcomes, inspect IL2CPP_ANALYSIS_REPORT.md, and request a clean APKPure Original re-upload. Rerun static/deep analysis with a clean package before approving a feature or starting final packaging.
