@@ -7,10 +7,39 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 
-from analyze_apk_code import archive_crc_status
+from analyze_apk_code import archive_crc_status, summarize_android_entrypoint
 
 
 class ApkCodeArchiveIntegrityTests(unittest.TestCase):
+    def test_activity_entrypoint_summary_finds_lifecycle_and_native_calls(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            source_root = Path(temporary) / "sources"
+            package_dir = source_root / "jp" / "konami" / "duellinks" / "plugins"
+            package_dir.mkdir(parents=True)
+            (package_dir / "YgomMainActivity.java").write_text(
+                "package jp.konami.duellinks.plugins;\\n"
+                "public class YgomMainActivity extends Activity {\\n"
+                "  protected void onCreate(Bundle state) {\\n"
+                "    super.onCreate(state);\\n"
+                "    System.loadLibrary(\\\"duel\\\");\\n"
+                "    setContentView(new View(this));\\n"
+                "  }\\n"
+                "  public void onResume() { super.onResume(); }\\n"
+                "}\\n",
+                encoding="utf-8",
+            )
+            summary = summarize_android_entrypoint(source_root)
+        joined = "\\n".join(summary)
+        self.assertIn("YgomMainActivity.java", joined)
+        self.assertIn("onCreate", joined)
+        self.assertIn("loadLibrary", joined)
+        self.assertIn("setContentView", joined)
+
+    def test_missing_activity_entrypoint_is_reported(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            summary = summarize_android_entrypoint(Path(temporary))
+        self.assertTrue(any("not present" in line for line in summary))
+
     def test_valid_apk_zip_passes_full_crc_scan(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             archive_path = Path(temporary) / "valid.apk"
