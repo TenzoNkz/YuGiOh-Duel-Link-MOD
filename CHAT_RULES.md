@@ -41,7 +41,7 @@
 - PROJECT_STATE.md records verified state and one next action.
 - HANDOVER.md records the exact continuation point.
 - ANALYSIS_LOG.md is chronological and must add only verified findings.
-- APP_ANALYSIS_REPORT.md, APK_CODE_ANALYSIS.md and APK_VARIANT_COMPARISON.md must identify their exact input assets and limitations.
+- APP_ANALYSIS_REPORT.md, APK_CODE_ANALYSIS.md, IL2CPP_ANALYSIS_REPORT.md and APK_VARIANT_COMPARISON.md must identify their exact input assets, tool results and limitations.
 - MOD_CANDIDATES.md tracks each candidate's evidence and status.
 - CHATGPT_MOD_BUILD_REPORT.md records the true build outcome and blockers.
 
