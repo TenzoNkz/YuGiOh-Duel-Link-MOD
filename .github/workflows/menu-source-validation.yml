@@ -1,0 +1,61 @@
+name: CHATGPT MOD Menu Source Validation
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - src/mod_menu/**
+      - tools/build_chatgpt_mod.py
+      - tests/test_build_chatgpt_mod.py
+      - .github/workflows/menu-source-validation.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-menu-source:
+    name: Compile menu helper to DEX and test patcher primitives
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7.0.1
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android compile tools
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Compile Python and run patcher tests
+        run: |
+          python3 -m py_compile tools/build_chatgpt_mod.py
+          python3 -m unittest discover -s tests -p 'test_build_chatgpt_mod.py' -v
+
+      - name: Compile CHATGPT MOD helper Java source
+        run: |
+          set -euo pipefail
+          SDK_ROOT="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
+          test -n "$SDK_ROOT"
+          ANDROID_JAR="$SDK_ROOT/platforms/android-35/android.jar"
+          D8="$SDK_ROOT/build-tools/35.0.0/d8"
+          test -f "$ANDROID_JAR"
+          test -x "$D8"
+          mkdir -p "$RUNNER_TEMP/menu-classes" "$RUNNER_TEMP/menu-dex"
+          javac -source 8 -target 8 -classpath "$ANDROID_JAR" \
+            -d "$RUNNER_TEMP/menu-classes" \
+            src/mod_menu/com/chatgptmod/menu/ModMenu.java
+          mapfile -t CLASS_FILES < <(find "$RUNNER_TEMP/menu-classes" -type f -name '*.class' -print | sort)
+          test "${#CLASS_FILES[@]}" -gt 0
+          "$D8" --lib "$ANDROID_JAR" --min-api 21 \
+            --output "$RUNNER_TEMP/menu-dex" "${CLASS_FILES[@]}"
+          test -s "$RUNNER_TEMP/menu-dex/classes.dex"
+          echo "Menu helper compiled to DEX successfully; no APK was packaged."
