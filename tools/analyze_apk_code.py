@@ -7,6 +7,7 @@ inside a temporary directory; only a summarized Markdown report is persisted.
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 import hashlib
 import json
 import os
