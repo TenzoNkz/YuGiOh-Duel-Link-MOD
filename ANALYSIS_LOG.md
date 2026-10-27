@@ -61,3 +61,15 @@ Verify the latest APK Code Analysis and Checkpoint Validation outcomes, inspect 
 ## NEXT
 Inspect the final outcome and refreshed reports from https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40454023712. Then map the clean primary APK manifest and jp.konami.duellinks.plugins.YgomMainActivity DEX entry points to a safe menu integration plan. Do not start final packaging during Eksekusi Full.
 
+## 2026-10-27 — YgomMainActivity entry-point trace and integration plan
+- APK Code Analysis with inner ZIP CRC scans and the new Android Activity trace passed: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40454946821.
+- Checkpoint Validation with Activity-trace and archive-integrity tests passed: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40454946814.
+- Current report locates jp/konami/duellinks/plugins/YgomMainActivity.java (581 lines). It extends com.google.firebase.MessagingUnityPlayerActivity and implements BillingClientStateListener/PurchasesUpdatedListener.
+- onCreate(Bundle) sets a fullscreen no-action-bar theme, calls super.onCreate, initializes a Logger, reads the launch Intent, reports re-engagement and updates URI state. onResume/onPause delegate to super, onDestroy tears down the billing client, and onNewIntent updates Intent/URI.
+- UnityPlayer.UnitySendMessage hits in this class belong to purchase/billing callback paths (e.g. PurchaseBehaviour), not evidence of an existing mod menu callback.
+- APKPure's decompiled DEX output contains zero com.platinmods classes. The manifest has no SYSTEM_ALERT_WINDOW permission or Platinmods-style floating menu service, and the Activity trace shows no direct WindowManager overlay hook or addContentView call. Therefore no ready-made Platinmods floating menu can simply be enabled in APKPure.
+- Created MOD_INTEGRATION_PLAN.md. Option A—attach an independently owned View to the existing Activity after super.onCreate—is a candidate to prototype, not a proven solution. Unity fullscreen z-order, touch handling, lifecycle, screen scaling, split packaging and signer behavior still require an actual patch and device/runtime test.
+- Recommended first safe scope for review: menu shell/presentation controls plus local preference persistence, with no gameplay callbacks yet. No gameplay cheat has been proven functional.
+- Current source integrity is PASS with XAPK SHA-256 66ba31c32fbba03b5fe0f75ef27dd9fa875978de7921a0c4ee8b93b878ce64eb. The older 1f2cf45f87f52217227611b1d48f83a1d3990c326a0b2a6c64fa54296237be16 hash belongs to the previous corrupt asset.
+- Current remaining blockers: bounded safe feature scope not approved, no genuine APKPure-based patch/build tool, no validated XAPK/split-to-output strategy, no signer/update compatibility proof, and no mod APK built or runtime-tested.
+
