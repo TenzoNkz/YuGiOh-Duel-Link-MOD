@@ -1,6 +1,6 @@
 # APK Code Analysis Report
 
-**Generated:** 2026-10-27 04:00:28 UTC
+**Generated:** 2026-10-27 04:01:43 UTC
 **Method:** JADX/Apktool static analysis; the APK was not installed or executed.
 - Repository: TenzoNkz/YuGiOh-Duel-Link-MOD
 - Requested release tag: APKPure_Latest
@@ -24,6 +24,7 @@
 - Embedded APK member: jp.konami.duellinks.apk (55854706 bytes)
 - OBB members in XAPK: 0
 - No OBB member detected.
+- Selected APK member CRC in outer XAPK: FAIL
 
 **Status:** CODE_ANALYSIS_PARTIAL
 
@@ -37,7 +38,7 @@
 ## Tool execution
 - Apktool exit code: 1
 - JADX exit code: 3
-- JADX-reported decompiler error count: 96
+- JADX-reported decompiler error count: 97
 - Decompiled Java source files found: 8180
 - Decoded Apktool output entries: 18234
 
@@ -58,30 +59,30 @@
     	... 3 more
 
 ### JADX output excerpt
+    INFO  - progress: 7051 of 8855 (79%)
+    INFO  - progress: 7127 of 8855 (80%)
+    INFO  - progress: 7199 of 8855 (81%)
+    INFO  - progress: 7322 of 8855 (82%)
+    INFO  - progress: 7424 of 8855 (83%)
+    INFO  - progress: 7512 of 8855 (84%)
+    INFO  - progress: 7626 of 8855 (86%)
+    INFO  - progress: 7696 of 8855 (86%)
+    INFO  - progress: 7766 of 8855 (87%)
+    INFO  - progress: 7797 of 8855 (88%)
+    INFO  - progress: 7860 of 8855 (88%)
     INFO  - progress: 7962 of 8855 (89%)
-    INFO  - progress: 8041 of 8855 (90%)
-    INFO  - progress: 8108 of 8855 (91%)
-    INFO  - progress: 8178 of 8855 (92%)
-    INFO  - progress: 8357 of 8855 (94%)
+    INFO  - progress: 8098 of 8855 (91%)
+    INFO  - progress: 8115 of 8855 (91%)
+    INFO  - progress: 8215 of 8855 (92%)
     INFO  - progress: 8496 of 8855 (95%)
     INFO  - progress: 8496 of 8855 (95%)
     INFO  - progress: 8496 of 8855 (95%)
     INFO  - progress: 8496 of 8855 (95%)
     INFO  - progress: 8496 of 8855 (95%)
     INFO  - progress: 8496 of 8855 (95%)
-    INFO  - progress: 8496 of 8855 (95%)
-    INFO  - progress: 8496 of 8855 (95%)
-    INFO  - progress: 8496 of 8855 (95%)
-    INFO  - progress: 8496 of 8855 (95%)
-    INFO  - progress: 8496 of 8855 (95%)
-    INFO  - progress: 8496 of 8855 (95%)
-    INFO  - progress: 8496 of 8855 (95%)
-    INFO  - progress: 8496 of 8855 (95%)
-    INFO  - progress: 8496 of 8855 (95%)
-    INFO  - progress: 8510 of 8855 (96%)
-    INFO  - progress: 8720 of 8855 (98%)
+    INFO  - progress: 8690 of 8855 (98%)
                                                                  
-    ERROR - finished with errors, count: 96
+    ERROR - finished with errors, count: 97
 
 ## Selected native/IL2CPP inventory
 - assets/bin/Data/Managed/Metadata/global-metadata.dat: 11183816 bytes
@@ -174,6 +175,7 @@
 - Static decompilation does not prove server-authoritative behavior, online compatibility, or runtime success.
 - The APK was not executed or installed. Temporary decompiled source was not committed to the repository.
 - For XAPK input, JADX/Apktool analyze the selected primary APK only; any split APKs and OBB payloads require separate compatibility/integration checks before producing a single installable APK.
+- The outer XAPK member CRC is reported separately from the selected APK's own ZIP structure. A failed outer CRC must be investigated and prevents treating the source container as clean, even if static analysis can read the inner APK bytes.
 
 ## Recommended next step
 Review the source/resource/native-string hits together with the decompiled manifest. Record exact file/class/method evidence for each feature in MOD_CANDIDATES.md, then separate code-reading hypotheses from any isolated test results.
