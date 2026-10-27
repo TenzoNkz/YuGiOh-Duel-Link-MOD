@@ -41,6 +41,28 @@ def bytes_label(size: int) -> str:
     return f"{size:,} bytes ({size / (1024 * 1024):.2f} MiB)"
 
 
+def source_integrity_assessment(
+    digest_ok: bool | None,
+    outer_crc_failures: list[str],
+    read_errors: dict[str, str],
+) -> str:
+    """Describe APKPure's integrity based only on the package actually analyzed."""
+    problems = []
+    if digest_ok is not True:
+        problems.append(
+            "container digest mismatch"
+            if digest_ok is False
+            else "Release digest not provided"
+        )
+    if outer_crc_failures:
+        problems.append("embedded APK outer CRC failures: " + ", ".join(outer_crc_failures))
+    if read_errors:
+        problems.append(f"{len(read_errors)} unreadable or corrupt package entries")
+    if problems:
+        return "WARN: " + "; ".join(problems) + "."
+    return "PASS: Release digest matched; embedded APK outer CRCs and per-entry reads passed."
+
+
 def load_package(repo: str, tag: str, work: Path, role: str) -> dict:
     validate_tag(tag)
     release = get_release(repo, tag)
@@ -280,23 +302,31 @@ def main() -> int:
         reference_member = next((item for item in reference["members"] if item["name"] == reference["selected_name"]), {})
         base_crc_failures = [item["name"] for item in base["members"] if item.get("container_crc_status") == "FAIL"]
         reference_crc_failures = [item["name"] for item in reference["members"] if item.get("container_crc_status") == "FAIL"]
-        if base_crc_failures or reference_crc_failures:
+        if base_crc_failures:
             warnings.append(
-                "- Embedded APK outer CRC failures: "
-                + (", ".join("APKPure/" + name for name in base_crc_failures) or "none in APKPure")
-                + "; "
-                + (", ".join("Platinmods/" + name for name in reference_crc_failures) or "none in Platinmods")
-                + ". The original container is not clean and must be verified before any patch/build."
+                "- APKPure embedded APK outer CRC failures: "
+                + ", ".join(base_crc_failures)
+                + ". The intended source package needs replacement or verification before patch/build."
+            )
+        if reference_crc_failures:
+            warnings.append(
+                "- Platinmods reference embedded APK outer CRC failures: "
+                + ", ".join(reference_crc_failures)
+                + ". Treat the reference comparison as incomplete; this does not by itself invalidate the APKPure base."
             )
         if base["read_errors"] or reference["read_errors"]:
             warnings.append(f"- Entries could not be fully decompressed/hashed: APKPure main/splits={len(base['read_errors'])}, Platinmods={len(reference['read_errors'])}. See the unverified-entry section below.")
-            warnings.append("- BUILD BLOCKER: the current APKPure XAPK and/or one of its embedded APK payloads fails CRC/decompression checks. Do not patch or build from this upload; replace it with a clean APKPure package and rerun the full analysis.")
+        if base["read_errors"]:
+            warnings.append("- BUILD BLOCKER: the APKPure source package has unreadable or corrupt entries. Do not patch/build until the source is replaced or its integrity is resolved.")
         if base["digest_ok"] is True and (base["read_errors"] or any(member.get("container_crc_status") == "FAIL" for member in base["members"])):
             warnings.append("- The XAPK container SHA-256 matches GitHub's release metadata, but this only confirms the downloaded bytes match the uploaded asset. It does not establish that the embedded package contents are internally valid.")
         if base["digest_ok"] is False or reference["digest_ok"] is False:
             warnings.append("- One or both container downloads did not match GitHub's declared SHA-256. Resolve before patching.")
         if base["apk_sha"] == reference["apk_sha"]:
             warnings.append("- Selected APK SHA-256 values match. Investigate XAPK sidecars/splits before inferring where differences reside.")
+        base_integrity_assessment = source_integrity_assessment(
+            base["digest_ok"], base_crc_failures, base["read_errors"]
+        )
         if not any("libplatinmods.so" in name.lower() for name in ref_only + changed):
             warnings.append("- No libplatinmods.so-only/different entry was detected by exact path; inspect other possible library names.")
         if not warnings:
@@ -351,8 +381,7 @@ def main() -> int:
             "- Different entry hashes prove byte differences only, not what changed semantically.",
             "- APK v2/v3 signing blocks are not ordinary ZIP entries; this report does not verify signer identity or Android update compatibility.",
             "- For XAPK input, the comparison merges the primary APK's logical entries with unique entries from extracted splits (including native libraries), while excluding split-specific manifests/signature metadata. It does not synthesize or validate a single installable APK.",
-            "- Current APKPure source-integrity blockers: both embedded APK outer CRC checks fail; one primary asset cannot decompress and the ARM64 libduel.so entry fails its inner CRC. Do not patch/build until a clean original XAPK is uploaded and passes analysis.",
-            "- The current APKPure XAPK contains integrity failures in the primary APK asset data and the arm64 libduel.so entry. Treat all features depending on those entries as unknown until a clean original package is uploaded.",
+            f"- APKPure source-integrity assessment: {base_integrity_assessment}",
             "- Platinmods is not the build base. Do not copy its binary components into CHATGPT MOD without independent technical review and necessary rights.",
             "",
             "## Next reverse-engineering actions",
