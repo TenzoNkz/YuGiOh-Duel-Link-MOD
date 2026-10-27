@@ -1,37 +1,46 @@
 # Project State
 
-Last checkpoint: 2026-10-27  
+Last update: 2026-10-27  
 Canonical repository: TenzoNkz/YuGiOh-Duel-Link-MOD  
 Canonical branch: main
 
-## Workflow design status
-- Three primary JE X FYZ-style modes are defined in CHAT_TRANSFER.md:
-  - Diskusi! = discuss and review all relevant code; no changes/builds.
-  - Eksekusi Full! = execute agreed source-code work, tests, and durable checkpoint updates.
-  - Eksekusi Build App! = build/QC only, with visible Android label "CHATGPT Mod".
-- Added .github/workflows/build-chatgpt-mod.yml.
-- Added tools/validate_chatgpt_mod_source.py.
-- Added CHATGPT_MOD_BUILD_REPORT.md with initial status BLOCKED_SOURCE_PROJECT_MISSING.
-- The build workflow is manual-only; it does not run on ordinary documentation changes. It builds only a checked-in Android Gradle source tree under chatgpt-mod/, uploads the output as a GitHub Actions artifact, and does not publish a new public Release.
+## Product direction — locked
 
-## Important current blocker — no app source project
-- The tracked repository presently contains APK-analysis scripts, reports, docs, and workflows, but no chatgpt-mod/ Gradle project.
-- The public Release Platinmods_V11.0.0 is an APK binary; it is not source code and cannot be treated as an Android Gradle project.
-- Therefore, no new CHATGPT Mod APK has been built yet. The workflow has been scaffolded and must not be reported as a successful build until a valid source project exists and a real run produces an artifact.
-- The build preflight requires the manifest's resolved application label to be exactly CHATGPT Mod.
+- APKPure Original V11.1.0 is the sole intended input/base for CHATGPT MOD.
+- Platinmods V11.1.0 is a reference used only to compare archive members and investigate architecture. It is not the build base.
+- The eventual output should be a real modified APK (.apk), not a renamed XAPK and not a standalone Android demo.
+- The user-visible mod-menu title is CHATGPT MOD.
+- Reverse engineering and feature feasibility must be completed before choosing the patch plan or building.
 
-## Canonical source APK and verified inventory
-- Release: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/releases/tag/Platinmods_V11.0.0
-- Asset: Yu-Gi-Oh.Duel.Links.Platinmods.V11.0.0.apk
-- Size: 127,424,878 bytes.
-- SHA-256: d7855754afbfe8e6b0a5db51ba47e4cefcd3079631190c11478d6556e06c56fb.
-- Archive inventory passed: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40272870450.
-- APK_CODE_ANALYSIS.md remains partial because JADX reported 96 decompilation errors; latest successful analysis run: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40274382469.
+## Implemented analysis pipeline
 
-## Safety and scope
-- The public Release APK remains an immutable analysis input.
-- Build artifacts must stay outside Git history and are uploaded as Actions artifacts only.
-- Safe UI/accessibility and offline simulation work can be evaluated. A live online-duel change intended to unfairly alter match outcomes is not an implementation target.
+- tools/apk_inputs.py: shared Release download, digest and safe APK/XAPK primary-member handling.
+- tools/analyze_release_apk.py: static archive inventory for APK or XAPK; inspects the selected primary APK and records embedded APK/OBB members.
+- tools/analyze_apk_code.py: APKPure-first Apktool/JADX analysis; selects the primary APK from XAPK input and records container integrity separately.
+- tools/compare_apk_variants.py: compares primary APK archive members, sizes and SHA-256 values for APKPure against Platinmods as reference only.
+- .github/workflows/apk-static-analysis.yml: default source is APKPure_Latest.
+- .github/workflows/apk-code-analysis.yml: default deep-analysis source is APKPure_Latest; reference comparison default is Latest.
+- tests/test_apk_inputs.py: local tests for release asset selection, primary XAPK APK selection, and plain APK passthrough.
+- APK_VARIANT_COMPARISON.md: comparison report target. The placeholder is explicitly marked PENDING_ANALYSIS until a real run overwrites it.
 
-## Next action
-Use Eksekusi Full! to establish or implement an authorized, safe Android source project under chatgpt-mod/ if that is the agreed product direction. Verify its application label is CHATGPT Mod, run relevant tests and Checkpoint Validation, then use Eksekusi Build App! to produce and inspect a real APK artifact. Do not run the build workflow while the required source project is absent and then describe the result as successful.
+## Verification state
+
+- Earlier completed evidence is from Platinmods V11.0.0: ZIP/CRC and inventory passed; decoded package was jp.konami.duellinks; Unity/IL2CPP architecture and Platinmods menu framework references were observed.
+- Earlier JADX analysis produced 8,194 Java source files but reported 96 decompilation errors. That report was partial and is not evidence for V11.1.0 behavior.
+- New APKPure V11.1.0 static/deep analysis and binary comparison must be confirmed from current GitHub Actions runs and generated reports before claiming completion.
+- Unit tests, Python syntax validation, generated reports and latest workflow conclusions must be checked explicitly. Do not infer a run succeeded just because the workflow file exists.
+
+## Build status
+
+- No CHATGPT MOD APK has been produced.
+- The former Gradle-only scaffold does not represent the intended product because it would build a standalone app rather than modify APKPure Duel Links.
+- Final build stays blocked until V11.1.0 analysis determines package structure (including XAPK split/OBB requirements), feature candidates and a real APK-based patch/build path.
+- APK signing compatibility must be verified separately. If Platinmods private signing key is unavailable, matching its signer cannot be assumed.
+
+## Scope
+
+Safe local UI/accessibility/settings and compatibility changes, plus isolated offline simulations, may be considered. Do not implement code intended to unfairly alter live online duel results. Preserve the original Release assets and do not commit generated APK binaries.
+
+## NEXT ACTION
+
+Verify the latest APK Static Analysis, APK Code Analysis (APKPure Base), and Checkpoint Validation runs. Inspect APP_ANALYSIS_REPORT.md, APK_CODE_ANALYSIS.md, and APK_VARIANT_COMPARISON.md; fix any new failures before updating MOD_CANDIDATES.md with V11.1.0 evidence and selecting features. Keep Build App blocked until that evidence is reviewed.
