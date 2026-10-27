@@ -296,10 +296,13 @@ def main() -> int:
             embedded_apk_name = asset_name
             nested_apks = []
             obb_names = []
+            selected_container_crc = "NOT_APPLICABLE"
             if suffix == ".xapk":
                 apk_path, embedded_apk_name, nested_apks, obb_names = resolve_primary_apk(
                     container_path, asset_name, work / "source-primary.apk"
                 )
+                selected_member = next((item for item in nested_apks if item["name"] == embedded_apk_name), {})
+                selected_container_crc = selected_member.get("container_crc_status", "NOT_CHECKED")
             digest_matches = actual_sha.lower() == expected_sha.lower() if expected_sha else None
 
             base_lines.extend([
@@ -319,6 +322,7 @@ def main() -> int:
                 *([f"- Embedded APK member: {item['name']} ({item['size']} bytes)" for item in nested_apks] or ["- No nested APK members; analyzing the Release asset directly."]),
                 f"- OBB members in XAPK: {len(obb_names)}",
                 *([f"- OBB member: {name}" for name in obb_names[:20]] or ["- No OBB member detected."]),
+                f"- Selected APK member CRC in outer XAPK: {selected_container_crc}",
                 "",
             ])
             if digest_matches is False:
@@ -409,7 +413,7 @@ def main() -> int:
             error_match = re.search(r"finished with errors, count: *([0-9]+)", combined_jadx_output, re.IGNORECASE)
             jadx_error_count = int(error_match.group(1)) if error_match else 0
             status = "CODE_ANALYSIS_COMPLETE"
-            if apktool_result["returncode"] != 0 or jadx_result["returncode"] != 0:
+            if apktool_result["returncode"] != 0 or jadx_result["returncode"] != 0 or selected_container_crc == "FAIL":
                 status = "CODE_ANALYSIS_PARTIAL"
 
             base_lines.extend([
@@ -460,6 +464,7 @@ def main() -> int:
                 "- Static decompilation does not prove server-authoritative behavior, online compatibility, or runtime success.",
                 "- The APK was not executed or installed. Temporary decompiled source was not committed to the repository.",
                 "- For XAPK input, JADX/Apktool analyze the selected primary APK only; any split APKs and OBB payloads require separate compatibility/integration checks before producing a single installable APK.",
+                "- The outer XAPK member CRC is reported separately from the selected APK's own ZIP structure. A failed outer CRC must be investigated and prevents treating the source container as clean, even if static analysis can read the inner APK bytes.",
                 "",
                 "## Recommended next step",
                 "Review the source/resource/native-string hits together with the decompiled manifest. Record exact file/class/method evidence for each feature in MOD_CANDIDATES.md, then separate code-reading hypotheses from any isolated test results.",
