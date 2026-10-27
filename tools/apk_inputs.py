@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
 import shutil
 import urllib.request
@@ -15,15 +16,21 @@ from typing import Any
 USER_AGENT = "YuGiOh-Duel-Link-MOD-analysis/1.0"
 
 
+def github_api_headers() -> dict[str, str]:
+    """Build GitHub API headers, using the Actions token when available."""
+    headers = {
+        "Accept": "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+        "User-Agent": USER_AGENT,
+    }
+    token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    return headers
+
+
 def get_json(url: str) -> dict[str, Any]:
-    request = urllib.request.Request(
-        url,
-        headers={
-            "Accept": "application/vnd.github+json",
-            "X-GitHub-Api-Version": "2022-11-28",
-            "User-Agent": USER_AGENT,
-        },
-    )
+    request = urllib.request.Request(url, headers=github_api_headers())
     with urllib.request.urlopen(request, timeout=60) as response:
         return json.load(response)
 
