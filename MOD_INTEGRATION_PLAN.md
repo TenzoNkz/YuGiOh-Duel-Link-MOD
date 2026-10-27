@@ -3,7 +3,7 @@
 **Date:** 2026-10-27  
 **Mod base:** APKPure Original V11.1.0 — Release tag APKPure_Latest  
 **Comparison reference only:** Platinmods V11.1.0 — Release tag Latest  
-**Status:** STATIC_ENTRYPOINT_MAPPED; RUNTIME_INTEGRATION_NOT_TESTED  
+**Status:** UI_SOURCE_AND_PATCHER_IMPLEMENTED; APK_BUILD_AND_RUNTIME_NOT_TESTED  
 **Build approval:** PENDING_REVERSE_ENGINEERING
 
 ## 1. Current APK input, verified
@@ -21,47 +21,64 @@ The static decompiler report finds:
 - onCreate(Bundle) lines 85–93: sets a fullscreen no-action-bar theme, calls super.onCreate(bundle), initializes a logger, reads the launch Intent, reports re-engagement data and updates URI state.
 - onResume() and onPause() delegate to super. onDestroy() calls super and tears down the billing client. onNewIntent() updates the Intent/URI and reports re-engagement.
 - UnityPlayer.UnitySendMessage is used in billing/purchase callbacks to communicate with Unity objects such as PurchaseBehaviour. These are purchase bridge calls, not mod-menu callbacks.
-- The APKPure primary DEX output contains no com.platinmods package classes. The manifest/component inventory does not declare a Platinmods-style floating menu service or android.permission.SYSTEM_ALERT_WINDOW. The Activity trace does not show a current WindowManager-based menu hook or addContentView call.
-- Interpretation: APKPure has no ready-made Platinmods floating menu integration that can simply be enabled. This does not prove a menu is impossible; it means an independently implemented and reviewed integration path is needed.
+- The APKPure primary DEX output contains no com.platinmods package classes. The manifest/component inventory does not declare a Platinmods-style floating menu service or android.permission.SYSTEM_ALERT_WINDOW. The Activity trace does not show an existing WindowManager-based menu hook or addContentView call.
+- Interpretation: APKPure has no ready-made Platinmods floating menu integration that can simply be enabled. The menu must be independently implemented and attached through a reviewed integration path.
 
-## 3. Proposed safe first scope — not yet approved
-A bounded first milestone would be presentation and local preferences only:
-1. An owned CHATGPT MOD menu launcher and panel, with open/close and a small set of visual controls.
-2. Drag/minimize/restore behavior, size/opacity/theme controls only if these can be tested without disrupting Unity touch input.
-3. Independent SharedPreferences namespace, sensible defaults and reset action.
-4. No buttons represented as working gameplay cheats until a verified call path exists. No hidden-opponent-card access or online-duel outcome manipulation.
+## 3. Implemented UI-only prototype source — not yet integrated into an APK
+Owned source: src/mod_menu/com/chatgptmod/menu/ModMenu.java.
+- Creates a CHATGPT MOD launcher and panel in the existing Activity content view.
+- Supports opening/closing the panel, dragging the launcher within the Activity bounds, and remembering whether the panel should be open on the next launch.
+- Uses its own SharedPreferences namespace, chatgpt_mod_local_ui.
+- Contains no IL2CPP calls, native hooks or gameplay actions. The panel explicitly indicates that gameplay actions are not connected.
+- Java source compiles to DEX successfully in [CHATGPT MOD Menu Source Validation](https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40456595296).
+- Patcher primitives and Python unit tests passed in the same run. Checkpoint/record validation also passed at https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40456595229.
+- This validates source compilation and selected patcher logic only. No original APK has yet been rebuilt, signed, installed or runtime-tested with this UI.
 
-## 4. Integration options and decision criteria
+## 4. Integration implementation and safety checks
+The gated patch tool is in tools/build_chatgpt_mod.py. It is designed to:
+1. Require Build approval: APPROVED_FOR_IMPLEMENTATION in MOD_CANDIDATES.md.
+2. Download only the XAPK asset from APKPure_Latest, require a Release SHA-256 digest, and verify XAPK and embedded APK CRC/decompression integrity.
+3. Decode the primary APK with pinned Apktool, confirm package jp.konami.duellinks, find the Activity onCreate(Bundle) smali method and inject one call immediately after the superclass onCreate call.
+4. Compile the owned menu helper with javac/D8, merge validated ARM64 libraries from config split into the decoded primary package, rebuild, append the helper DEX, zipalign, sign with an explicitly provided key and verify APK signature/archive integrity.
+5. Fail closed if the Activity method structure changes, DEX hook already exists, source hashes/CRCs fail, expected native libraries are missing, non-ARM64 ABI libraries appear, or required signing values are unavailable.
+
+The source validation action and Python tests do not execute the full APK patch/build pipeline. That end-to-end step remains intentionally blocked by the pending user feature-scope approval and signing configuration.
+
+## 5. Runtime integration hypothesis and criteria
 ### Option A — attach an owned Android View to the existing Activity
-- Candidate injection point: immediately after super.onCreate(bundle) in YgomMainActivity, then attach a small view through the Activity's current window/view hierarchy.
-- Advantages: uses the existing package/activity; a same-window view may avoid SYSTEM_ALERT_WINDOW special permission; Java UI and preference storage are straightforward.
-- Risks: Unity fullscreen rendering/input may affect z-order, pointer handling, lifecycle, orientation and safe areas. No working runtime proof exists.
-- Needed proof: compile a unique helper class into DEX, inject only the agreed call, rebuild and sign a test APK, then verify launch/crash, touch pass-through, drag behavior, pause/resume and persistence on a test device.
+- Injection point: immediately after super.onCreate(bundle) in YgomMainActivity.
+- Advantages: uses the existing package/activity; the same-window view may avoid the special SYSTEM_ALERT_WINDOW permission.
+- Risks: Unity fullscreen rendering/input can affect z-order, pointer pass-through, lifecycle, orientation, safe areas and performance. These are unknown until the patched APK is run.
+- Needed proof: launch the signed test APK, inspect logcat/crash state, verify bubble/panel display, touch passthrough outside the controls, drag bounds, Activity pause/resume, orientation behavior and preference persistence.
 
 ### Option B — Unity/IL2CPP-side UI
-- Would integrate more naturally with the Unity render/input loop, but it requires locating the relevant Unity-side UI construction path and a safe native/IL2CPP injection technique. Static method names alone do not provide that path.
+- Would integrate more naturally with the Unity render/input loop, but requires a concrete Unity-side UI construction path and a safe native/IL2CPP injection technique. Static method names do not provide that path.
 - Do not select this option until a concrete entry point and reproducible test are documented.
 
 ### Current recommendation
-Evaluate Option A first because the Android Activity entry point and lifecycle are now identified. Treat it only as a hypothesis until a genuine APKPure-based patcher and device test establish that it works. Do not import Platinmods service or native-library binaries.
+Use the existing UI-only Java prototype and evaluate Option A first after scope approval. Do not import Platinmods service/native-library binaries. No gameplay feature is ready to connect merely because a method name was recovered.
 
-## 5. APK format and signing are still unresolved
-The source is an XAPK with a base APK plus an ARM64 config split. The primary APK has no native library entries; the split contains the nine native libraries. A future single-APK output may require merging the split's required native libraries into the rebuilt primary APK, or the release artifact may need to remain an installable split set. Neither strategy has been implemented or validated; do not assume that extracting or merging the files creates an installable APK.
+## 6. APK format and signing
+- The prototype patch tool merges the validated ARM64 native libraries from the config split into the decoded primary APK before rebuilding a single-APK test artifact. This has not been tested with a full APK rebuild or installation, so any unexpected split payload or library conflict must stop the process rather than be ignored.
+- The resulting APK is ARM64-only, matching the available APKPure XAPK split; it should not be represented as a universal multi-ABI APK.
+- The rebuilt artifact requires a valid signing key. The build workflow expects repository Actions secrets named MOD_SIGNING_KEYSTORE_B64, MOD_SIGNING_KEY_ALIAS, MOD_SIGNING_STORE_PASSWORD and MOD_SIGNING_KEY_PASSWORD. These values should never be committed to the repository.
+- Without the private key used for an installed Platinmods APK or an applicable signing-certificate rotation chain, overwriting that installation cannot be promised. A separate uninstall/reinstall may be required and could affect local app data.
 
-The rebuilt artifact will require a valid signature. Without the private key used for an installed Platinmods APK or an applicable signing-certificate rotation chain, overwriting that installation cannot be promised. A separate uninstall/reinstall might be necessary and could affect local app data.
+## 7. Required gates before an APK test build
+1. Review and explicitly approve the bounded UI-only scope in MOD_CANDIDATES.md; keep game-action controls disabled.
+2. Configure an explicitly controlled signing key through repository Actions secrets; never store private keys or passwords in Git.
+3. Run the gated APKPure-based build workflow only after approval. A successful archive/build step is not proof of installability or runtime behavior.
+4. Inspect the resulting package, DEX entries, merged libraries, package/version and signer certificate.
+5. Install on a dedicated device/emulator and test first launch/crash logs, Activity lifecycle, Unity touch interaction, display scaling and preference persistence.
+6. Record artifact size, SHA-256, signer, install result, test device/Android version, and observed UI behavior.
 
-## 6. Required before implementation/build
-1. Review and explicitly approve the bounded feature scope in MOD_CANDIDATES.md.
-2. Implement a real APKPure-only patch/build tool: preserve the main/split relationship, add only owned code, rebuild, align, sign and verify the exact output APK.
-3. Record the injected class/method and patch diff; add automated checks that reject Platinmods components/binaries as build inputs.
-4. Test on a dedicated device/emulator: install, first launch, crash/logcat, Activity lifecycle, touch input, display scaling, preference persistence, update/uninstall implications.
-5. Record artifact size, SHA-256, package/version, signer certificate, install result and actual UI behavior.
-
-## 7. Current gates
+## 8. Current gates
 - Source integrity: PASS.
-- Static Activity entry-point discovery: PASS, limited to recovered DEX source.
-- Full reverse engineering: PARTIAL (JADX reports 96 errors; IL2CPP dumper generates outputs but has a post-output Console.ReadKey exception).
-- Working mod menu: NOT IMPLEMENTED / NOT TESTED.
+- Static Activity entry-point discovery: PASS, based on recovered DEX source.
+- UI-only helper Java -> DEX compilation: PASS in CI.
+- Patcher primitive/unit tests: PASS in CI.
+- End-to-end APKPure XAPK download/decode/inject/rebuild/align/sign: NOT RUN.
+- Full reverse engineering: PARTIAL (JADX reports 96 errors; Il2CppDumper generates outputs but has a post-output Console.ReadKey exception).
+- Integrated/running mod menu: NOT IMPLEMENTED IN APK / NOT TESTED.
 - Game-feature callbacks: NOT PROVEN.
-- APKPure-based patcher and single-APK/split strategy: NOT IMPLEMENTED.
 - Final build approval: PENDING_REVERSE_ENGINEERING.
