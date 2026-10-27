@@ -1,7 +1,7 @@
 # APK Static Analysis Report
 
 **Status:** INVENTORY_COMPLETE_WITH_WARNINGS
-**Generated:** 2026-10-27 04:04:31 UTC
+**Generated:** 2026-10-27 04:07:47 UTC
 **Method:** static archive inspection only; the APK was not executed or installed.
 
 ## Source Release
@@ -22,8 +22,8 @@
 - APK analyzed: jp.konami.duellinks.apk
 - Analyzed APK size: 55854706 bytes
 - Embedded APK members: 2
-- Embedded APK member: config.arm64_v8a.apk (36869159 bytes)
-- Embedded APK member: jp.konami.duellinks.apk (55854706 bytes)
+- Embedded APK member: config.arm64_v8a.apk (36869159 bytes); outer CRC: FAIL
+- Embedded APK member: jp.konami.duellinks.apk (55854706 bytes); outer CRC: FAIL
 - OBB members in container: 0
 - No .obb member found in the XAPK container.
 
@@ -36,15 +36,38 @@
 - First CRC-failing entry: CRC/decompression scan aborted: error
 - Archive error: error: Error -3 while decompressing data: invalid literal/length code
 
-## Structural inventory
+## Embedded config/split APK inventory
+### config.arm64_v8a.apk
+- Extracted/inventoried: PASS
+- Extracted size: 36869159 bytes
+- SHA-256: 04b19996e2311ee0e479096a5339e8fb2d2d1271dca2ef718daaa379e20bd15f
+- Outer XAPK member CRC: FAIL
+- Inner ZIP opened: PASS
+- AndroidManifest.xml present: YES
+- Entry count: 14
+- DEX file count: 0
+- Native library count: 9
+- Inner CRC scan: FAIL
+- First inner CRC/decompression error: lib/arm64-v8a/libduel.so
+- Native library: lib/arm64-v8a/libFirebaseCppAnalytics.so
+- Native library: lib/arm64-v8a/libFirebaseCppApp-13_4_0.so
+- Native library: lib/arm64-v8a/libFirebaseCppMessaging.so
+- Native library: lib/arm64-v8a/lib_burst_generated.so
+- Native library: lib/arm64-v8a/libdatastore_shared_counter.so
+- Native library: lib/arm64-v8a/libduel.so
+- Native library: lib/arm64-v8a/libil2cpp.so
+- Native library: lib/arm64-v8a/libmain.so
+- Native library: lib/arm64-v8a/libunity.so
+
+## Structural inventory (selected primary APK only)
 - AndroidManifest.xml present: YES
 - DEX file count: 3
 - classes.dex: 7574408 bytes (7.22 MiB)
 - classes2.dex: 7094488 bytes (6.77 MiB)
 - classes3.dex: 2076 bytes (2.03 KiB)
 
-- Native library count (.so): 0
-- No native libraries under lib/<ABI>/ were detected.
+- Native library count (.so) in primary APK only: 0
+- No native libraries under lib/<ABI>/ were detected in the primary APK; inspect the split APK inventory above.
 
 ## Common engine indicators
 - **Unity:** assets/bin/Data/00000000000000000000000000000000, assets/bin/Data/0000000000000000f000000000000000, assets/bin/Data/0050f757a0d6b344291b18d9875bda03, assets/bin/Data/0056c8597feb97b419ba279270d2544f, assets/bin/Data/008bf88483f7bd74da1d04c69ac3b73f, assets/bin/Data/0096ea1dea4724b4180e0ec56e07b496, assets/bin/Data/00a8799b609025540a6d2e274686562d, assets/bin/Data/00d3c66b9071da144bafe96ff68f8592
