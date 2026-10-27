@@ -21,6 +21,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from xml.etree import ElementTree
 
+from apk_inputs import resolve_primary_apk, select_release_asset, get_release
+
 USER_AGENT = "YuGiOh-Duel-Link-MOD-code-analysis/1.0"
 JADX_VERSION = "1.5.6"
 JADX_URL = "https://github.com/skylot/jadx/releases/download/v1.5.6/jadx-1.5.6.zip"
@@ -279,42 +281,44 @@ def main() -> int:
     ]
 
     try:
-        api_url = (
-            "https://api.github.com/repos/"
-            + args.repo
-            + "/releases/tags/"
-            + urllib.parse.quote(args.release_tag, safe="")
-        )
-        release = request_json(api_url)
-        apks = [
-            asset for asset in release.get("assets", [])
-            if asset.get("name", "").lower().endswith(".apk")
-        ]
-        if len(apks) != 1:
-            raise RuntimeError(
-                f"Expected one APK asset on release; found {len(apks)}. "
-                "This workflow requires an unambiguous source APK."
-            )
-        asset = apks[0]
+        release = get_release(args.repo, args.release_tag)
+        asset = select_release_asset(release)
         expected_digest = asset.get("digest") or ""
         expected_sha = expected_digest.split(":", 1)[1] if expected_digest.startswith("sha256:") else ""
 
         with tempfile.TemporaryDirectory(prefix="apk-code-analysis-") as temporary:
             work = Path(temporary)
-            apk_path = work / "source.apk"
-            actual_size, actual_sha = download(asset["browser_download_url"], apk_path)
+            asset_name = str(asset.get("name", "(unnamed)"))
+            suffix = ".xapk" if asset_name.lower().endswith(".xapk") else ".apk"
+            container_path = work / ("source-container" + suffix)
+            actual_size, actual_sha = download(asset["browser_download_url"], container_path)
+            apk_path = container_path
+            embedded_apk_name = asset_name
+            nested_apks = []
+            obb_names = []
+            if suffix == ".xapk":
+                apk_path, embedded_apk_name, nested_apks, obb_names = resolve_primary_apk(
+                    container_path, asset_name, work / "source-primary.apk"
+                )
             digest_matches = actual_sha.lower() == expected_sha.lower() if expected_sha else None
 
             base_lines.extend([
                 "## Source Release and integrity",
                 f"- Release page: {release.get('html_url', '(not supplied)')}",
                 f"- Release tag: {release.get('tag_name', args.release_tag)}",
-                f"- APK asset: {asset.get('name', '(unnamed)')}",
+                f"- Release asset: {asset_name}",
                 f"- GitHub-reported size: {asset.get('size', 'unknown')} bytes",
-                f"- Downloaded size: {actual_size} bytes",
-                f"- Expected SHA-256: {expected_sha or 'not provided'}",
-                f"- Calculated SHA-256: {actual_sha}",
-                f"- Digest comparison: {'PASS' if digest_matches is True else 'FAIL' if digest_matches is False else 'NOT_AVAILABLE'}",
+                f"- Downloaded container size: {actual_size} bytes",
+                f"- Expected container SHA-256: {expected_sha or 'not provided'}",
+                f"- Calculated container SHA-256: {actual_sha}",
+                f"- Container digest comparison: {'PASS' if digest_matches is True else 'FAIL' if digest_matches is False else 'NOT_AVAILABLE'}",
+                f"- Package input type: {'XAPK' if suffix == '.xapk' else 'APK'}",
+                f"- APK selected for code analysis: {embedded_apk_name}",
+                f"- Selected APK size: {apk_path.stat().st_size} bytes",
+                f"- Embedded APK members: {len(nested_apks)}",
+                *([f"- Embedded APK member: {item['name']} ({item['size']} bytes)" for item in nested_apks] or ["- No nested APK members; analyzing the Release asset directly."]),
+                f"- OBB members in XAPK: {len(obb_names)}",
+                *([f"- OBB member: {name}" for name in obb_names[:20]] or ["- No OBB member detected."]),
                 "",
             ])
             if digest_matches is False:
@@ -455,6 +459,7 @@ def main() -> int:
                 "- JADX primarily analyzes DEX/Java/Kotlin code. Unity IL2CPP game logic may be compiled into native libraries and metadata; full native tracing requires separate tooling and careful symbol/metadata analysis.",
                 "- Static decompilation does not prove server-authoritative behavior, online compatibility, or runtime success.",
                 "- The APK was not executed or installed. Temporary decompiled source was not committed to the repository.",
+                "- For XAPK input, JADX/Apktool analyze the selected primary APK only; any split APKs and OBB payloads require separate compatibility/integration checks before producing a single installable APK.",
                 "",
                 "## Recommended next step",
                 "Review the source/resource/native-string hits together with the decompiled manifest. Record exact file/class/method evidence for each feature in MOD_CANDIDATES.md, then separate code-reading hypotheses from any isolated test results.",
