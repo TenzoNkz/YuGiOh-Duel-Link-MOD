@@ -21,6 +21,7 @@ on:
       - .github/workflows/*.yml
       - tools/*.py
       - tests/*.py
+      - src/mod_menu/**
   workflow_dispatch:
 
 permissions:
@@ -59,7 +60,11 @@ jobs:
               "IL2CPP_ANALYSIS_REPORT.md",
               "CHATGPT_MOD_BUILD_REPORT.md",
               "MOD_CANDIDATES.md",
+              "MOD_INTEGRATION_PLAN.md",
               "ANALYSIS_LOG.md",
+              "tools/build_chatgpt_mod.py",
+              "src/mod_menu/com/chatgptmod/menu/ModMenu.java",
+              "tests/test_build_chatgpt_mod.py",
           ]
           missing = [name for name in required if not Path(name).is_file()]
           empty = [name for name in required if Path(name).is_file() and not Path(name).read_text(encoding="utf-8").strip()]
@@ -79,7 +84,7 @@ jobs:
                   problems.append("CHAT_TRANSFER.md is missing marker: " + marker)
           if not Path(".github/workflows/build-chatgpt-mod.yml").is_file():
               problems.append("Missing .github/workflows/build-chatgpt-mod.yml.")
-          for path in ("tools/apk_inputs.py", "tools/compare_apk_variants.py", "tools/analyze_il2cpp.py"):
+          for path in ("tools/apk_inputs.py", "tools/compare_apk_variants.py", "tools/analyze_il2cpp.py", "tools/build_chatgpt_mod.py"):
               if not Path(path).is_file():
                   problems.append("Missing required APK analysis tool: " + path)
           il2cpp_report = Path("IL2CPP_ANALYSIS_REPORT.md").read_text(encoding="utf-8") if Path("IL2CPP_ANALYSIS_REPORT.md").exists() else ""
