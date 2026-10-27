@@ -1,4 +1,5 @@
 import io
+import struct
 import sys
 import tempfile
 import unittest
@@ -47,9 +48,49 @@ class ApkInputTests(unittest.TestCase):
             self.assertEqual(name, "com.konami.duellinks.apk")
             self.assertEqual(selected.stat().st_size, len(primary))
             self.assertEqual(len(members), 2)
+            selected_member = next(item for item in members if item["name"] == name)
+            self.assertEqual(selected_member["container_crc_status"], "PASS")
             self.assertEqual(obbs, ["Android/obb/main.obb"])
             with zipfile.ZipFile(selected, "r") as apk:
                 self.assertIn("classes.dex", apk.namelist())
+
+    def test_xapk_with_bad_outer_member_crc_is_reported_but_inner_apk_is_readable(self) -> None:
+        primary = fake_apk_bytes({
+            "AndroidManifest.xml": b"test-manifest",
+            "classes.dex": b"dex-bytes",
+        })
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            container = root / "bad-crc.xapk"
+            with zipfile.ZipFile(container, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+                archive.writestr("jp.konami.duellinks.apk", primary)
+                archive.writestr("config.arm64_v8a.apk", fake_apk_bytes({"AndroidManifest.xml": b"split"}))
+            damaged = bytearray(container.read_bytes())
+            marker = b"PK\x01\x02"
+            index = 0
+            changed = False
+            while True:
+                index = damaged.find(marker, index)
+                if index < 0:
+                    break
+                name_length = struct.unpack_from("<H", damaged, index + 28)[0]
+                name_start = index + 46
+                member_name = bytes(damaged[name_start:name_start + name_length]).decode("utf-8")
+                if member_name == "jp.konami.duellinks.apk":
+                    damaged[index + 16] ^= 0x01
+                    changed = True
+                    break
+                index += 4
+            self.assertTrue(changed, "test fixture must contain the primary APK central-directory entry")
+            container.write_bytes(damaged)
+            selected, name, members, _ = resolve_primary_apk(
+                container, "bad-crc.xapk", root / "selected.apk"
+            )
+            status = next(item for item in members if item["name"] == name)["container_crc_status"]
+            self.assertEqual(status, "FAIL")
+            with zipfile.ZipFile(selected, "r") as apk:
+                self.assertIn("classes.dex", apk.namelist())
+                self.assertIsNone(apk.testzip())
 
     def test_plain_apk_is_passed_through_without_extraction(self) -> None:
         payload = fake_apk_bytes({"AndroidManifest.xml": b"manifest"})
