@@ -32,6 +32,13 @@ The XAPK container digest matching GitHub metadata only proves the retrieved byt
 - tools/compare_apk_variants.py: aggregate primary+split payload comparison with Platinmods as reference.
 - tests/test_apk_inputs.py: XAPK selection, split extraction and CRC failure tests.
 
+## IL2CPP metadata recovery — partial output generated
+- Perfare Il2CppDumper v6.7.46 generated `dump.cs`, `script.json`, and `stringliteral.json` from APKPure's ARM64 `libil2cpp.so` plus `global-metadata.dat`. It then exited with code -6 at a final `Console.ReadKey` prompt because stdin was redirected. Report status is `IL2CPP_OUTPUTS_GENERATED_WITH_POST_DUMP_CONSOLE_ERROR`, not a clean tool exit.
+- Static signatures recovered include `ShowMonster(bool immediate, bool showAura, Action onFinished)`; card-face query declarations `GetFieldCardFace(int player, int position, int index)`, `GetCardFace(...)`, and `DLL_DuelGetCardFace(...)`; `PvP.Command.CHEATCARD = 9`; `IDS_CARD.PROCESS_DAMAGE` through variants 1–3; and `DLL_DuelGetDamageValue(int)` / `PVP_DuelGetDamageValue(int)`.
+- `DuelMenu` metadata includes `GetAutoPlay`, `SetAutoPlay(bool)`, `ChangeAutoPlay`, `autoPlayEnable`, and `fastAutoEnable`; `DuelClient` exposes autoplay-related state. These look like game-side state/control declarations, not proof of a Platinmods-style overlay callback or an automation mod.
+- Method names, enum values and getters are static evidence only. No call path from an independent CHATGPT MOD menu to those methods has been proven; damage getters do not establish a writable damage multiplier, and card-face getters do not establish a way to reveal hidden opponent cards.
+- Code-analysis report currently reaches `CODE_ANALYSIS_PARTIAL`: Apktool cannot decompress `assets/bin/Data/e1f73dc34613ec042897cc46749d448c`, and JADX reports 96 decompilation errors. This is not complete reverse engineering.
+
 ## Feature feasibility — current assessment
 - Highest feasibility after a clean package: custom CHATGPT MOD UI, menu navigation, drag/minimize/restore, size/opacity/theme and independent preference persistence. Integration into the original game's activity/window lifecycle still needs a patch strategy.
 - Mid/low confidence: Show Monster/status display; metadata strings are clues only and the relevant call path/data source has not been verified.
