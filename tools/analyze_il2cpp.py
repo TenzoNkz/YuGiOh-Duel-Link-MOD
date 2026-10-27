@@ -32,12 +32,17 @@ METADATA_PATH = "assets/bin/Data/Managed/Metadata/global-metadata.dat"
 ARM64_IL2CPP_PATH = "lib/arm64-v8a/libil2cpp.so"
 FOCUSED_TERM_GROUPS = {
     "ShowMonster": re.compile(r"ShowMonster|showMonster", re.IGNORECASE),
-    "Reveal Card": re.compile(r"RevealCard|Reveal_Card|CardFace|ShowCardFace", re.IGNORECASE),
+    "Card-face API": re.compile(r"RevealCard|Reveal_Card|CardFace|GetFieldCardFace|GetCardFace|DLL_DuelGetCardFace|ShowCardFace", re.IGNORECASE),
     "CHEATCARD": re.compile(r"\bCHEATCARD\b|DuelComCheatCard", re.IGNORECASE),
     "PROCESS_DAMAGE": re.compile(r"\bPROCESS_DAMAGE[0-9]*\b", re.IGNORECASE),
     "Damage getter": re.compile(r"DLL_DuelGetDamageValue|DuelGetDamageValue", re.IGNORECASE),
     "Damage positions": re.compile(r"DamageSrcPosition|DamageDstPosition", re.IGNORECASE),
     "AutoPlay": re.compile(r"AutoPlay|autoPlay|GetAutoPlay|SetAutoPlay|ChangeAutoPlay", re.IGNORECASE),
+    "DuelMenu/AutoPlay settings": re.compile(
+        r"production3DEnable|autoPlayEnable|fastAutoEnable|manualChainEnable|"
+        r"GetAutoPlay|SetAutoPlay|ChangeAutoPlay|reqAutoPlay|autoPlayState|OnChangeAutoPlay",
+        re.IGNORECASE,
+    ),
     "Monster/status": re.compile(r"MonsterStatus|StatusDetails|ShowMonster", re.IGNORECASE),
 }
 CLASS_DECLARATION = re.compile(r"^\s*(?:public|private|internal|protected|abstract|sealed|static|partial|enum|struct|class|interface|\[)", re.IGNORECASE)
@@ -90,6 +95,17 @@ def focused_dump_hits(dump_path: Path, limit_per_group: int = 3) -> tuple[list[s
 
     for group, pattern in FOCUSED_TERM_GROUPS.items():
         matches = [index for index, line in enumerate(lines) if pattern.search(line)]
+        # Prioritize methods/fields specific to the feature over generic Unity
+        # timeline parameters such as "autoPlay".
+        if group == "AutoPlay":
+            def autoplay_priority(match_index: int) -> tuple[int, int]:
+                line = lines[match_index]
+                if re.search(r"GetAutoPlay|SetAutoPlay|ChangeAutoPlay|autoPlayEnable|fastAutoEnable|reqAutoPlay|autoPlayState|OnChangeAutoPlay", line, re.IGNORECASE):
+                    return (0, match_index)
+                if re.search(r"isAutoPlay|enabledAutoPlay|fastAuto", line, re.IGNORECASE):
+                    return (1, match_index)
+                return (2, match_index)
+            matches = sorted(matches, key=autoplay_priority)
         counts[group] = len(matches)
         if not matches:
             output.append(f"- {group}: 0 matching dump.cs lines.")
@@ -99,7 +115,7 @@ def focused_dump_hits(dump_path: Path, limit_per_group: int = 3) -> tuple[list[s
         for index in selected:
             # Include the nearest enclosing class/struct/enum declaration when possible.
             declaration = None
-            for previous in range(index, max(-1, index - 250), -1):
+            for previous in range(index, max(-1, index - 5000), -1):
                 line = lines[previous]
                 if re.search(r"^\s*(?:public|private|internal|protected).*\b(class|struct|enum|interface)\b", line):
                     declaration = previous
