@@ -1,6 +1,6 @@
 # APK Code Analysis Report
 
-**Generated:** 2026-10-27 04:26:09 UTC
+**Generated:** 2026-10-27 04:28:22 UTC
 **Method:** JADX/Apktool static analysis; the APK was not installed or executed.
 - Repository: TenzoNkz/YuGiOh-Duel-Link-MOD
 - Requested release tag: APKPure_Latest
@@ -104,28 +104,28 @@
     	... 3 more
 
 ### JADX output excerpt
-    INFO  - progress: 6209 of 8855 (70%)
-    INFO  - progress: 6344 of 8855 (71%)
-    INFO  - progress: 6437 of 8855 (72%)
-    INFO  - progress: 6529 of 8855 (73%)
-    INFO  - progress: 6639 of 8855 (74%)
-    INFO  - progress: 6722 of 8855 (75%)
-    INFO  - progress: 7057 of 8855 (79%)
-    INFO  - progress: 7133 of 8855 (80%)
-    INFO  - progress: 7320 of 8855 (82%)
-    INFO  - progress: 7430 of 8855 (83%)
-    INFO  - progress: 7618 of 8855 (86%)
-    INFO  - progress: 7732 of 8855 (87%)
-    INFO  - progress: 7783 of 8855 (87%)
-    INFO  - progress: 7931 of 8855 (89%)
-    INFO  - progress: 8035 of 8855 (90%)
-    INFO  - progress: 8104 of 8855 (91%)
-    INFO  - progress: 8215 of 8855 (92%)
+    INFO  - progress: 7975 of 8855 (90%)
+    INFO  - progress: 8079 of 8855 (91%)
+    INFO  - progress: 8114 of 8855 (91%)
+    INFO  - progress: 8223 of 8855 (92%)
     INFO  - progress: 8496 of 8855 (95%)
     INFO  - progress: 8496 of 8855 (95%)
     INFO  - progress: 8496 of 8855 (95%)
     INFO  - progress: 8496 of 8855 (95%)
-    INFO  - progress: 8505 of 8855 (96%)
+    INFO  - progress: 8496 of 8855 (95%)
+    INFO  - progress: 8496 of 8855 (95%)
+    INFO  - progress: 8496 of 8855 (95%)
+    INFO  - progress: 8496 of 8855 (95%)
+    INFO  - progress: 8496 of 8855 (95%)
+    INFO  - progress: 8496 of 8855 (95%)
+    INFO  - progress: 8496 of 8855 (95%)
+    INFO  - progress: 8496 of 8855 (95%)
+    INFO  - progress: 8496 of 8855 (95%)
+    INFO  - progress: 8496 of 8855 (95%)
+    INFO  - progress: 8496 of 8855 (95%)
+    INFO  - progress: 8496 of 8855 (95%)
+    INFO  - progress: 8699 of 8855 (98%)
+    INFO  - progress: 8850 of 8855 (99%)
                                                                  
     ERROR - finished with errors, count: 96
 
