@@ -51,8 +51,25 @@ jobs:
           dotnet-version: '6.0.x'
 
 
+      - name: Enforce APKPure-only base and Platinmods-only comparison
+        id: source_check
+        env:
+          RELEASE_TAG: §{{ github.event.inputs.release_tag || 'APKPure_Latest' }}
+          REFERENCE_TAG: §{{ github.event.inputs.reference_release_tag || 'Latest' }}
+        run: |
+          set -euo pipefail
+          if [ "$RELEASE_TAG" != "APKPure_Latest" ]; then
+            echo "Refusing to analyze a different build base: APKPure_Latest is the sole approved mod base."
+            exit 1
+          fi
+          if [ "$REFERENCE_TAG" != "Latest" ]; then
+            echo "Refusing to change the comparison-only reference: Latest is the Platinmods reference."
+            exit 1
+          fi
+
       - name: Run pinned JADX and Apktool analysis
         id: analyze
+        if: steps.source_check.outcome == 'success'
         continue-on-error: true
         env:
           RELEASE_TAG: ${{ github.event.inputs.release_tag || 'APKPure_Latest' }}
@@ -65,6 +82,7 @@ jobs:
 
       - name: Compare APKPure base with Platinmods reference
         id: compare
+        if: steps.source_check.outcome == 'success'
         continue-on-error: true
         env:
           BASE_TAG: ${{ github.event.inputs.release_tag || 'APKPure_Latest' }}
@@ -79,6 +97,7 @@ jobs:
 
       - name: Recover IL2CPP type and method metadata
         id: il2cpp
+        if: steps.source_check.outcome == 'success'
         continue-on-error: true
         env:
           RELEASE_TAG: ${{ github.event.inputs.release_tag || 'APKPure_Latest' }}
@@ -148,7 +167,7 @@ jobs:
           exit 1
 
       - name: Preserve analysis failure status
-        if: steps.analyze.outcome == 'failure' || steps.compare.outcome == 'failure' || steps.il2cpp.outcome == 'failure'
+        if: steps.source_check.outcome == 'failure' || steps.analyze.outcome == 'failure' || steps.compare.outcome == 'failure' || steps.il2cpp.outcome == 'failure'
         run: |
-          echo "At least one APKPure analysis stage did not finish cleanly. Inspect APK_CODE_ANALYSIS.md, APK_VARIANT_COMPARISON.md, IL2CPP_ANALYSIS_REPORT.md, and this run's logs."
+          echo "The source-direction guard or at least one APKPure analysis stage failed. Inspect APK_CODE_ANALYSIS.md, APK_VARIANT_COMPARISON.md, IL2CPP_ANALYSIS_REPORT.md, and this run's logs."
           exit 1
