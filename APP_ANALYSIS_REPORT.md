@@ -1,7 +1,7 @@
 # APK Static Analysis Report
 
-**Status:** INVENTORY_COMPLETE_WITH_WARNINGS
-**Generated:** 2026-10-27 04:07:47 UTC
+**Status:** INVENTORY_COMPLETE
+**Generated:** 2026-10-27 05:03:38 UTC
 **Method:** static archive inspection only; the APK was not executed or installed.
 
 ## Source Release
@@ -13,8 +13,8 @@
 - Asset download URL: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/releases/download/APKPure_Latest/Yu-Gi-Oh.Duel.Links.APKPure.V11.1.0.xapk
 - GitHub-reported size: 92726986 bytes
 - Actual downloaded size: 92726986 bytes (88.43 MiB)
-- Expected GitHub SHA-256: 1f2cf45f87f52217227611b1d48f83a1d3990c326a0b2a6c64fa54296237be16
-- Calculated SHA-256: 1f2cf45f87f52217227611b1d48f83a1d3990c326a0b2a6c64fa54296237be16
+- Expected GitHub SHA-256: 66ba31c32fbba03b5fe0f75ef27dd9fa875978de7921a0c4ee8b93b878ce64eb
+- Calculated SHA-256: 66ba31c32fbba03b5fe0f75ef27dd9fa875978de7921a0c4ee8b93b878ce64eb
 - SHA-256 comparison: PASS
 
 ## Selected APK and XAPK container
@@ -22,33 +22,30 @@
 - APK analyzed: jp.konami.duellinks.apk
 - Analyzed APK size: 55854706 bytes
 - Embedded APK members: 2
-- Embedded APK member: config.arm64_v8a.apk (36869159 bytes); outer CRC: FAIL
-- Embedded APK member: jp.konami.duellinks.apk (55854706 bytes); outer CRC: FAIL
+- Embedded APK member: config.arm64_v8a.apk (36869159 bytes); outer CRC: PASS
+- Embedded APK member: jp.konami.duellinks.apk (55854706 bytes); outer CRC: PASS
 - OBB members in container: 0
 - No .obb member found in the XAPK container.
 
-- Selected APK member CRC in the XAPK container: FAIL
+- Selected APK member CRC in the XAPK container: PASS
 ## Selected APK archive integrity
 - ZIP/APK opened: PASS
 - Central-directory entry count: 3368
 - Total uncompressed size: 98705262 bytes (94.13 MiB)
-- CRC scan: FAIL
-- First CRC-failing entry: CRC/decompression scan aborted: error
-- Archive error: error: Error -3 while decompressing data: invalid literal/length code
+- CRC scan: PASS
 
 ## Embedded config/split APK inventory
 ### config.arm64_v8a.apk
 - Extracted/inventoried: PASS
 - Extracted size: 36869159 bytes
-- SHA-256: 04b19996e2311ee0e479096a5339e8fb2d2d1271dca2ef718daaa379e20bd15f
-- Outer XAPK member CRC: FAIL
+- SHA-256: d2bb8f75605e457b1680b2c428ba653840aed11ca49644d9ad5d10bd649dacf4
+- Outer XAPK member CRC: PASS
 - Inner ZIP opened: PASS
 - AndroidManifest.xml present: YES
 - Entry count: 14
 - DEX file count: 0
 - Native library count: 9
-- Inner CRC scan: FAIL
-- First inner CRC/decompression error: lib/arm64-v8a/libduel.so
+- Inner CRC scan: PASS
 - Native library: lib/arm64-v8a/libFirebaseCppAnalytics.so
 - Native library: lib/arm64-v8a/libFirebaseCppApp-13_4_0.so
 - Native library: lib/arm64-v8a/libFirebaseCppMessaging.so
