@@ -1,27 +1,37 @@
-# CHATGPT Mod Build Report
+# CHATGPT MOD Build Report
 
-**Status:** BLOCKED_SOURCE_PROJECT_MISSING  
-**Last checked:** 2026-10-27  
+**Status:** BLOCKED_REVERSE_ENGINEERING_PENDING  
+**Last updated:** 2026-10-27  
 **Canonical repository:** TenzoNkz/YuGiOh-Duel-Link-MOD  
-**Requested Android application label:** CHATGPT Mod  
-**Expected source project:** `chatgpt-mod/`
+**Mod base:** APKPure Original V11.1.0 — Release tag APKPure_Latest  
+**Comparison-only reference:** Platinmods V11.1.0 — Release tag Latest  
+**Required in-game menu title:** CHATGPT MOD  
+**Expected output:** a verified modified APK (.apk)
 
 ## Current verified state
-- The repository currently contains analysis scripts, reports, documentation, and GitHub Actions workflows.
-- No Android Gradle source project is present in the tracked repository tree at this checkpoint.
-- Therefore, no new CHATGPT Mod APK has been built, signed, or tested by this repository workflow.
-- The public Release APK is retained as an immutable analysis input and is not silently overwritten or republished.
+- The repository has APK/XAPK-aware static-analysis and comparison tooling.
+- APKPure Original is the sole intended modification base. Platinmods must not be used as the build base.
+- The V11.1.0 code analysis and byte-level comparison outputs must be checked from current GitHub Actions before the feature plan can be approved.
+- No custom APKPure-based patch/build tool has been implemented yet.
+- No CHATGPT MOD APK has been built, signed, installed, or runtime-tested.
 
-## Build contract
-The manual workflow `.github/workflows/build-chatgpt-mod.yml` will:
-1. Validate the Android Gradle project and exact application label.
-2. Build the Debug APK from the checked-in `chatgpt-mod/` source tree.
-3. Calculate the artifact size and SHA-256.
-4. Upload the generated APK as a workflow artifact, not as a new public Release.
-5. Commit the build report and record the exact workflow run.
+## Why build is blocked
+A source XAPK is a binary package, not an Android Gradle source tree. The earlier Gradle-only scaffold would produce an independent app and does not satisfy the goal of modifying Duel Links. The XAPK may contain split APKs or OBB content, so a valid single-APK output cannot be assumed by just renaming a file or extracting an arbitrary embedded APK.
+
+## Required preconditions
+1. Confirm current APKPure V11.1.0 container SHA-256 and the selected primary APK SHA-256.
+2. Inspect APK_VARIANT_COMPARISON.md and APK_CODE_ANALYSIS.md to identify proven differences and feature paths.
+3. Update MOD_CANDIDATES.md with evidence and explicitly approve the first safe feature scope.
+4. Determine whether the game can be packaged as a compatible single APK or requires split/OBB integration.
+5. Identify an authorized patch/build approach, then verify package ID, app version, signing certificate and Android installation behavior.
+6. Build from APKPure input only. The menu title must be CHATGPT MOD.
+7. Upload the output APK as a workflow artifact, not Git history, and record its size, SHA-256, signer verification, run URL and actual test results.
+
+## Signature limitation
+The public signing certificate can be inspected, but it is not the private key. Unless the appropriate private signing key or valid signing-certificate rotation chain is available, the build cannot be assumed to update an installed Platinmods APK. A separate uninstall/reinstall may be necessary and could affect app-local data.
 
 ## Scope
-Eligible work includes UI-only changes, accessibility, local presentation, compatibility fixes, and offline/sandbox simulations. This build path must not implement or claim a live online-duel modification that changes match outcomes. Static symbol names alone do not establish functionality.
+Safe local UI/accessibility/settings and compatibility changes, plus offline simulations, may be considered. Features designed to unfairly alter live online-duel outcomes are excluded. Static symbol names or a successful packaging step do not prove a gameplay feature works.
 
-## Next action
-Use `Eksekusi Full!` to establish and test an authorized, safe source project or suitable local-only patch source. Then run `Eksekusi Build App!` to produce the build artifact. If the source tree is still absent, the workflow must report the blocker rather than fabricate a successful APK.
+## NEXT ACTION
+Complete and verify the V11.1.0 APKPure static inventory, deep code analysis and Platinmods comparison reports. Do not trigger final packaging until this review is complete and a real APKPure-based patch/build tool exists.
