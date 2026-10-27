@@ -299,18 +299,18 @@ def summarize_android_entrypoint(source_root: Path, limit: int = 40) -> list[str
     except OSError as error:
         return [f"- Could not read {candidate.name}: {type(error).__name__}: {error}"]
 
-    class_pattern = re.compile(r"^\\s*(?:public\\s+)?(?:abstract\\s+|final\\s+)?class\\s+YgomMainActivity\\b")
+    class_pattern = re.compile(r"^\s*(?:public\s+)?(?:abstract\s+|final\s+)?class\s+YgomMainActivity\b")
     method_pattern = re.compile(
-        r"^\\s*(?:public|protected|private)\\s+(?:(?:static|final|synchronized|native)\\s+)*"
-        r"[\\w.$<>?, \\[\\]]+\\s+(\\w+)\\s*\\("
+        r"^\s*(?:public|protected|private)\s+(?:(?:static|final|synchronized|native)\s+)*"
+        r"[\w.$<>?, \[\]]+\s+(\w+)\s*\("
     )
     relevant_pattern = re.compile(
-        r"YgomMainActivity|\\bonCreate\\b|\\bonStart\\b|\\bonResume\\b|\\bonPause\\b|"
-        r"\\bonStop\\b|\\bonDestroy\\b|\\bonNewIntent\\b|System\\.loadLibrary|"
-        r"\\bloadLibrary\\b|\\bnative\\b|UnityPlayer|WindowManager|"
-        r"\\baddContentView\\b|\\bsetContentView\\b|\\bstartService\\b|"
-        r"\\bgetWindow\\b|\\brequestWindowFeature\\b|\\bdispatchKeyEvent\\b|"
-        r"\\bonActivityResult\\b|\\bWebView\\b",
+        r"YgomMainActivity|\bonCreate\b|\bonStart\b|\bonResume\b|\bonPause\b|"
+        r"\bonStop\b|\bonDestroy\b|\bonNewIntent\b|System\.loadLibrary|"
+        r"\bloadLibrary\b|\bnative\b|UnityPlayer|WindowManager|"
+        r"\baddContentView\b|\bsetContentView\b|\bstartService\b|"
+        r"\bgetWindow\b|\brequestWindowFeature\b|\bdispatchKeyEvent\b|"
+        r"\bonActivityResult\b|\bWebView\b",
         re.IGNORECASE,
     )
     lifecycle = {"onCreate", "onStart", "onResume", "onPause", "onStop", "onDestroy",
@@ -321,7 +321,7 @@ def summarize_android_entrypoint(source_root: Path, limit: int = 40) -> list[str
         method_match = method_pattern.match(line)
         method_name = method_match.group(1) if method_match else ""
         if class_pattern.match(line) or method_name in lifecycle or relevant_pattern.search(line):
-            compact = re.sub(r"\\s+", " ", stripped)
+            compact = re.sub(r"\s+", " ", stripped)
             if len(compact) > 260:
                 compact = compact[:257] + "..."
             selected.append((index, compact))
