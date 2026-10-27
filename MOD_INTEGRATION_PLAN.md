@@ -30,7 +30,7 @@ Owned source: src/mod_menu/com/chatgptmod/menu/ModMenu.java.
 - Supports opening/closing the panel, dragging the launcher within the Activity bounds, and remembering whether the panel should be open on the next launch.
 - Uses its own SharedPreferences namespace, chatgpt_mod_local_ui.
 - Contains no IL2CPP calls, native hooks or gameplay actions. The panel explicitly indicates that gameplay actions are not connected.
-- Java source compiles to DEX successfully in [CHATGPT MOD Menu Source Validation](https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40456595296).
+- Java source compiles to DEX and patcher tests (including full report preflight and approval-bypass regression) pass in [CHATGPT MOD Menu Source Validation](https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40457542823).
 - Patcher primitives and Python unit tests passed in the same run. Checkpoint/record validation also passed at https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40456595229.
 - This validates source compilation and selected patcher logic only. No original APK has yet been rebuilt, signed, installed or runtime-tested with this UI.
 
@@ -76,9 +76,10 @@ Use the existing UI-only Java prototype and evaluate Option A first after scope 
 - Source integrity: PASS.
 - Static Activity entry-point discovery: PASS, based on recovered DEX source.
 - UI-only helper Java -> DEX compilation: PASS in CI.
-- Patcher primitive/unit tests: PASS in CI.
+- Patcher primitive/unit tests and full report preflight gate: PASS in CI, including a regression that explanatory prose cannot satisfy the approval marker.
 - End-to-end APKPure XAPK download/decode/inject/rebuild/align/sign: NOT RUN.
 - Full reverse engineering: PARTIAL (JADX reports 96 errors; Il2CppDumper generates outputs but has a post-output Console.ReadKey exception).
 - Integrated/running mod menu: NOT IMPLEMENTED IN APK / NOT TESTED.
 - Game-feature callbacks: NOT PROVEN.
+- The required standalone line `**Build approval: APPROVED_FOR_IMPLEMENTATION**` is parsed as a separate checkpoint line; the current marker remains `**Build approval: PENDING_REVERSE_ENGINEERING**`.
 - Final build approval: PENDING_REVERSE_ENGINEERING.
