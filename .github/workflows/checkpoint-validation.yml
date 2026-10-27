@@ -14,6 +14,7 @@ on:
       - APP_ANALYSIS_REPORT.md
       - APK_VARIANT_COMPARISON.md
       - APK_CODE_ANALYSIS.md
+      - IL2CPP_ANALYSIS_REPORT.md
       - CHATGPT_MOD_BUILD_REPORT.md
       - MOD_CANDIDATES.md
       - ANALYSIS_LOG.md
@@ -54,6 +55,7 @@ jobs:
               "APP_ANALYSIS_REPORT.md",
               "APK_VARIANT_COMPARISON.md",
               "APK_CODE_ANALYSIS.md",
+              "IL2CPP_ANALYSIS_REPORT.md",
               "CHATGPT_MOD_BUILD_REPORT.md",
               "MOD_CANDIDATES.md",
               "ANALYSIS_LOG.md",
@@ -76,11 +78,14 @@ jobs:
                   problems.append("CHAT_TRANSFER.md is missing marker: " + marker)
           if not Path(".github/workflows/build-chatgpt-mod.yml").is_file():
               problems.append("Missing .github/workflows/build-chatgpt-mod.yml.")
-          for path in ("tools/apk_inputs.py", "tools/compare_apk_variants.py"):
+          for path in ("tools/apk_inputs.py", "tools/compare_apk_variants.py", "tools/analyze_il2cpp.py"):
               if not Path(path).is_file():
                   problems.append("Missing required APK analysis tool: " + path)
+          il2cpp_report = Path("IL2CPP_ANALYSIS_REPORT.md").read_text(encoding="utf-8") if Path("IL2CPP_ANALYSIS_REPORT.md").exists() else ""
           if "APKPure Original" not in comparison_report or "Platinmods" not in comparison_report:
               problems.append("APK_VARIANT_COMPARISON.md must identify APKPure as base and Platinmods as reference.")
+          if "APKPure" not in il2cpp_report or "IL2CPP" not in il2cpp_report:
+              problems.append("IL2CPP_ANALYSIS_REPORT.md must identify the APKPure IL2CPP analysis scope.")
           if not ("CHATGPT Mod" in build_report or "CHATGPT MOD" in build_report) or "**Status:**" not in build_report:
               problems.append("CHATGPT_MOD_BUILD_REPORT.md must record the requested menu label and a status.")
           if "APKPure_Latest" not in build_report or "Platinmods" not in build_report:
