@@ -17,7 +17,7 @@
 - Both embedded members pass outer XAPK CRC validation. Both the primary APK and ARM64 split pass their inner ZIP CRC/decompression scans. No OBB member was detected.
 - Static archive inventory run: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40453605293 (success).
 - Latest full Code Analysis with inner ZIP CRC scans and YgomMainActivity entry-point trace: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40454946821 (success; code report remains partial because JADX emitted 96 decompilation errors).
-- Latest Checkpoint Validation after build report refresh: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40457665323 (success).
+- Latest Checkpoint Validation after index/report updates: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40457881877 (success).
 - Latest menu helper validation including Java-to-DEX compilation, full report preflight and explicit approval-bypass regression: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40457542823 (success).
 - Integration and gated patcher record: [MOD_INTEGRATION_PLAN.md](https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/blob/main/MOD_INTEGRATION_PLAN.md).
 
@@ -55,4 +55,4 @@ A public certificate is not the private signing key. Unless the required Platinm
 Safe local UI/accessibility/settings, compatibility changes, independent preferences and offline simulations may be considered. A successful archive, static-analysis workflow or packaging step is not proof that a gameplay feature works.
 
 ## NEXT ACTION
-Review and explicitly approve the proposed UI-only scope: CHATGPT MOD launcher/panel, open/close, dragging and one persisted local UI preference, with no gameplay callbacks. Then configure the Actions signing secrets and trigger the gated non-release test build; test the resulting APK on a dedicated device before any release packaging.
+Owner decision required: explicitly approve or decline the proposed UI-only scope (launcher/panel, open/close, dragging and one persisted local UI preference; no gameplay callbacks). Keep build approval pending until that decision. After approval, configure the Actions signing secrets and use Eksekusi Build App! for the gated non-release test build and dedicated-device QC.
