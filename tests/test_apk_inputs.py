@@ -9,7 +9,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 
-from apk_inputs import resolve_primary_apk, select_release_asset
+from apk_inputs import extract_xapk_member, resolve_primary_apk, select_release_asset
 
 
 def fake_apk_bytes(entries: dict[str, bytes]) -> bytes:
@@ -91,6 +91,24 @@ class ApkInputTests(unittest.TestCase):
             with zipfile.ZipFile(selected, "r") as apk:
                 self.assertIn("classes.dex", apk.namelist())
                 self.assertIsNone(apk.testzip())
+
+    def test_extract_xapk_split_reports_outer_crc(self) -> None:
+        primary = fake_apk_bytes({"AndroidManifest.xml": b"base"})
+        config = fake_apk_bytes({
+            "AndroidManifest.xml": b"config",
+            "lib/arm64-v8a/libgame.so": b"native-library",
+        })
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            container = root / "package.xapk"
+            with zipfile.ZipFile(container, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+                archive.writestr("jp.konami.duellinks.apk", primary)
+                archive.writestr("config.arm64_v8a.apk", config)
+            extracted = extract_xapk_member(container, "config.arm64_v8a.apk", root / "config.apk")
+            self.assertEqual(extracted["container_crc_status"], "PASS")
+            self.assertEqual(extracted["size"], len(config))
+            with zipfile.ZipFile(root / "config.apk", "r") as apk:
+                self.assertIn("lib/arm64-v8a/libgame.so", apk.namelist())
 
     def test_plain_apk_is_passed_through_without_extraction(self) -> None:
         payload = fake_apk_bytes({"AndroidManifest.xml": b"manifest"})
