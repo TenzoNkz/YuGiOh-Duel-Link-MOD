@@ -17,11 +17,12 @@ import tempfile
 import urllib.parse
 import urllib.request
 import zipfile
+import zlib
 from datetime import datetime, timezone
 from pathlib import Path
 from xml.etree import ElementTree
 
-from apk_inputs import resolve_primary_apk, select_release_asset, get_release
+from apk_inputs import extract_xapk_member, resolve_primary_apk, select_release_asset, get_release
 
 USER_AGENT = "YuGiOh-Duel-Link-MOD-code-analysis/1.0"
 JADX_VERSION = "1.5.6"
@@ -297,12 +298,56 @@ def main() -> int:
             nested_apks = []
             obb_names = []
             selected_container_crc = "NOT_APPLICABLE"
+            analysis_apks: list[dict] = []
             if suffix == ".xapk":
                 apk_path, embedded_apk_name, nested_apks, obb_names = resolve_primary_apk(
                     container_path, asset_name, work / "source-primary.apk"
                 )
                 selected_member = next((item for item in nested_apks if item["name"] == embedded_apk_name), {})
                 selected_container_crc = selected_member.get("container_crc_status", "NOT_CHECKED")
+                # Keep the base APK and every ABI/config split separate. This is
+                # inventory only: no split contents are merged or treated as
+                # proof that the selected main APK can be installed by itself.
+                for split_index, member in enumerate(nested_apks, start=1):
+                    if member["name"] == embedded_apk_name:
+                        analysis_apks.append({
+                            "name": member["name"],
+                            "path": apk_path,
+                            "is_primary": True,
+                            "container_crc_status": selected_container_crc,
+                            "size": member["size"],
+                        })
+                        continue
+                    member_path = work / f"xapk-split-{split_index}.apk"
+                    try:
+                        extracted = extract_xapk_member(container_path, member["name"], member_path)
+                        nested_apks = [
+                            extracted if current["name"] == member["name"] else current
+                            for current in nested_apks
+                        ]
+                        analysis_apks.append({
+                            "name": extracted["name"],
+                            "path": member_path,
+                            "is_primary": False,
+                            "container_crc_status": extracted["container_crc_status"],
+                            "size": extracted["size"],
+                        })
+                    except Exception as split_error:
+                        nested_apks = [
+                            {**current, "analysis_error": f"{type(split_error).__name__}: {split_error}"}
+                            if current["name"] == member["name"] else current
+                            for current in nested_apks
+                        ]
+                if not analysis_apks:
+                    raise RuntimeError("No APK member could be extracted from the XAPK")
+            else:
+                analysis_apks.append({
+                    "name": asset_name,
+                    "path": apk_path,
+                    "is_primary": True,
+                    "container_crc_status": "NOT_APPLICABLE",
+                    "size": apk_path.stat().st_size,
+                })
             digest_matches = actual_sha.lower() == expected_sha.lower() if expected_sha else None
 
             base_lines.extend([
@@ -319,7 +364,8 @@ def main() -> int:
                 f"- APK selected for code analysis: {embedded_apk_name}",
                 f"- Selected APK size: {apk_path.stat().st_size} bytes",
                 f"- Embedded APK members: {len(nested_apks)}",
-                *([f"- Embedded APK member: {item['name']} ({item['size']} bytes)" for item in nested_apks] or ["- No nested APK members; analyzing the Release asset directly."]),
+                *([f"- Embedded APK member: {item['name']} ({item['size']} bytes); outer CRC: {item.get('container_crc_status', 'NOT_SELECTED')}; scan: {'EXTRACTED' if any(p['name'] == item['name'] for p in analysis_apks) else item.get('analysis_error', 'NOT_EXTRACTED')}" for item in nested_apks] or ["- No nested APK members; analyzing the Release asset directly."]),
+                f"- Embedded APKs extracted for static inventory: {len(analysis_apks)}",
                 f"- OBB members in XAPK: {len(obb_names)}",
                 *([f"- OBB member: {name}" for name in obb_names[:20]] or ["- No OBB member detected."]),
                 f"- Selected APK member CRC in outer XAPK: {selected_container_crc}",
@@ -382,32 +428,61 @@ def main() -> int:
             focused_native_hits: list[str] = []
             focused_native_count = 0
             inventory: list[str] = []
-            with zipfile.ZipFile(apk_path, "r") as archive:
-                names = archive.namelist()
-                wanted = [
-                    name for name in names
-                    if name.endswith((".so", "global-metadata.dat"))
-                    and (
-                        "libplatinmods.so" in name
-                        or "libduel.so" in name
-                        or "libil2cpp.so" in name
-                        or name.endswith("global-metadata.dat")
+            split_inventory: list[str] = []
+            split_read_errors: list[str] = []
+            for package_item in analysis_apks:
+                package_path = package_item["path"]
+                package_name = package_item["name"]
+                try:
+                    with zipfile.ZipFile(package_path, "r") as archive:
+                        names = archive.namelist()
+                        so_names = sorted(name for name in names if name.endswith(".so"))
+                        metadata_names = sorted(name for name in names if name.endswith("global-metadata.dat"))
+                        split_inventory.append(
+                            f"- {package_name} ({'primary APK' if package_item['is_primary'] else 'config/split APK'}): "
+                            f"{len(names)} entries, {len(so_names)} native libraries, "
+                            f"{len(metadata_names)} IL2CPP metadata file(s), "
+                            f"outer XAPK CRC={package_item['container_crc_status']}."
+                        )
+                        if not package_item["is_primary"]:
+                            for split_name in sorted(name for name in names if name.endswith((".so", "global-metadata.dat"))):
+                                split_info = archive.getinfo(split_name)
+                                inventory.append(f"- [{package_name}] {split_name}: {split_info.file_size} bytes")
+                        wanted = [
+                            name for name in names
+                            if name.endswith((".so", "global-metadata.dat"))
+                            and (
+                                "libplatinmods.so" in name
+                                or "libduel.so" in name
+                                or "libil2cpp.so" in name
+                                or "libunity.so" in name
+                                or name.endswith("global-metadata.dat")
+                            )
+                        ]
+                        for name in wanted:
+                            info = archive.getinfo(name)
+                            label = f"[{package_name}] {name}"
+                            if package_item["is_primary"]:
+                                inventory.append(f"- {name}: {info.file_size} bytes")
+                            try:
+                                native_bytes = archive.read(name)
+                            except (zipfile.BadZipFile, zlib.error, EOFError, OSError, RuntimeError, NotImplementedError) as entry_error:
+                                split_read_errors.append(f"- {label}: read failed ({type(entry_error).__name__}: {entry_error})")
+                                continue
+                            matches, count = scan_binary_strings(native_bytes, limit=20, pattern=NATIVE_TERMS)
+                            native_hit_count += count
+                            if matches:
+                                native_hits.append(f"### {label}")
+                                native_hits.extend(f"- {value}" for value in matches)
+                            focused, focused_count = extract_focused_binary_matches(native_bytes, limit=50)
+                            focused_native_count += focused_count
+                            if focused:
+                                focused_native_hits.append(f"### {label}")
+                                focused_native_hits.extend(f"- {value}" for value in focused)
+                except (zipfile.BadZipFile, zlib.error, EOFError, OSError, RuntimeError, NotImplementedError) as package_error:
+                    split_read_errors.append(
+                        f"- Package {package_name}: inventory failed ({type(package_error).__name__}: {package_error})"
                     )
-                ]
-                for name in wanted:
-                    info = archive.getinfo(name)
-                    inventory.append(f"- {name}: {info.file_size} bytes")
-                    native_bytes = archive.read(name)
-                    matches, count = scan_binary_strings(native_bytes, limit=20, pattern=NATIVE_TERMS)
-                    native_hit_count += count
-                    if matches:
-                        native_hits.append(f"### {name}")
-                        native_hits.extend(f"- {value}" for value in matches)
-                    focused, focused_count = extract_focused_binary_matches(native_bytes, limit=50)
-                    focused_native_count += focused_count
-                    if focused:
-                        focused_native_hits.append(f"### {name}")
-                        focused_native_hits.extend(f"- {value}" for value in focused)
 
             combined_jadx_output = (jadx_result.get("stdout", "") or "") + "\n" + (jadx_result.get("stderr", "") or "")
             error_match = re.search(r"finished with errors, count: *([0-9]+)", combined_jadx_output, re.IGNORECASE)
@@ -435,8 +510,14 @@ def main() -> int:
                 "### JADX output excerpt",
                 *indented_excerpt(jadx_result.get("stderr", "") or jadx_result.get("stdout", "")),
                 "",
-                "## Selected native/IL2CPP inventory",
-                *(inventory or ["- No target native libraries/metadata were found in the APK ZIP listing."]),
+                "## APK split inventory",
+                *(split_inventory or ["- No APK members were successfully inventoried."]),
+                "",
+                "## Native/IL2CPP inventory across readable APK members",
+                *(inventory or ["- No targeted native libraries/metadata were read successfully."]),
+                "",
+                "## APK/split read warnings",
+                *(split_read_errors or ["- No per-entry split inventory read errors were recorded; the selected primary APK CRC warning above still applies."]),
                 "",
                 "## Search hits in decompiled Java",
                 f"- Matching lines found: {source_hit_count}; displaying up to {len(source_hits)}.",
