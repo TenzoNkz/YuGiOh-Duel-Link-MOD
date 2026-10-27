@@ -23,6 +23,15 @@ Status meanings:
 - APKTool successfully decodes the primary APK (exit code 0). JADX reports 96 decompilation errors with partial source output (exit code 3). This is a code-analysis limitation, not an inner ZIP CRC failure.
 - **Source integrity is now PASS.** Do not ask for another upload based on the obsolete corruption findings. Final build remains blocked by incomplete call-flow validation, no approved feature scope, and absence of a genuine APKPure-based patch/build pipeline.
 
+## Android entry-point trace (static; current APKPure V11.1.0)
+
+- The decoded base manifest identifies jp.konami.duellinks.plugins.YgomMainActivity as the exported main Activity. The decompiled class is 581 lines and extends com.google.firebase.MessagingUnityPlayerActivity, implementing BillingClientStateListener and PurchasesUpdatedListener.
+- YgomMainActivity.onCreate(Bundle) sets a fullscreen no-action-bar theme, calls super.onCreate, initializes a Logger, reads the launching Intent, reports re-engagement data and updates URI state. onResume/onPause delegate to the Unity Activity superclass; onDestroy shuts down the billing client; onNewIntent refreshes Intent/URI state.
+- UnityPlayer.UnitySendMessage calls in this class are in purchase/billing callback flows (for example PurchaseBehaviour), not evidence of a mod-menu callback.
+- The APKPure Java output contains zero com.platinmods classes, and its manifest does not declare android.permission.SYSTEM_ALERT_WINDOW or a Platinmods-style floating-menu service. The Activity trace shows no direct WindowManager-based overlay hook or addContentView call in the existing class.
+- Evidence: [APK_CODE_ANALYSIS.md](https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/blob/main/APK_CODE_ANALYSIS.md); integration decision record: [MOD_INTEGRATION_PLAN.md](https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/blob/main/MOD_INTEGRATION_PLAN.md).
+- **Interpretation:** the current APKPure base has no ready-made Android floating menu integration to enable. An independently implemented same-Activity menu is a candidate, not a proven solution; it must be patched into the actual game and runtime-tested. No gameplay feature is proven by this Activity trace.
+
 ## Historical Platinmods V11.0.0 evidence (reference only)
 
 - Decoded package name: jp.konami.duellinks.
