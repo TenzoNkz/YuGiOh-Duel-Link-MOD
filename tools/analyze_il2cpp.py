@@ -84,6 +84,43 @@ def get_member_bytes(apk_path: Path, member_name: str) -> bytes:
         return archive.read(member)
 
 
+def archive_integrity(path: Path) -> tuple[str, str]:
+    """Return ZIP CRC/decompression status and a concise reason for an APK archive."""
+    try:
+        with zipfile.ZipFile(path, "r") as archive:
+            bad_member = archive.testzip()
+        if bad_member:
+            return "FAIL", f"first failing member: {bad_member}"
+        return "PASS", "all archive entries passed"
+    except (zipfile.BadZipFile, zipfile.LargeZipFile, OSError, RuntimeError,
+            NotImplementedError, zlib.error, EOFError) as error:
+        return "FAIL", f"{type(error).__name__}: {error}"
+
+
+def classify_dumper_result(
+    returncode: int, outputs_generated: bool, log: str
+) -> tuple[bool, bool, str]:
+    """Classify generated dumps before the report renders the classification fields."""
+    generated_output_marker = "Generate dummy dll" in log and "Dumping..." in log
+    post_dump_console_error = (
+        returncode != 0
+        and outputs_generated
+        and generated_output_marker
+        and ("Console.ReadKey" in log or "Press any key to exit" in log)
+    )
+    if returncode == 0 and outputs_generated:
+        status = "IL2CPP_DUMP_COMPLETE"
+    elif outputs_generated and generated_output_marker:
+        status = (
+            "IL2CPP_OUTPUTS_GENERATED_WITH_POST_DUMP_CONSOLE_ERROR"
+            if post_dump_console_error
+            else "IL2CPP_OUTPUTS_GENERATED_WITH_TOOL_WARNING"
+        )
+    else:
+        status = "IL2CPP_DUMP_PARTIAL"
+    return generated_output_marker, post_dump_console_error, status
+
+
 def focused_dump_hits(dump_path: Path, limit_per_group: int = 3) -> tuple[list[str], dict[str, int]]:
     """Summarize useful symbol neighborhoods without letting generic AutoPlay hits dominate."""
     if not dump_path.is_file():
@@ -178,9 +215,12 @@ def main() -> int:
             split_meta = next((item for item in inner_members if "config.arm64_v8a.apk" in item["name"]), None)
             if split_meta is None:
                 raise RuntimeError("Could not locate config.arm64_v8a.apk in APKPure XAPK")
-            split_info = extract_xapk_member(xapk_path, split_meta["name"], work / "arm64-split.apk")
+            split_path = work / "arm64-split.apk"
+            split_info = extract_xapk_member(xapk_path, split_meta["name"], split_path)
+            primary_inner_crc, primary_inner_detail = archive_integrity(primary_path)
+            split_inner_crc, split_inner_detail = archive_integrity(split_path)
             metadata = get_member_bytes(primary_path, METADATA_PATH)
-            library = get_member_bytes(work / "arm64-split.apk", ARM64_IL2CPP_PATH)
+            library = get_member_bytes(split_path, ARM64_IL2CPP_PATH)
             metadata_path = work / "global-metadata.dat"
             library_path = work / "libil2cpp.so"
             metadata_path.write_bytes(metadata)
@@ -212,6 +252,30 @@ def main() -> int:
                 (item.get("container_crc_status", "NOT_CHECKED") for item in inner_members if item["name"] == primary_name),
                 "NOT_CHECKED",
             )
+            outputs_generated = bool(dump_path and script_path and string_path)
+            generated_output_marker, post_dump_console_error, status = classify_dumper_result(
+                result.returncode, outputs_generated, log
+            )
+            integrity_issues = []
+            if container_matches is not True:
+                integrity_issues.append(
+                    "container SHA-256 did not verify against the Release digest"
+                    if container_matches is False
+                    else "Release digest was not provided"
+                )
+            if selected_outer_crc != "PASS":
+                integrity_issues.append(f"primary APK outer CRC={selected_outer_crc}")
+            if split_info["container_crc_status"] != "PASS":
+                integrity_issues.append(f"ARM64 split outer CRC={split_info['container_crc_status']}")
+            if primary_inner_crc != "PASS":
+                integrity_issues.append(f"primary APK inner CRC scan={primary_inner_crc} ({primary_inner_detail})")
+            if split_inner_crc != "PASS":
+                integrity_issues.append(f"ARM64 split inner CRC scan={split_inner_crc} ({split_inner_detail})")
+            integrity_summary = (
+                "Container digest, embedded-member outer CRCs, and both inner APK CRC scans passed."
+                if not integrity_issues
+                else "Integrity warnings remain: " + "; ".join(integrity_issues) + "."
+            )
             lines.extend([
                 "## Source integrity",
                 f"- Release: {release.get('html_url', '(not provided)')}",
@@ -225,6 +289,9 @@ def main() -> int:
                 f"- Primary APK outer CRC: {selected_outer_crc}",
                 f"- ARM64 split member: {split_info['name']}",
                 f"- ARM64 split outer CRC: {split_info['container_crc_status']}",
+                f"- Primary APK inner CRC scan: {primary_inner_crc} ({primary_inner_detail})",
+                f"- ARM64 split inner CRC scan: {split_inner_crc} ({split_inner_detail})",
+                f"- Integrity assessment: {integrity_summary}",
                 f"- ARM64 libil2cpp.so size: {len(library)} bytes",
                 f"- ARM64 libil2cpp.so SHA-256: {sha256_bytes(library)}",
                 f"- global-metadata.dat size: {len(metadata)} bytes",
@@ -252,24 +319,10 @@ def main() -> int:
                 "",
                 "## Interpretation",
                 "- Method names/type declarations recovered by Il2CppDumper are static metadata evidence; they do not prove a menu callback invokes the method or that behavior works at runtime.",
-                "- The APKPure XAPK and selected entries have reported CRC/decompression problems. Even successful metadata extraction does not clear those integrity warnings.",
+                f"- Integrity assessment: {integrity_summary}",
                 "- Native library and metadata outputs are temporary; only this summary report is persisted.",
                 "",
             ])
-            outputs_generated = bool(dump_path and script_path and string_path)
-            generated_output_marker = "Generate dummy dll" in log and "Dumping..." in log
-            post_dump_console_error = (
-                result.returncode != 0
-                and outputs_generated
-                and generated_output_marker
-                and ("Console.ReadKey" in log or "Press any key to exit" in log)
-            )
-            if result.returncode == 0 and outputs_generated:
-                status = "IL2CPP_DUMP_COMPLETE"
-            elif outputs_generated and generated_output_marker:
-                status = "IL2CPP_OUTPUTS_GENERATED_WITH_POST_DUMP_CONSOLE_ERROR" if post_dump_console_error else "IL2CPP_OUTPUTS_GENERATED_WITH_TOOL_WARNING"
-            else:
-                status = "IL2CPP_DUMP_PARTIAL"
             if post_dump_console_error:
                 interpretation_heading = lines.index("## Interpretation")
                 lines.insert(
