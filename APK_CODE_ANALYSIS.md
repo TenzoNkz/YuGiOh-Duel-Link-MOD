@@ -1,6 +1,6 @@
 # APK Code Analysis Report
 
-**Generated:** 2026-10-27 05:19:54 UTC
+**Generated:** 2026-10-27 05:22:36 UTC
 **Method:** JADX/Apktool static analysis; the APK was not installed or executed.
 - Repository: TenzoNkz/YuGiOh-Duel-Link-MOD
 - Requested release tag: APKPure_Latest
@@ -103,28 +103,28 @@
     I: Copying unknown files...
 
 ### JADX output excerpt
-    INFO  - progress: 7286 of 8855 (82%)
-    INFO  - progress: 7377 of 8855 (83%)
-    INFO  - progress: 7465 of 8855 (84%)
-    INFO  - progress: 7574 of 8855 (85%)
-    INFO  - progress: 7632 of 8855 (86%)
-    INFO  - progress: 7683 of 8855 (86%)
-    INFO  - progress: 7756 of 8855 (87%)
-    INFO  - progress: 7783 of 8855 (87%)
-    INFO  - progress: 7819 of 8855 (88%)
-    INFO  - progress: 7937 of 8855 (89%)
     INFO  - progress: 7970 of 8855 (90%)
     INFO  - progress: 8098 of 8855 (91%)
-    INFO  - progress: 8164 of 8855 (92%)
+    INFO  - progress: 8110 of 8855 (91%)
     INFO  - progress: 8215 of 8855 (92%)
-    INFO  - progress: 8385 of 8855 (94%)
+    INFO  - progress: 8376 of 8855 (94%)
+    INFO  - progress: 8496 of 8855 (95%)
+    INFO  - progress: 8496 of 8855 (95%)
+    INFO  - progress: 8496 of 8855 (95%)
+    INFO  - progress: 8496 of 8855 (95%)
+    INFO  - progress: 8496 of 8855 (95%)
+    INFO  - progress: 8496 of 8855 (95%)
+    INFO  - progress: 8496 of 8855 (95%)
+    INFO  - progress: 8496 of 8855 (95%)
+    INFO  - progress: 8496 of 8855 (95%)
+    INFO  - progress: 8496 of 8855 (95%)
     INFO  - progress: 8496 of 8855 (95%)
     INFO  - progress: 8496 of 8855 (95%)
     INFO  - progress: 8496 of 8855 (95%)
     INFO  - progress: 8496 of 8855 (95%)
     INFO  - progress: 8496 of 8855 (95%)
     INFO  - progress: 8501 of 8855 (96%)
-    INFO  - progress: 8737 of 8855 (98%)
+    INFO  - progress: 8734 of 8855 (98%)
                                                                  
     ERROR - finished with errors, count: 96
 
@@ -174,13 +174,30 @@
 - L46: public class YgomMainActivity extends MessagingUnityPlayerActivity implements BillingClientStateListener, PurchasesUpdatedListener {
 - L84: @Override // com.google.firebase.MessagingUnityPlayerActivity, com.unity3d.player.UnityPlayerActivity, android.app.Activity
 - L85: protected void onCreate(Bundle bundle) {
+- L86: setTheme(android.R.style.Theme.Material.Light.NoActionBar.Fullscreen);
 - L87: super.onCreate(bundle);
+- L88: this.mIsIabAvailable = false;
+- L89: this.mLogger = new Logger();
+- L90: Intent intent = getIntent();
+- L91: reportReEngagement(intent.getData());
+- L92: setUriFromIntent(intent);
+- L93: }
 - L95: @Override // com.unity3d.player.UnityPlayerActivity, android.app.Activity
 - L96: protected void onDestroy() {
+- L97: try {
 - L98: super.onDestroy();
+- L99: } catch (NullPointerException unused) {
+- L100: }
+- L101: destroyBillingClient();
+- L102: this.mLogger = null;
+- L103: }
 - L105: @Override // com.google.firebase.MessagingUnityPlayerActivity, com.unity3d.player.UnityPlayerActivity, android.app.Activity
 - L106: protected void onNewIntent(Intent intent) {
 - L107: super.onNewIntent(intent);
+- L108: setIntent(intent);
+- L109: setUriFromIntent(intent);
+- L110: reportReEngagement(intent.getData());
+- L111: }
 - L136: PurchasesResponseListener purchasesResponseListener = new PurchasesResponseListener() { // from class: jp.konami.duellinks.plugins.YgomMainActivity.1
 - L146: if (YgomMainActivity.this.mBillingClient.isFeatureSupported(BillingClient.FeatureType.PRODUCT_DETAILS).getResponseCode() == 0) {
 - L157: String strRewardsToJson = YgomMainActivity.this.rewardsToJson(arrayList);
@@ -197,9 +214,11 @@
 - L182: @Override // com.unity3d.player.UnityPlayerActivity, android.app.Activity
 - L183: protected void onResume() {
 - L184: super.onResume();
+- L185: }
 - L187: @Override // com.unity3d.player.UnityPlayerActivity, android.app.Activity
 - L188: protected void onPause() {
 - L189: super.onPause();
+- L190: }
 - L285: this.mBillingClient.queryProductDetailsAsync(QueryProductDetailsParams.newBuilder().setProductList(ImmutableList.of(QueryProductDetailsParams.Product.newBuilder().setProductId(str).setProductType("inapp").build())).build(), new ProductDetailsResponseListene...
 - L308: this.mBillingClient.launchBillingFlow(UnityPlayer.currentActivity, billingFlowParamsBuild);
 - L325: PurchasesResponseListener purchasesResponseListener = new PurchasesResponseListener() { // from class: jp.konami.duellinks.plugins.YgomMainActivity$$ExternalSyntheticLambda0
@@ -209,7 +228,8 @@
 - L408: YgomMainActivity.this.IABLogD("IabSkuDetails empty");
 - L412: YgomMainActivity.this.IABLogD("skuDetailList empty");
 - L416: YgomMainActivity.this.IABLogE("getItemDetails : " + billingResult.getDebugMessage());
-- Truncated: 6 additional matching lines were not included.
+- L432: this.mBillingClient.consumeAsync(ConsumeParams.newBuilder().setPurchaseToken(iabPurchase.getToken()).build(), new ConsumeResponseListener() { // from class: jp.konami.duellinks.plugins.YgomMainActivity.3
+- Truncated: 5 additional matching/context lines were not included.
 
 ## APK split inventory
 - config.arm64_v8a.apk (config/split APK): 14 entries, 9 native libraries, 0 IL2CPP metadata file(s), outer XAPK CRC=PASS, inner ZIP CRC=PASS.
