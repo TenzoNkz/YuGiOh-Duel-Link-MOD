@@ -30,7 +30,7 @@ Owned source: src/mod_menu/com/chatgptmod/menu/ModMenu.java.
 - Supports opening/closing the panel, dragging the launcher within the Activity bounds, and remembering whether the panel should be open on the next launch.
 - Uses its own SharedPreferences namespace, chatgpt_mod_local_ui.
 - Contains no IL2CPP calls, native hooks or gameplay actions. The panel explicitly indicates that gameplay actions are not connected.
-- Java source compiles to DEX and patcher tests (including full report preflight and approval-bypass regression) pass in [CHATGPT MOD Menu Source Validation](https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40457542823).
+- Java source compiles to DEX; patcher tests include full report preflight and approval-bypass regression in [CHATGPT MOD Menu Source Validation](https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40458144076) (success).
 - Patcher primitives and Python unit tests passed in the same run. Checkpoint/record validation also passed at https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40456595229.
 - This validates source compilation and selected patcher logic only. No original APK has yet been rebuilt, signed, installed or runtime-tested with this UI.
 
