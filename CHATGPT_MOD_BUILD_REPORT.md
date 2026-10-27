@@ -18,8 +18,10 @@
 - Static archive inventory run: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40453605293 (success).
 - Latest full Code Analysis with inner ZIP CRC scans and YgomMainActivity entry-point trace: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40454946821 (success; code report remains partial because JADX emitted 96 decompilation errors).
 - Latest Checkpoint Validation after index/report updates: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40457881877 (success).
-- Latest menu helper validation including Java-to-DEX compilation, full report preflight and explicit approval-bypass regression: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40457542823 (success).
 - Integration and gated patcher record: [MOD_INTEGRATION_PLAN.md](https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/blob/main/MOD_INTEGRATION_PLAN.md).
+
+- Latest source/patche r validation (Java 21 workflow setup, Java-to-DEX, preflight fixtures and approval-bypass regression): https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40458144076 (success).
+- Latest checkpoint validation after those code/workflow changes: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40458144071 (success).
 
 ## Actual analysis state
 - APKTool exits 0 and decoded the current primary APK manifest/resources.
