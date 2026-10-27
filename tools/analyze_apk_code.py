@@ -283,6 +283,60 @@ def decode_manifest(decoded_dir: Path) -> list[str]:
     return lines
 
 
+def summarize_android_entrypoint(source_root: Path, limit: int = 40) -> list[str]:
+    """Summarize lifecycle, native bridge and view/window calls in the game Activity."""
+    candidates = list(source_root.rglob("YgomMainActivity.java")) if source_root.exists() else []
+    preferred = [
+        path for path in candidates
+        if "jp/konami/duellinks/plugins" in path.as_posix()
+    ]
+    candidate = preferred[0] if preferred else (candidates[0] if candidates else None)
+    if candidate is None:
+        return ["- YgomMainActivity.java was not present in the current JADX output."]
+
+    try:
+        source_lines = candidate.read_text(encoding="utf-8", errors="replace").splitlines()
+    except OSError as error:
+        return [f"- Could not read {candidate.name}: {type(error).__name__}: {error}"]
+
+    class_pattern = re.compile(r"^\\s*(?:public\\s+)?(?:abstract\\s+|final\\s+)?class\\s+YgomMainActivity\\b")
+    method_pattern = re.compile(
+        r"^\\s*(?:public|protected|private)\\s+(?:(?:static|final|synchronized|native)\\s+)*"
+        r"[\\w.$<>?, \\[\\]]+\\s+(\\w+)\\s*\\("
+    )
+    relevant_pattern = re.compile(
+        r"YgomMainActivity|\\bonCreate\\b|\\bonStart\\b|\\bonResume\\b|\\bonPause\\b|"
+        r"\\bonStop\\b|\\bonDestroy\\b|\\bonNewIntent\\b|System\\.loadLibrary|"
+        r"\\bloadLibrary\\b|\\bnative\\b|UnityPlayer|WindowManager|"
+        r"\\baddContentView\\b|\\bsetContentView\\b|\\bstartService\\b|"
+        r"\\bgetWindow\\b|\\brequestWindowFeature\\b|\\bdispatchKeyEvent\\b|"
+        r"\\bonActivityResult\\b|\\bWebView\\b",
+        re.IGNORECASE,
+    )
+    lifecycle = {"onCreate", "onStart", "onResume", "onPause", "onStop", "onDestroy",
+                 "onNewIntent", "onActivityResult", "dispatchKeyEvent"}
+    selected: list[tuple[int, str]] = []
+    for index, line in enumerate(source_lines, start=1):
+        stripped = line.strip()
+        method_match = method_pattern.match(line)
+        method_name = method_match.group(1) if method_match else ""
+        if class_pattern.match(line) or method_name in lifecycle or relevant_pattern.search(line):
+            compact = re.sub(r"\\s+", " ", stripped)
+            if len(compact) > 260:
+                compact = compact[:257] + "..."
+            selected.append((index, compact))
+    if not selected:
+        return [f"- {candidate.relative_to(source_root).as_posix()} was found but no Activity lifecycle/native/window markers matched."]
+    output = [f"- Source: {candidate.relative_to(source_root).as_posix()} ({len(source_lines)} lines)."]
+    output.extend(
+        f"- L{number}: {line}"
+        for number, line in selected[:limit]
+    )
+    if len(selected) > limit:
+        output.append(f"- Truncated: {len(selected) - limit} additional matching lines were not included.")
+    return output
+
+
 def summarize_java_packages(source_root: Path, java_sources: list[Path]) -> list[str]:
     package_counts: Counter[str] = Counter()
     app_classes: list[str] = []
@@ -490,6 +544,7 @@ def main() -> int:
             key_source_hits, key_source_hit_count = scan_key_java_sources(source_root, limit_per_file=25)
             resource_hits, resource_hit_count = scan_text_files(apktool_out / "res", limit=40, pattern=RESOURCE_TERMS)
             package_summary_lines = summarize_java_packages(source_root, java_sources)
+            entrypoint_lines = summarize_android_entrypoint(source_root)
 
             native_hits: list[str] = []
             native_hit_count = 0
@@ -596,6 +651,9 @@ def main() -> int:
                 *indented_excerpt(jadx_result.get("stderr", "") or jadx_result.get("stdout", "")),
                 "",
                 *package_summary_lines,
+                "",
+                "## Android Activity entry-point trace",
+                *entrypoint_lines,
                 "",
                 "## APK split inventory",
                 *(split_inventory or ["- No APK members were successfully inventoried."]),
