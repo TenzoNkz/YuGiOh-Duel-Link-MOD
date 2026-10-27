@@ -1,6 +1,6 @@
 # APKPure Original vs Platinmods — Static Variant Comparison
 
-Generated: 2026-10-27 05:13:56 UTC
+Generated: 2026-10-27 05:19:08 UTC
 Purpose: APKPure Original is the sole intended mod base. Platinmods is a comparison reference only.
 Method: Release digest checks, primary APK resolution, archive entry inventory, and per-entry SHA-256 comparison. No app was installed or executed.
 
