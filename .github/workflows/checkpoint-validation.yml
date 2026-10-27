@@ -13,6 +13,7 @@ on:
       - HANDOVER.md
       - APP_ANALYSIS_REPORT.md
       - APK_CODE_ANALYSIS.md
+      - CHATGPT_MOD_BUILD_REPORT.md
       - MOD_CANDIDATES.md
       - ANALYSIS_LOG.md
       - .github/workflows/*.yml
@@ -45,6 +46,7 @@ jobs:
               "HANDOVER.md",
               "APP_ANALYSIS_REPORT.md",
               "APK_CODE_ANALYSIS.md",
+              "CHATGPT_MOD_BUILD_REPORT.md",
               "MOD_CANDIDATES.md",
               "ANALYSIS_LOG.md",
           ]
@@ -53,15 +55,22 @@ jobs:
           transfer = Path("CHAT_TRANSFER.md").read_text(encoding="utf-8") if Path("CHAT_TRANSFER.md").exists() else ""
           project_state = Path("PROJECT_STATE.md").read_text(encoding="utf-8") if Path("PROJECT_STATE.md").exists() else ""
           handover = Path("HANDOVER.md").read_text(encoding="utf-8") if Path("HANDOVER.md").exists() else ""
+          build_report = Path("CHATGPT_MOD_BUILD_REPORT.md").read_text(encoding="utf-8") if Path("CHATGPT_MOD_BUILD_REPORT.md").exists() else ""
 
           problems = []
           if missing:
               problems.append("Missing required files: " + ", ".join(missing))
           if empty:
               problems.append("Empty required files: " + ", ".join(empty))
-          for marker in ("Diskusi!", "Eksekusi Analisa APK!", "Chat Stuck!", "CANONICAL REPOSITORY"):
+          for marker in ("Diskusi!", "Eksekusi Full!", "Eksekusi Build App!", "CHATGPT Mod", "CANONICAL REPOSITORY"):
               if marker not in transfer:
                   problems.append("CHAT_TRANSFER.md is missing marker: " + marker)
+          if not Path(".github/workflows/build-chatgpt-mod.yml").is_file():
+              problems.append("Missing .github/workflows/build-chatgpt-mod.yml.")
+          if not Path("tools/validate_chatgpt_mod_source.py").is_file():
+              problems.append("Missing tools/validate_chatgpt_mod_source.py.")
+          if "CHATGPT Mod" not in build_report or "**Status:**" not in build_report:
+              problems.append("CHATGPT_MOD_BUILD_REPORT.md must record the requested label and a status.")
           if "TenzoNkz/YuGiOh-Duel-Link-MOD" not in project_state:
               problems.append("PROJECT_STATE.md is missing the canonical repository identifier.")
           if "NEXT ACTION" not in handover:
