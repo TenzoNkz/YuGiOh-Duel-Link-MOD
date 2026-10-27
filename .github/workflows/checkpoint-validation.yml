@@ -12,6 +12,7 @@ on:
       - PROJECT_STATE.md
       - HANDOVER.md
       - APP_ANALYSIS_REPORT.md
+      - APK_VARIANT_COMPARISON.md
       - APK_CODE_ANALYSIS.md
       - CHATGPT_MOD_BUILD_REPORT.md
       - MOD_CANDIDATES.md
@@ -34,7 +35,8 @@ jobs:
       - name: Compile repository Python scripts
         run: |
           python3 -m py_compile tools/*.py
-          echo "Python scripts compile successfully."
+          python3 -m unittest discover -s tests -p 'test_*.py' -v
+          echo "Python scripts compile and unit tests pass."
 
       - name: Check required files and transfer prompts
         run: |
@@ -50,6 +52,7 @@ jobs:
               "PROJECT_STATE.md",
               "HANDOVER.md",
               "APP_ANALYSIS_REPORT.md",
+              "APK_VARIANT_COMPARISON.md",
               "APK_CODE_ANALYSIS.md",
               "CHATGPT_MOD_BUILD_REPORT.md",
               "MOD_CANDIDATES.md",
@@ -61,6 +64,7 @@ jobs:
           project_state = Path("PROJECT_STATE.md").read_text(encoding="utf-8") if Path("PROJECT_STATE.md").exists() else ""
           handover = Path("HANDOVER.md").read_text(encoding="utf-8") if Path("HANDOVER.md").exists() else ""
           build_report = Path("CHATGPT_MOD_BUILD_REPORT.md").read_text(encoding="utf-8") if Path("CHATGPT_MOD_BUILD_REPORT.md").exists() else ""
+          comparison_report = Path("APK_VARIANT_COMPARISON.md").read_text(encoding="utf-8") if Path("APK_VARIANT_COMPARISON.md").exists() else ""
 
           problems = []
           if missing:
@@ -72,8 +76,11 @@ jobs:
                   problems.append("CHAT_TRANSFER.md is missing marker: " + marker)
           if not Path(".github/workflows/build-chatgpt-mod.yml").is_file():
               problems.append("Missing .github/workflows/build-chatgpt-mod.yml.")
-          if not Path("tools/validate_chatgpt_mod_source.py").is_file():
-              problems.append("Missing tools/validate_chatgpt_mod_source.py.")
+          for path in ("tools/apk_inputs.py", "tools/compare_apk_variants.py"):
+              if not Path(path).is_file():
+                  problems.append("Missing required APK analysis tool: " + path)
+          if "APKPure Original" not in comparison_report or "Platinmods" not in comparison_report:
+              problems.append("APK_VARIANT_COMPARISON.md must identify APKPure as base and Platinmods as reference.")
           if "CHATGPT Mod" not in build_report or "**Status:**" not in build_report:
               problems.append("CHATGPT_MOD_BUILD_REPORT.md must record the requested label and a status.")
           if "TenzoNkz/YuGiOh-Duel-Link-MOD" not in project_state:
