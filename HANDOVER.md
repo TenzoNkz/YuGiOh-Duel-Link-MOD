@@ -29,6 +29,11 @@ Branch: main
 - Reworked durable docs to keep APKPure as base and Platinmods as reference only.
 - Replaced the Gradle demo build workflow with a gated APKPure-based build scaffold. No actual APK patcher exists, so build stays blocked.
 
+## Latest IL2CPP static findings
+- The metadata dumper created `dump.cs`, `script.json`, and `stringliteral.json`, then failed only at its final `Console.ReadKey` prompt (exit -6); the report records this caveat.
+- Recovered names include `ShowMonster(bool immediate, bool showAura, Action onFinished)`, `GetFieldCardFace`, `GetCardFace`, `DLL_DuelGetCardFace`, `PvP.Command.CHEATCARD = 9`, damage-value getters, and `DuelMenu` autoplay methods/fields.
+- These are static declarations only. Their exact enclosing types/callers, behavior, and any connection to a mod-menu callback are not yet proven. The source package's corrupted `libduel.so` and primary asset remain serious limitations.
+
 ## Current known blocker
 The APKPure Release asset's outer digest matches GitHub, but embedded package contents are internally corrupt. Do not use it for patch/build. Its current analysis output is useful for partial static findings only. A clean APKPure upload is required for full reverse engineering and reliable implementation.
 
