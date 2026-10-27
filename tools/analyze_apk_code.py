@@ -233,18 +233,79 @@ def decode_manifest(decoded_dir: Path) -> list[str]:
         root = ElementTree.parse(manifest_path).getroot()
     except (ElementTree.ParseError, OSError) as exc:
         return [f"- Could not parse decoded AndroidManifest.xml: {type(exc).__name__}: {exc}"]
+    package_name = root.get("package", "not decoded")
     uses_sdk = root.find("uses-sdk")
     min_sdk = uses_sdk.get(ANDROID_NS + "minSdkVersion", "not declared") if uses_sdk is not None else "not declared"
     target_sdk = uses_sdk.get(ANDROID_NS + "targetSdkVersion", "not declared") if uses_sdk is not None else "not declared"
     version_code = root.get(ANDROID_NS + "versionCode", "not declared")
     version_name = root.get(ANDROID_NS + "versionName", "not declared")
-    return [
-        f"- Package name: {root.get('package', 'not decoded')}",
+    lines = [
+        f"- Package name: {package_name}",
         f"- Version name: {version_name}",
         f"- Version code: {version_code}",
         f"- minSdkVersion: {min_sdk}",
         f"- targetSdkVersion: {target_sdk}",
     ]
+    application = root.find("application")
+    if application is not None:
+        lines.append(f"- Application class: {application.get(ANDROID_NS + 'name', 'not declared')}")
+        lines.append(f"- Application label reference: {application.get(ANDROID_NS + 'label', 'not declared')}")
+    permissions = []
+    for node in list(root):
+        if node.tag in ("uses-permission", "uses-permission-sdk-23", "uses-permission-sdk-m"):
+            permission = node.get(ANDROID_NS + "name", "")
+            if permission:
+                permissions.append(permission)
+    lines.append(f"- Declared permission entries: {len(permissions)}")
+    lines.extend(f"  - {permission}" for permission in permissions[:50])
+    component_tags = ("activity", "activity-alias", "service", "receiver", "provider")
+    components = []
+    if application is not None:
+        for node in list(application):
+            if node.tag not in component_tags:
+                continue
+            name = node.get(ANDROID_NS + "name", "(unnamed)")
+            exported = node.get(ANDROID_NS + "exported", "unspecified")
+            permission = node.get(ANDROID_NS + "permission", "")
+            components.append((node.tag, name, exported, permission))
+    lines.append(f"- Declared activity/service/receiver/provider entries: {len(components)}")
+    for kind, name, exported, permission in components[:80]:
+        suffix = f", permission={permission}" if permission else ""
+        lines.append(f"  - {kind}: {name}, exported={exported}{suffix}")
+    if len(components) > 80:
+        lines.append(f"  - ... {len(components) - 80} more component entries not displayed")
+    return lines
+
+
+def summarize_java_packages(source_root: Path, java_sources: list[Path]) -> list[str]:
+    package_counts: Counter[str] = Counter()
+    app_classes: list[str] = []
+    mod_menu_classes: list[str] = []
+    for path in java_sources:
+        try:
+            relative = path.relative_to(source_root).as_posix()
+        except ValueError:
+            relative = path.name
+        parts = relative.split("/")
+        package = ".".join(parts[: min(3, max(1, len(parts) - 1))]) if len(parts) > 1 else "(default package)"
+        package_counts[package] += 1
+        if relative.startswith("jp/konami/duellinks/"):
+            app_classes.append(relative)
+        if relative.startswith("com/platinmods/"):
+            mod_menu_classes.append(relative)
+    lines = [
+        "## Decompiled class namespace summary",
+        f"- Decompiled class files found: {len(java_sources)}",
+        f"- Classes under jp/konami/duellinks/: {len(app_classes)}",
+        f"- Classes under com/platinmods/: {len(mod_menu_classes)}",
+        "- Top package-prefix counts:",
+    ]
+    lines.extend(f"  - {package}: {count}" for package, count in package_counts.most_common(20))
+    lines.append("- Sample classes under jp/konami/duellinks/:")
+    lines.extend(f"  - {name}" for name in sorted(app_classes)[:40] or ["(none found)"])
+    lines.append("- Classes under com/platinmods/:")
+    lines.extend(f"  - {name}" for name in sorted(mod_menu_classes)[:40] or ["(none found)"])
+    return lines
 
 
 def indented_excerpt(text: str, max_lines: int = 24) -> list[str]:
@@ -422,6 +483,7 @@ def main() -> int:
             source_hits, source_hit_count = scan_text_files(source_root, limit=100)
             key_source_hits, key_source_hit_count = scan_key_java_sources(source_root, limit_per_file=25)
             resource_hits, resource_hit_count = scan_text_files(apktool_out / "res", limit=40, pattern=RESOURCE_TERMS)
+            package_summary_lines = summarize_java_packages(source_root, java_sources)
 
             native_hits: list[str] = []
             native_hit_count = 0
@@ -488,7 +550,14 @@ def main() -> int:
             error_match = re.search(r"finished with errors, count: *([0-9]+)", combined_jadx_output, re.IGNORECASE)
             jadx_error_count = int(error_match.group(1)) if error_match else 0
             status = "CODE_ANALYSIS_COMPLETE"
-            if apktool_result["returncode"] != 0 or jadx_result["returncode"] != 0 or selected_container_crc == "FAIL":
+            any_split_crc_failure = any(item.get("container_crc_status") == "FAIL" for item in nested_apks)
+            if (
+                apktool_result["returncode"] != 0
+                or jadx_result["returncode"] != 0
+                or selected_container_crc == "FAIL"
+                or any_split_crc_failure
+                or split_read_errors
+            ):
                 status = "CODE_ANALYSIS_PARTIAL"
 
             base_lines.extend([
@@ -509,6 +578,8 @@ def main() -> int:
                 "",
                 "### JADX output excerpt",
                 *indented_excerpt(jadx_result.get("stderr", "") or jadx_result.get("stdout", "")),
+                "",
+                *package_summary_lines,
                 "",
                 "## APK split inventory",
                 *(split_inventory or ["- No APK members were successfully inventoried."]),
@@ -544,7 +615,7 @@ def main() -> int:
                 "- JADX primarily analyzes DEX/Java/Kotlin code. Unity IL2CPP game logic may be compiled into native libraries and metadata; full native tracing requires separate tooling and careful symbol/metadata analysis.",
                 "- Static decompilation does not prove server-authoritative behavior, online compatibility, or runtime success.",
                 "- The APK was not executed or installed. Temporary decompiled source was not committed to the repository.",
-                "- For XAPK input, JADX/Apktool analyze the selected primary APK only; any split APKs and OBB payloads require separate compatibility/integration checks before producing a single installable APK.",
+                "- For XAPK input, JADX/Apktool decompile the selected primary APK; native-library and metadata inventory also scans other readable split APKs. Split payloads are not merged or proven installable as a single APK.",
                 "- The outer XAPK member CRC is reported separately from the selected APK's own ZIP structure. A failed outer CRC must be investigated and prevents treating the source container as clean, even if static analysis can read the inner APK bytes.",
                 "",
                 "## Recommended next step",
