@@ -68,6 +68,42 @@ def download_and_hash(url: str, destination: Path) -> tuple[int, str]:
     return size, digest.hexdigest()
 
 
+def extract_xapk_member(container_path: Path, member_name: str, destination: Path) -> dict[str, Any]:
+    """Extract one named APK member and explicitly report the outer-container CRC."""
+    with zipfile.ZipFile(container_path, "r") as archive:
+        matches = [
+            item for item in archive.infolist()
+            if not item.is_dir() and item.filename == member_name
+        ]
+        if len(matches) != 1:
+            raise RuntimeError(f"Expected one XAPK member named {member_name!r}; found {len(matches)}")
+        selected = matches[0]
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        with archive.open(selected, "r") as source, destination.open("wb") as output:
+            if hasattr(source, "_expected_crc"):
+                source._expected_crc = None
+            shutil.copyfileobj(source, output, length=1024 * 1024)
+        if destination.stat().st_size != selected.file_size:
+            raise RuntimeError(f"Extracted XAPK member {member_name!r} has an unexpected size")
+        crc = 0
+        with destination.open("rb") as selected_stream:
+            for chunk in iter(lambda: selected_stream.read(1024 * 1024), b""):
+                crc = zlib.crc32(chunk, crc)
+        crc_value = crc & 0xFFFFFFFF
+        record = {
+            "name": selected.filename,
+            "size": selected.file_size,
+            "compressed_size": selected.compress_size,
+            "expected_container_crc32": f"{selected.CRC:08x}",
+            "calculated_container_crc32": f"{crc_value:08x}",
+            "container_crc_status": "PASS" if crc_value == selected.CRC else "FAIL",
+        }
+    with zipfile.ZipFile(destination, "r") as nested:
+        if "AndroidManifest.xml" not in nested.namelist():
+            raise RuntimeError(f"Selected XAPK member {member_name!r} has no AndroidManifest.xml")
+    return record
+
+
 def resolve_primary_apk(
     container_path: Path,
     asset_name: str,
