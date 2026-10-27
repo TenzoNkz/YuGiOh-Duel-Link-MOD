@@ -113,10 +113,16 @@ def require_approval(candidates_path: Path) -> None:
     if not candidates_path.is_file():
         raise BuildError(f"Missing feature register: {candidates_path}")
     candidates = candidates_path.read_text(encoding="utf-8")
-    if "Build approval: APPROVED_FOR_IMPLEMENTATION" not in candidates:
+    # The approval must be the exact current checkpoint line, not merely a mention
+    # of the required marker in explanatory prose elsewhere in the file.
+    approved_line = re.compile(
+        r"(?m)^\\s*\\*\\*Build approval:\\s*APPROVED_FOR_IMPLEMENTATION\\s*\\*\\*\\s*$"
+    )
+    if not approved_line.search(candidates):
         raise BuildError(
-            "Build approval is still pending. Review MOD_CANDIDATES.md and explicitly "
-            "set Build approval: APPROVED_FOR_IMPLEMENTATION before running a build."
+            "Build approval is still pending. The exact standalone line "
+            "'**Build approval: APPROVED_FOR_IMPLEMENTATION**' must be explicitly set "
+            "in MOD_CANDIDATES.md before running a build."
         )
 
 
