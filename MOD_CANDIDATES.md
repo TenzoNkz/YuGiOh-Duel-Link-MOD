@@ -89,4 +89,4 @@ The refreshed APKPure source passes container and inner-package integrity checks
 
 **Build approval: PENDING_REVERSE_ENGINEERING**
 
-No feature scope is approved for an APK build yet. The build tool and workflow require the exact marker Build approval: APPROVED_FOR_IMPLEMENTATION before any APK patch/build can proceed. The recommended first scope is the owned CHATGPT MOD UI shell and saved presentation preference only; gameplay callbacks remain excluded until separately evidenced and reviewed.
+No feature scope is approved for an APK build yet. The build tool and workflow require the exact standalone line `**Build approval: APPROVED_FOR_IMPLEMENTATION**` before any APK patch/build can proceed; merely mentioning the text in prose does not approve anything. The current line remains `**Build approval: PENDING_REVERSE_ENGINEERING**`. The recommended first scope is the owned CHATGPT MOD UI shell and saved presentation preference only; gameplay callbacks remain excluded until separately evidenced and reviewed.
