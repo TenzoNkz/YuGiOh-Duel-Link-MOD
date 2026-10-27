@@ -17,7 +17,7 @@
 - Both embedded members pass outer XAPK CRC validation. Both the primary APK and ARM64 split pass their inner ZIP CRC/decompression scans. No OBB member was detected.
 - Static archive inventory run: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40453605293 (success).
 - Latest full Code Analysis with inner ZIP CRC scans and YgomMainActivity entry-point trace: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40454946821 (success; code report remains partial because JADX emitted 96 decompilation errors).
-- Latest Checkpoint Validation after strict-gate/tooling changes: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40457406860 (success before the latest regression test addition); another current checkpoint run is tracked at https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40457598014.
+- Latest Checkpoint Validation after build report refresh: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40457665323 (success).
 - Latest menu helper validation including Java-to-DEX compilation, full report preflight and explicit approval-bypass regression: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40457542823 (success).
 - Integration and gated patcher record: [MOD_INTEGRATION_PLAN.md](https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/blob/main/MOD_INTEGRATION_PLAN.md).
 
