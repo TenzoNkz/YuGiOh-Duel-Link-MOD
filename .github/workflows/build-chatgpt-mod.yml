@@ -51,6 +51,7 @@ jobs:
           test -f src/mod_menu/com/chatgptmod/menu/ModMenu.java
           test -f tools/build_chatgpt_mod.py
           python3 - <<'PY'
+          import os
           from pathlib import Path
           static = Path("APP_ANALYSIS_REPORT.md").read_text(encoding="utf-8")
           code = Path("APK_CODE_ANALYSIS.md").read_text(encoding="utf-8")
@@ -82,8 +83,13 @@ jobs:
               blockers.append("IL2CPP input APKs have not both passed inner CRC checks.")
           if "Build approval: APPROVED_FOR_IMPLEMENTATION" not in candidates:
               blockers.append("No reviewed feature scope is approved in MOD_CANDIDATES.md.")
-          if not SIGNING_KEYSTORE_B64 or not SIGNING_KEY_ALIAS or not SIGNING_STORE_PASSWORD or not SIGNING_KEY_PASSWORD:
-              blockers.append("Signing secrets are not configured; supply a stable test signing keystore and passwords in repository Actions secrets.")
+          if not (
+              os.environ.get("SIGNING_KEYSTORE_B64")
+              and os.environ.get("SIGNING_KEY_ALIAS")
+              and os.environ.get("SIGNING_STORE_PASSWORD")
+              and os.environ.get("SIGNING_KEY_PASSWORD")
+          ):
+              blockers.append("Signing secrets are not configured; supply a stable signing keystore and passwords in repository Actions secrets.")
           if blockers:
               print("Preflight blocked:")
               for blocker in blockers:
@@ -98,11 +104,13 @@ jobs:
         uses: android-actions/setup-android@v3
 
       - name: Install Android build tools
+        id: android_sdk_install
         if: steps.preflight.outcome == 'success'
         run: sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
 
       - name: Prepare signing keystore
-        if: steps.preflight.outcome == 'success'
+        id: signing_key
+        if: steps.preflight.outcome == 'success' && steps.android_sdk_install.outcome == 'success'
         env:
           SIGNING_KEYSTORE_B64: ${{ secrets.MOD_SIGNING_KEYSTORE_B64 }}
         run: |
@@ -113,22 +121,24 @@ jobs:
 
       - name: Build modified APK from APKPure input
         id: build
-        if: steps.preflight.outcome == 'success'
+        if: steps.preflight.outcome == 'success' && steps.android_sdk_install.outcome == 'success' && steps.signing_key.outcome == 'success'
         continue-on-error: true
         env:
           BASE_TAG: ${{ github.event.inputs.base_release_tag || 'APKPure_Latest' }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ANDROID_JAR: ${{ env.ANDROID_HOME }}/platforms/android-35/android.jar
-          D8: ${{ env.ANDROID_HOME }}/build-tools/35.0.0/d8
-          ZIPALIGN: ${{ env.ANDROID_HOME }}/build-tools/35.0.0/zipalign
-          APKSIGNER: ${{ env.ANDROID_HOME }}/build-tools/35.0.0/apksigner
           MOD_SIGNING_KEYSTORE: ${{ runner.temp }}/chatgpt-mod-signing.jks
           MOD_SIGNING_KEY_ALIAS: ${{ secrets.MOD_SIGNING_KEY_ALIAS }}
           MOD_SIGNING_STORE_PASSWORD: ${{ secrets.MOD_SIGNING_STORE_PASSWORD }}
           MOD_SIGNING_KEY_PASSWORD: ${{ secrets.MOD_SIGNING_KEY_PASSWORD }}
         run: |
           set -euo pipefail
+          SDK_ROOT="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
+          test -n "$SDK_ROOT"
+          export ANDROID_JAR="$SDK_ROOT/platforms/android-35/android.jar"
+          export D8="$SDK_ROOT/build-tools/35.0.0/d8"
+          export ZIPALIGN="$SDK_ROOT/build-tools/35.0.0/zipalign"
+          export APKSIGNER="$SDK_ROOT/build-tools/35.0.0/apksigner"
           mkdir -p dist
           python3 tools/build_chatgpt_mod.py \
             --repo "$GITHUB_REPOSITORY" \
