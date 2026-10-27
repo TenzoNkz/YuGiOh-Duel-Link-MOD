@@ -19,6 +19,7 @@ import tempfile
 import urllib.error
 import urllib.request
 import zipfile
+import zlib
 from datetime import datetime, timezone
 from pathlib import Path
 
