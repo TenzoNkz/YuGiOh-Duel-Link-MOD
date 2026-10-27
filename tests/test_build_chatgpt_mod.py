@@ -9,6 +9,7 @@ sys.path.insert(0, str(ROOT / "tools"))
 
 from build_chatgpt_mod import (
     BuildError,
+    check_reports,
     copy_split_libraries,
     next_dex_name,
     patch_activity_smali,
@@ -94,6 +95,51 @@ class BuildPreconditionTests(unittest.TestCase):
             bad.write_bytes(b"not a zip")
             with self.assertRaisesRegex(BuildError, "valid readable ZIP"):
                 verify_zip(bad, "fixture")
+
+    def test_report_gate_accepts_only_clean_reports_and_explicit_approval(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / "APP_ANALYSIS_REPORT.md").write_text(
+                "**Status:** INVENTORY_COMPLETE\n- CRC scan: PASS\n", encoding="utf-8"
+            )
+            (root / "APK_CODE_ANALYSIS.md").write_text(
+                "**Status:** CODE_ANALYSIS_PARTIAL\n"
+                "- Apktool exit code: 0\n"
+                "- Full inner ZIP CRC/decompression scans passed for every extracted APK member.\n"
+                "## Android Activity entry-point trace\n",
+                encoding="utf-8",
+            )
+            (root / "IL2CPP_ANALYSIS_REPORT.md").write_text(
+                "- Primary APK outer CRC: PASS\n"
+                "- ARM64 split outer CRC: PASS\n"
+                "- Primary APK inner CRC scan: PASS\n"
+                "- ARM64 split inner CRC scan: PASS\n",
+                encoding="utf-8",
+            )
+            (root / "APK_VARIANT_COMPARISON.md").write_text(
+                "- APKPure source-integrity assessment: PASS: Release digest matched; "
+                "embedded APK outer CRCs and per-entry reads passed.\n",
+                encoding="utf-8",
+            )
+            (root / "MOD_INTEGRATION_PLAN.md").write_text(
+                "**Status:** STATIC_ENTRYPOINT_MAPPED; RUNTIME_INTEGRATION_NOT_TESTED\n",
+                encoding="utf-8",
+            )
+            candidates = root / "MOD_CANDIDATES.md"
+            candidates.write_text(
+                "**Build approval: APPROVED_FOR_IMPLEMENTATION**\n",
+                encoding="utf-8",
+            )
+            check_reports(root)
+
+            # Even with otherwise clean reports, explanatory prose is not approval.
+            candidates.write_text(
+                "**Build approval: PENDING_REVERSE_ENGINEERING**\n"
+                "Required marker: Build approval: APPROVED_FOR_IMPLEMENTATION\n",
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(BuildError, "still pending"):
+                check_reports(root)
 
     def test_next_dex_name_uses_next_available_index(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
