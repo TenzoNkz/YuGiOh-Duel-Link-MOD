@@ -1,7 +1,7 @@
 # APK Static Analysis Report
 
 **Status:** INVENTORY_COMPLETE_WITH_WARNINGS
-**Generated:** 2026-10-27 04:03:06 UTC
+**Generated:** 2026-10-27 04:04:31 UTC
 **Method:** static archive inspection only; the APK was not executed or installed.
 
 ## Source Release
