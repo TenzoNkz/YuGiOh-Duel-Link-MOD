@@ -3,13 +3,14 @@ import struct
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 
-from apk_inputs import extract_xapk_member, resolve_primary_apk, select_release_asset
+from apk_inputs import extract_xapk_member, github_api_headers, resolve_primary_apk, select_release_asset
 
 
 def fake_apk_bytes(entries: dict[str, bytes]) -> bytes:
@@ -21,6 +22,22 @@ def fake_apk_bytes(entries: dict[str, bytes]) -> bytes:
 
 
 class ApkInputTests(unittest.TestCase):
+    def test_github_api_headers_use_actions_token_when_available(self) -> None:
+        with patch.dict("os.environ", {"GITHUB_TOKEN": "workflow-token"}, clear=True):
+            headers = github_api_headers()
+        self.assertEqual(headers["Authorization"], "Bearer workflow-token")
+        self.assertEqual(headers["Accept"], "application/vnd.github+json")
+
+    def test_github_api_headers_fall_back_to_gh_token(self) -> None:
+        with patch.dict("os.environ", {"GH_TOKEN": "cli-token"}, clear=True):
+            headers = github_api_headers()
+        self.assertEqual(headers["Authorization"], "Bearer cli-token")
+
+    def test_github_api_headers_allow_anonymous_local_analysis(self) -> None:
+        with patch.dict("os.environ", {}, clear=True):
+            headers = github_api_headers()
+        self.assertNotIn("Authorization", headers)
+
     def test_select_release_asset_accepts_apk_and_xapk(self) -> None:
         release = {"assets": [
             {"name": "notes.txt"},
