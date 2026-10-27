@@ -5,28 +5,32 @@ Repository: TenzoNkz/YuGiOh-Duel-Link-MOD
 Branch: main
 
 ## Product direction
-- APKPure Original V11.1.0 at Release tag APKPure_Latest is the sole intended mod base.
-- Platinmods V11.1.0 at Release tag Latest is a comparison-only reference.
-- Target deliverable is a real modified APK (.apk), with the in-game menu title CHATGPT MOD.
-- The task now is reverse engineering and candidate assessment. Do not build yet.
+- APKPure Original V11.1.0 (Release tag APKPure_Latest) is the sole intended mod base.
+- Platinmods V11.1.0 (Release tag Latest) is comparison-only reference.
+- Target output is a genuine modified APK with the in-game menu title CHATGPT MOD.
+- Do not build until the source package is clean and the first feature plan is approved.
 
-## Last completed engineering changes
-1. Added tools/apk_inputs.py to download verified Release assets and choose an APK member from XAPK without extracting untrusted member paths to arbitrary filesystem locations.
-2. Updated tools/analyze_release_apk.py to inventory APKPure XAPK input and inspect its selected primary APK.
-3. Updated tools/analyze_apk_code.py to decompile the selected APKPure primary APK rather than always using Platinmods.
-4. Added tools/compare_apk_variants.py and APK_VARIANT_COMPARISON.md for per-entry file-size/SHA-256 comparison. Platinmods is reference only.
-5. Added tests/test_apk_inputs.py covering APK/XAPK selection and plain APK passthrough.
-6. Updated the static and deep-analysis workflow defaults to APKPure_Latest; the deep-analysis workflow compares against Latest.
-7. Updated README.md, CHAT_RULES.md, CHAT_TRANSFER.md, MEMORY_INDEX.md, PROJECT_STATE.md and MOD_CANDIDATES.md to keep the source direction consistent.
+## Verified V11.1.0 findings
+1. The XAPK outer container is 92,726,986 bytes and its SHA-256 matches GitHub metadata.
+2. It contains jp.konami.duellinks.apk (55,854,706 bytes) and config.arm64_v8a.apk (36,869,159 bytes), with no OBB member found.
+3. The outer member CRC fails for both embedded APKs.
+4. The primary APK's decompression/CRC scan fails in assets/bin/Data/e1f73dc34613ec042897cc46749d448c with invalid literal/length code.
+5. The ARM64 split contains nine native libraries; lib/arm64-v8a/libduel.so fails its ZIP CRC check.
+6. The comparison found 2,874 identical readable package paths, 205 different readable shared paths, 296 APKPure-only paths, 317 Platinmods-only paths and two shared unreadable APKPure entries.
+7. ARM64 libil2cpp.so and global-metadata.dat are byte-identical between APKPure and Platinmods; the primary manifest and three DEX files differ byte-for-byte. The corrupted libduel.so prevents a reliable comparison for that file.
+8. Apktool/JADX output remains partial. A new pinned IL2CPP dump is in progress/needs its current report checked. No mod feature is confirmed working.
 
-## Verification still required
-- Check current Actions outcomes for APK Static Analysis, APK Code Analysis (APKPure Base), and Checkpoint Validation.
-- Inspect actual APP_ANALYSIS_REPORT.md, APK_CODE_ANALYSIS.md and APK_VARIANT_COMPARISON.md output from V11.1.0 runs.
-- Fix any tool/test/workflow failures before treating the reverse-engineering pipeline as complete.
-- JADX/Apktool findings remain static-only; no runtime feature claim is allowed without a reproducible isolated test.
+## Engineering changes already made
+- Added APK/XAPK-aware input handling and split-member CRC inspection.
+- Updated static inventory and JADX/Apktool workflow to use APKPure by default.
+- Added aggregate APKPure-versus-Platinmods byte-level comparison.
+- Added a pinned Il2CppDumper v6.7.46 analysis stage and report.
+- Added unit tests for plain APK passthrough, XAPK primary/split selection and malformed outer CRC reporting.
+- Reworked durable docs to keep APKPure as base and Platinmods as reference only.
+- Replaced the Gradle demo build workflow with a gated APKPure-based build scaffold. No actual APK patcher exists, so build stays blocked.
 
-## Build state
-No CHATGPT MOD APK has been built. The earlier Gradle-only build scaffold is not the intended product and must not be used to claim a modified Duel Links APK. The final build remains blocked until the reports support a reviewed feature plan, XAPK/split/OBB handling is understood, and a genuine APKPure-based patch/build tool exists.
+## Current known blocker
+The APKPure Release asset's outer digest matches GitHub, but embedded package contents are internally corrupt. Do not use it for patch/build. Its current analysis output is useful for partial static findings only. A clean APKPure upload is required for full reverse engineering and reliable implementation.
 
 ## NEXT ACTION
-Verify the latest three GitHub Actions runs and review the generated V11.1.0 reports. Update MOD_CANDIDATES.md with proven APKPure-specific evidence and choose the first safe feature only after that review.
+Check the latest APK Code Analysis and Checkpoint Validation runs plus IL2CPP_ANALYSIS_REPORT.md. Then replace the corrupted APKPure XAPK with a clean original and rerun static/deep analysis. Update MOD_CANDIDATES.md only with evidence from the clean version, then approve the first safe feature.
