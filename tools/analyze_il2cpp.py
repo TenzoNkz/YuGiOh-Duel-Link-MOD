@@ -221,6 +221,8 @@ def main() -> int:
                 f"- script.json generated: {'YES' if script_path else 'NO'}",
                 f"- stringliteral.json generated: {'YES' if string_path else 'NO'}",
                 f"- Focused dump.cs match lines: {focused_count}",
+                f"- Output generation confirmed from log: {'YES' if ('Generate dummy dll' in log and 'Dumping...' in log) else 'NO'}",
+                f"- Final console-input exception after generation: {'YES' if (result.returncode != 0 and dump_path and script_path and string_path and 'Console.ReadKey' in log and 'Press any key to exit' in log) else 'NO'}",
                 "- Match count by term group:",
                 *[f"  - {group}: {count}" for group, count in focused_counts.items()],
                 "",
@@ -250,12 +252,12 @@ def main() -> int:
                 status = "IL2CPP_OUTPUTS_GENERATED_WITH_POST_DUMP_CONSOLE_ERROR" if post_dump_console_error else "IL2CPP_OUTPUTS_GENERATED_WITH_TOOL_WARNING"
             else:
                 status = "IL2CPP_DUMP_PARTIAL"
-            lines.extend([
-                f"- Output generation confirmed from log: {'YES' if generated_output_marker else 'NO'}",
-                f"- Final console-input exception after generation: {'YES' if post_dump_console_error else 'NO'}",
-            ])
             if post_dump_console_error:
-                lines.append("- Interpretation of non-zero exit: the dumper generated all three output files, then failed in its final Console.ReadKey prompt because stdin was redirected; this is not a clean exit, but the generated dump outputs are present.")
+                interpretation_heading = lines.index("## Interpretation")
+                lines.insert(
+                    interpretation_heading + 1,
+                    "- Interpretation of non-zero exit: the dumper generated all three output files, then failed in its final Console.ReadKey prompt because stdin was redirected; this is not a clean exit, but the generated dump outputs are present.",
+                )
             lines.insert(3, f"**Status:** {status}")
             output_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
             print(f"Wrote {output_path} with status {status}")
