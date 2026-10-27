@@ -1,50 +1,60 @@
 # YuGiOh-Duel-Link-MOD — GitHub Source of Truth
 
-This repository uses GitHub for durable engineering state and chat-limit recovery. Three primary modes follow the JE X FYZ-style workflow: discussion, code execution, and app build/QC.
+This repository follows the JE X FYZ-style recovery workflow. **APKPure Original V11.1.0 is the sole intended mod base. Platinmods V11.1.0 is a comparison reference only.** The project is still in reverse-engineering and feasibility analysis; no CHATGPT MOD APK has been built.
 
-## Canonical source APK
+## Canonical inputs
+
 - Repository: TenzoNkz/YuGiOh-Duel-Link-MOD
 - Branch: main
-- Release: [Platinmods Original — Platinmods_V11.0.0](https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/releases/tag/Platinmods_V11.0.0)
-- APK asset: Yu-Gi-Oh.Duel.Links.Platinmods.V11.0.0.apk
-- Verified SHA-256: d7855754afbfe8e6b0a5db51ba47e4cefcd3079631190c11478d6556e06c56fb
+- Intended base: [APKPure Original Release — APKPure_Latest](https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/releases/tag/APKPure_Latest)
+- APKPure asset: Yu-Gi-Oh.Duel.Links.APKPure.V11.1.0.xapk
+- Reference only: [Platinmods Original Release — Latest](https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/releases/tag/Latest)
+- Platinmods asset: Yu-Gi-Oh.Duel.Links.Platinmods.V11.1.0.apk
+
+The XAPK is not renamed to APK. The analysis tools inventory the container, select a likely primary APK, list other embedded APKs/OBB payloads, and keep the container SHA-256 separate from the selected APK SHA-256. A final single-APK output is not assumed possible until split/OBB compatibility is assessed.
 
 ## Three primary modes
 
 ### Diskusi!
-Discuss and review all relevant code, dependencies, architecture, risks, and next steps. No source edits, commits, builds, or workflow runs. Copy the prompt from [CHAT_TRANSFER.md](CHAT_TRANSFER.md).
+Review the current repository, reports, release metadata, relevant code and workflow outcomes. This mode does not edit files, commit, trigger workflows, patch APKs, or build.
 
 ### Eksekusi Full!
-Execute the agreed code task: edit source, implement scoped changes, run relevant tests/checks, fix regressions, verify GitHub Actions, and update project checkpoints. APK packaging is kept separate. Copy the prompt from [CHAT_TRANSFER.md](CHAT_TRANSFER.md).
+Implement the agreed engineering work, run code checks and tests, update durable reports/checkpoints, and verify Actions results. Current task: build a reliable APKPure-XAPK analysis and variant comparison pipeline before selecting CHATGPT MOD features.
 
 ### Eksekusi Build App!
-Build/QC only for the latest agreed source and require the user-visible Android application label **CHATGPT Mod**. The build workflow validates chatgpt-mod/, produces a Debug APK artifact, records size/SHA-256/run URL, and commits [CHATGPT_MOD_BUILD_REPORT.md](CHATGPT_MOD_BUILD_REPORT.md).
-
-**Current build blocker:** at this checkpoint the tracked repository has no Android Gradle source project under chatgpt-mod/. Consequently, no new CHATGPT Mod APK has yet been built. The build workflow will report this blocker instead of relabeling the original Release binary and claiming it was rebuilt. Use Eksekusi Full! to establish an authorized, safe source project first.
+Build/QC the agreed mod based on APKPure Original only. Platinmods must remain comparison-only. The final user-facing menu title is CHATGPT MOD. Do not run a build until the reverse-engineering evidence identifies an approved patch plan and a real APK patch/build pipeline exists.
 
 ## GitHub Actions
-- [APK Static Analysis](../../actions/workflows/apk-static-analysis.yml) — checksum, ZIP integrity, archive/DEX/native inventory. [Successful inventory run](https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40272870450).
-- [APK Code Analysis](../../actions/workflows/apk-code-analysis.yml) — manifest, DEX/JADX, menu framework, and selected native/IL2CPP strings. [Latest successful job](https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40274382469); its report is still CODE_ANALYSIS_PARTIAL due to 96 JADX errors.
-- [Checkpoint Validation](../../actions/workflows/checkpoint-validation.yml) — validates persistent files and prompt markers.
-- [CHATGPT Mod Build](../../actions/workflows/build-chatgpt-mod.yml) — manually validates source/label, builds Debug APK, uploads an artifact, and updates the build report. It does not run automatically on doc changes.
 
-## Durable records
-- [CHAT_TRANSFER.md](CHAT_TRANSFER.md) — copy-ready prompts for the three modes and auxiliary Chat Stuck! recovery.
-- [CHAT_RULES.md](CHAT_RULES.md) — mode behavior and boundaries.
-- [MEMORY_INDEX.md](MEMORY_INDEX.md) — read order.
-- [PROJECT_STATE.md](PROJECT_STATE.md) — verified state and next task.
-- [HANDOVER.md](HANDOVER.md) — last verified step and one NEXT ACTION.
-- [APP_ANALYSIS_REPORT.md](APP_ANALYSIS_REPORT.md) — measured APK inventory.
-- [APK_CODE_ANALYSIS.md](APK_CODE_ANALYSIS.md) — partial code-level static findings.
-- [CHATGPT_MOD_BUILD_REPORT.md](CHATGPT_MOD_BUILD_REPORT.md) — build status, artifact metadata, and blockers.
-- [MOD_CANDIDATES.md](MOD_CANDIDATES.md) — candidate evidence/status.
-- [ANALYSIS_LOG.md](ANALYSIS_LOG.md) — chronological record.
+- APK Static Analysis — downloads the selected Release APK/XAPK as data, validates the reported container digest, inventories the selected APK, and reports embedded XAPK members.
+- APK Code Analysis (APKPure Base) — runs Apktool/JADX against the selected APKPure primary APK and creates APK_CODE_ANALYSIS.md.
+- APK variant comparison — tools/compare_apk_variants.py creates APK_VARIANT_COMPARISON.md by comparing APKPure entry paths and hashes against Platinmods. It does not patch either package.
+- Checkpoint Validation — compiles Python tools and runs local unit tests for APK/XAPK input handling.
+- CHATGPT Mod Build — must remain blocked until the approved APKPure-based patch/build tooling is implemented. The previous Gradle-demo approach is not the intended product and must not be reported as a modified Duel Links APK.
+
+## Durable project records
+
+- CHAT_TRANSFER.md — copy-ready prompts for Diskusi!, Eksekusi Full!, and Eksekusi Build App!.
+- CHAT_RULES.md — operating rules and scope boundaries.
+- MEMORY_INDEX.md — authoritative reading order and tool index.
+- PROJECT_STATE.md — verified current state and next step.
+- HANDOVER.md — exact continuation point.
+- APP_ANALYSIS_REPORT.md — static archive inventory.
+- APK_CODE_ANALYSIS.md — Apktool/JADX/DEX/native static findings.
+- APK_VARIANT_COMPARISON.md — APKPure-versus-Platinmods path/hash comparison.
+- MOD_CANDIDATES.md — feature candidates, evidence, unknowns and status.
+- CHATGPT_MOD_BUILD_REPORT.md — build status and blockers.
+- ANALYSIS_LOG.md — chronological verified milestones.
+
+## Interpretation and scope
+
+A string or native symbol is a lead, not proof that an option works. Reports must separate directly observed facts, hypotheses, and runtime-tested behavior. Static analysis must not execute or install the APKs. Safe local UI/accessibility, settings, compatibility and offline simulations may be considered. Live-online-duel modifications intended to unfairly alter outcomes are out of scope.
+
+Do not claim signer identity from ordinary META-INF entries alone: APK v2/v3 signing blocks are not normal ZIP entries. Before promising installation over an existing Platinmods installation, verify package identity and signer certificate compatibility. Keep generated APK binaries out of Git history and never overwrite the original Release assets.
 
 ## Chat-limit recovery
-1. Open [CHAT_TRANSFER.md](CHAT_TRANSFER.md).
-2. Copy the prompt for the desired mode.
-3. Paste it into the new chat.
-4. The new chat must reload live main, current reports, Release metadata, and latest Actions status before continuing. Do not upload the same APK again if its canonical public Release is available.
 
-## Build and scope limitations
-The source Release is a binary analysis input, not a buildable Gradle project. An authorized Android source project must exist under chatgpt-mod/ for the build workflow to produce an APK. The build artifact is not published as a new Release by default. Safe local UI/accessibility and offline/sandbox work may be considered; live online-duel cheats intended to alter match outcomes are out of scope.
+1. Open CHAT_TRANSFER.md.
+2. Copy the prompt for the required mode.
+3. Paste it into the new chat.
+4. Reload the live main branch, current Release metadata, reports and latest Actions results. Continue from HANDOVER.md without asking for the same public Release files again.
