@@ -81,10 +81,13 @@ def main() -> int:
         embedded_apk_name = asset_name
         nested_apks = []
         obb_names = []
+        selected_container_crc = "NOT_APPLICABLE"
         if suffix == ".xapk":
             apk_path, embedded_apk_name, nested_apks, obb_names = resolve_primary_apk(
                 container_path, asset_name, work / "source-primary.apk"
             )
+            selected_member = next((item for item in nested_apks if item["name"] == embedded_apk_name), {})
+            selected_container_crc = selected_member.get("container_crc_status", "NOT_CHECKED")
         expected_digest = asset.get("digest") or ""
         expected_sha256 = (
             expected_digest.split(":", 1)[1]
@@ -185,7 +188,7 @@ def main() -> int:
         lines = [
             "# APK Static Analysis Report",
             "",
-            f"**Status:** {'INVENTORY_COMPLETE_WITH_WARNINGS' if (digest_matches is False or crc_result == 'FAIL') else 'INVENTORY_COMPLETE'}",
+            f"**Status:** {'INVENTORY_COMPLETE_WITH_WARNINGS' if (digest_matches is False or crc_result == 'FAIL' or selected_container_crc == 'FAIL') else 'INVENTORY_COMPLETE'}",
             f"**Generated:** {timestamp}",
             "**Method:** static archive inspection only; the APK was not executed or installed.",
             "",
@@ -211,6 +214,7 @@ def main() -> int:
             f"- OBB members in container: {len(obb_names)}",
             *([f"- OBB member: {name}" for name in obb_names[:20]] or ["- No .obb member found in the XAPK container."]),
             "",
+            f"- Selected APK member CRC in the XAPK container: {selected_container_crc}",
             "## Selected APK archive integrity",
             f"- ZIP/APK opened: {status_text(archive_opened)}",
             f"- Central-directory entry count: {len(infos)}",
@@ -254,7 +258,7 @@ def main() -> int:
         ])
         output_path.write_text("\n".join(lines), encoding="utf-8")
 
-    if digest_matches is False or crc_result == "FAIL":
+    if digest_matches is False or crc_result == "FAIL" or selected_container_crc == "FAIL":
         print(
             "WARNING: the report was written, but the digest comparison or archive integrity check failed.",
             file=sys.stderr,
