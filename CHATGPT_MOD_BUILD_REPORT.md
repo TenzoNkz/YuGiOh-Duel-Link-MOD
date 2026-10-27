@@ -18,6 +18,11 @@
 - Static code analysis remains partial. Strings and method names do not prove feature wiring or runtime behavior.
 - No CHATGPT MOD APK has been built, signed, installed or runtime-tested.
 
+## Partial reverse-engineering evidence
+- Il2CppDumper generated its static metadata output files, with a non-zero exit caused by a final console-read prompt after generation.
+- Candidate method names include `ShowMonster`, card-face query APIs, `PvP.Command.CHEATCARD`, damage-value getters, and `DuelMenu` autoplay state/control methods. These do not establish working mod functionality or a call path from a new menu.
+- APKPure's code report remains `CODE_ANALYSIS_PARTIAL` because a primary asset fails decompression and JADX reports 96 decompilation errors.
+
 ## Hard build blocker
 The downloaded XAPK's container SHA-256 matches the checksum recorded by GitHub, but its embedded APK content is internally invalid. This is not a successful source-integrity check for patching; it means the uploaded asset itself needs to be replaced with a clean original package. Do not patch/build from this XAPK.
 
