@@ -18,6 +18,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 import zipfile
+import zlib
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
@@ -118,10 +119,11 @@ def main() -> int:
                     crc_result = "PASS" if not crc_bad_file else "FAIL"
                 else:
                     crc_result = "SKIPPED_RESOURCE_LIMIT"
-        except (zipfile.BadZipFile, OSError, RuntimeError, NotImplementedError) as exc:
+        except (zipfile.BadZipFile, OSError, RuntimeError, NotImplementedError, zlib.error, EOFError) as exc:
             archive_error = f"{type(exc).__name__}: {exc}"
-            archive_opened = False
+            archive_opened = bool(infos)
             crc_result = "FAIL"
+            crc_bad_file = f"CRC/decompression scan aborted: {type(exc).__name__}"
 
         file_names = [item.filename for item in infos]
         dex_infos = sorted(
