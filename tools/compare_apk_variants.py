@@ -108,7 +108,12 @@ def source_lines(package: dict, role: str) -> list[str]:
     ]
     if package["inner_apks"]:
         lines.append("- Embedded APK members:")
-        lines.extend(f"  - {item['name']} ({bytes_label(item['size'])})" for item in package["inner_apks"])
+        lines.extend(
+            f"  - {item['name']} ({bytes_label(item['size'])}); outer-container CRC: {item.get('container_crc_status', 'NOT_SELECTED')}"
+            for item in package["inner_apks"]
+        )
+        selected_member = next((item for item in package["inner_apks"] if item["name"] == package["selected_name"]), {})
+        lines.append(f"- Selected APK member outer-container CRC: {selected_member.get('container_crc_status', 'NOT_APPLICABLE')}")
     if package["obbs"]:
         lines.append("- OBB members:")
         lines.extend(f"  - {name}" for name in package["obbs"][:30])
@@ -164,6 +169,10 @@ def main() -> int:
             ),
         )
         warnings = []
+        base_member = next((item for item in base["inner_apks"] if item["name"] == base["selected_name"]), {})
+        reference_member = next((item for item in reference["inner_apks"] if item["name"] == reference["selected_name"]), {})
+        if base_member.get("container_crc_status") == "FAIL" or reference_member.get("container_crc_status") == "FAIL":
+            warnings.append("- At least one selected embedded APK has an outer XAPK-member CRC mismatch. The bytes were analyzed as data, but the original container is not clean and must be verified before any patch/build.")
         if base["digest_ok"] is False or reference["digest_ok"] is False:
             warnings.append("- One or both container downloads did not match GitHub's declared SHA-256. Resolve before patching.")
         if base["apk_sha"] == reference["apk_sha"]:
