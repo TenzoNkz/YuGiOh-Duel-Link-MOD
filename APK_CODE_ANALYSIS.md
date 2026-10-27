@@ -1,6 +1,6 @@
 # APK Code Analysis Report
 
-**Generated:** 2026-10-27 04:30:26 UTC
+**Generated:** 2026-10-27 05:01:28 UTC
 **Method:** JADX/Apktool static analysis; the APK was not installed or executed.
 - Repository: TenzoNkz/YuGiOh-Duel-Link-MOD
 - Requested release tag: APKPure_Latest
@@ -13,19 +13,19 @@
 - Release asset: Yu-Gi-Oh.Duel.Links.APKPure.V11.1.0.xapk
 - GitHub-reported size: 92726986 bytes
 - Downloaded container size: 92726986 bytes
-- Expected container SHA-256: 1f2cf45f87f52217227611b1d48f83a1d3990c326a0b2a6c64fa54296237be16
-- Calculated container SHA-256: 1f2cf45f87f52217227611b1d48f83a1d3990c326a0b2a6c64fa54296237be16
+- Expected container SHA-256: 66ba31c32fbba03b5fe0f75ef27dd9fa875978de7921a0c4ee8b93b878ce64eb
+- Calculated container SHA-256: 66ba31c32fbba03b5fe0f75ef27dd9fa875978de7921a0c4ee8b93b878ce64eb
 - Container digest comparison: PASS
 - Package input type: XAPK
 - APK selected for code analysis: jp.konami.duellinks.apk
 - Selected APK size: 55854706 bytes
 - Embedded APK members: 2
-- Embedded APK member: config.arm64_v8a.apk (36869159 bytes); outer CRC: FAIL; scan: EXTRACTED
-- Embedded APK member: jp.konami.duellinks.apk (55854706 bytes); outer CRC: FAIL; scan: EXTRACTED
+- Embedded APK member: config.arm64_v8a.apk (36869159 bytes); outer CRC: PASS; scan: EXTRACTED
+- Embedded APK member: jp.konami.duellinks.apk (55854706 bytes); outer CRC: PASS; scan: EXTRACTED
 - Embedded APKs extracted for static inventory: 2
 - OBB members in XAPK: 0
 - No OBB member detected.
-- Selected APK member CRC in outer XAPK: FAIL
+- Selected APK member CRC in outer XAPK: PASS
 
 **Status:** CODE_ANALYSIS_PARTIAL
 
@@ -81,34 +81,40 @@
   - receiver: com.google.android.datatransport.runtime.scheduling.jobscheduling.AlarmManagerSchedulerBroadcastReceiver, exported=false
 
 ## Tool execution
-- Apktool exit code: 1
+- Apktool exit code: 0
 - JADX exit code: 3
 - JADX-reported decompiler error count: 96
 - Decompiled Java source files found: 8180
-- Decoded Apktool output entries: 18234
+- Decoded Apktool output entries: 18679
 
 ### Apktool output excerpt
-    Exception in thread "main" brut.androlib.exceptions.AndrolibException: brut.directory.DirectoryException: Error copying file: assets/bin/Data/e1f73dc34613ec042897cc46749d448c
-    	at brut.androlib.ApkDecoder.copyRawFiles(SourceFile:239)
-    	at brut.androlib.ApkDecoder.decode(SourceFile:95)
-    	at brut.apktool.Main.main(SourceFile:523)
-    Caused by: brut.directory.DirectoryException: Error copying file: assets/bin/Data/e1f73dc34613ec042897cc46749d448c
-    	at brut.directory.Directory.copyToDir(SourceFile:301)
-    	at brut.androlib.ApkDecoder.copyRawFiles(SourceFile:265)
-    	... 2 more
-    Caused by: java.util.zip.ZipException: invalid literal/length code
-    	at java.base/java.util.zip.InflaterInputStream.read(InflaterInputStream.java:181)
-    	at java.base/java.io.FilterInputStream.read(FilterInputStream.java:95)
-    	at org.apache.commons.io.IOUtils.copy(SourceFile:1734)
-    	at brut.directory.Directory.copyToDir(SourceFile:46)
-    	... 3 more
+    I: Using Apktool 3.0.3 on source-primary.apk with 4 threads
+    I: Baksmaling classes.dex...
+    I: Baksmaling classes2.dex...
+    I: Loading resource table...
+    I: Baksmaling classes3.dex...
+    I: Decoding value resources...
+    I: Loading resource table from file: /home/runner/.local/share/apktool/framework/1.apk
+    I: Decoding file resources...
+    I: Generating values XMLs...
+    I: Decoding AndroidManifest.xml with resources...
+    I: Copying original files...
+    I: Copying assets...
+    I: Copying unknown files...
 
 ### JADX output excerpt
-    INFO  - progress: 7911 of 8855 (89%)
-    INFO  - progress: 7969 of 8855 (89%)
-    INFO  - progress: 8076 of 8855 (91%)
-    INFO  - progress: 8124 of 8855 (91%)
-    INFO  - progress: 8285 of 8855 (93%)
+    INFO  - progress: 7516 of 8855 (84%)
+    INFO  - progress: 7604 of 8855 (85%)
+    INFO  - progress: 7664 of 8855 (86%)
+    INFO  - progress: 7753 of 8855 (87%)
+    INFO  - progress: 7783 of 8855 (87%)
+    INFO  - progress: 7799 of 8855 (88%)
+    INFO  - progress: 7860 of 8855 (88%)
+    INFO  - progress: 7962 of 8855 (89%)
+    INFO  - progress: 8055 of 8855 (90%)
+    INFO  - progress: 8104 of 8855 (91%)
+    INFO  - progress: 8178 of 8855 (92%)
+    INFO  - progress: 8270 of 8855 (93%)
     INFO  - progress: 8496 of 8855 (95%)
     INFO  - progress: 8496 of 8855 (95%)
     INFO  - progress: 8496 of 8855 (95%)
@@ -117,15 +123,8 @@
     INFO  - progress: 8496 of 8855 (95%)
     INFO  - progress: 8496 of 8855 (95%)
     INFO  - progress: 8496 of 8855 (95%)
-    INFO  - progress: 8496 of 8855 (95%)
-    INFO  - progress: 8496 of 8855 (95%)
-    INFO  - progress: 8496 of 8855 (95%)
-    INFO  - progress: 8496 of 8855 (95%)
-    INFO  - progress: 8496 of 8855 (95%)
-    INFO  - progress: 8496 of 8855 (95%)
-    INFO  - progress: 8496 of 8855 (95%)
-    INFO  - progress: 8595 of 8855 (97%)
-    INFO  - progress: 8771 of 8855 (99%)
+    INFO  - progress: 8649 of 8855 (97%)
+    INFO  - progress: 8816 of 8855 (99%)
                                                                  
     ERROR - finished with errors, count: 96
 
@@ -169,8 +168,8 @@
   - (none found)
 
 ## APK split inventory
-- config.arm64_v8a.apk (config/split APK): 14 entries, 9 native libraries, 0 IL2CPP metadata file(s), outer XAPK CRC=FAIL.
-- jp.konami.duellinks.apk (primary APK): 3368 entries, 0 native libraries, 1 IL2CPP metadata file(s), outer XAPK CRC=FAIL.
+- config.arm64_v8a.apk (config/split APK): 14 entries, 9 native libraries, 0 IL2CPP metadata file(s), outer XAPK CRC=PASS.
+- jp.konami.duellinks.apk (primary APK): 3368 entries, 0 native libraries, 1 IL2CPP metadata file(s), outer XAPK CRC=PASS.
 
 ## Native/IL2CPP inventory across readable APK members
 - [config.arm64_v8a.apk] lib/arm64-v8a/libFirebaseCppAnalytics.so: 51296 bytes
@@ -185,7 +184,7 @@
 - assets/bin/Data/Managed/Metadata/global-metadata.dat: 11183816 bytes
 
 ## APK/split read warnings
-- [config.arm64_v8a.apk] lib/arm64-v8a/libduel.so: read failed (BadZipFile: Bad CRC-32 for file 'lib/arm64-v8a/libduel.so')
+- No per-entry split inventory read errors were recorded; the selected primary APK CRC warning above still applies.
 
 ## Search hits in decompiled Java
 - Matching lines found: 31; displaying up to 31.
@@ -233,7 +232,10 @@
 - No matching term was found in the scanned decoded resource XML/text.
 
 ## Focused strings: feature labels, menu callbacks, and duel damage
-- Focused string matches found: 10.
+- Focused string matches found: 12.
+### [config.arm64_v8a.apk] lib/arm64-v8a/libduel.so
+- DLL_DuelGetDamageValue
+- DLL_DuelComCheatCard
 ### [config.arm64_v8a.apk] lib/arm64-v8a/libil2cpp.so
 - DLL_DuelGetDamageValue
 ### [jp.konami.duellinks.apk] assets/bin/Data/Managed/Metadata/global-metadata.dat
@@ -248,7 +250,12 @@
 - showMonster
 
 ## Search hits in selected native/IL2CPP strings
-- Total matching printable strings: 267.
+- Total matching printable strings: 271.
+### [config.arm64_v8a.apk] lib/arm64-v8a/libduel.so
+- DLL_DuelGetDamageSrcPosition
+- DLL_DuelGetDamageDstPosition
+- DLL_DuelGetDamageValue
+- DLL_DuelComCheatCard
 ### [config.arm64_v8a.apk] lib/arm64-v8a/libil2cpp.so
 - DLL_DuelGetDamageDstPosition
 - DLL_DuelGetDamageSrcPosition
