@@ -37,3 +37,11 @@ This is the durable chronological record of verified findings, decisions, workfl
 
 ## NEXT
 Verify the latest APK Code Analysis and Checkpoint Validation outcomes, inspect IL2CPP_ANALYSIS_REPORT.md, and request a clean APKPure Original re-upload. Rerun static/deep analysis with a clean package before approving a feature or starting final packaging.
+
+## 2026-10-27 — APKPure IL2CPP metadata recovery (partial)
+- Perfare Il2CppDumper v6.7.46 generated `dump.cs`, `script.json` and `stringliteral.json` using the APKPure ARM64 library and global metadata. It then exited with -6 in its final `Console.ReadKey` because stdin was redirected; report status explicitly records generated outputs with a post-dump console error.
+- Recovered static declarations include `ShowMonster(bool immediate, bool showAura, Action onFinished)`; `GetFieldCardFace(int player, int position, int index)`, `GetCardFace(...)`, `DLL_DuelGetCardFace(...)`; `PvP.Command.CHEATCARD = 9`; `IDS_CARD.PROCESS_DAMAGE` through variants 1–3; and `DLL_DuelGetDamageValue` / `PVP_DuelGetDamageValue`.
+- `DuelMenu` includes `GetAutoPlay`, `SetAutoPlay(bool)`, `ChangeAutoPlay`, `autoPlayEnable` and `fastAutoEnable`; `DuelClient` exposes autoplay-related state. These are not proof of a third-party AutoPlay Bot menu callback.
+- Static symbols do not prove runtime behavior or a mod-menu call path. No implementation candidate is upgraded to proven-working from these names alone.
+- APKPure XAPK still has failing outer member CRCs, an unreadable/decompression-failing primary asset, and a CRC-failing ARM64 `libduel.so`; final patch/build remains blocked until a clean original package replaces the upload.
+
