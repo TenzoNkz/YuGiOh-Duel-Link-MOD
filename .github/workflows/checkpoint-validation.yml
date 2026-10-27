@@ -81,8 +81,10 @@ jobs:
                   problems.append("Missing required APK analysis tool: " + path)
           if "APKPure Original" not in comparison_report or "Platinmods" not in comparison_report:
               problems.append("APK_VARIANT_COMPARISON.md must identify APKPure as base and Platinmods as reference.")
-          if "CHATGPT Mod" not in build_report or "**Status:**" not in build_report:
-              problems.append("CHATGPT_MOD_BUILD_REPORT.md must record the requested label and a status.")
+          if not ("CHATGPT Mod" in build_report or "CHATGPT MOD" in build_report) or "**Status:**" not in build_report:
+              problems.append("CHATGPT_MOD_BUILD_REPORT.md must record the requested menu label and a status.")
+          if "APKPure_Latest" not in build_report or "Platinmods" not in build_report:
+              problems.append("CHATGPT_MOD_BUILD_REPORT.md must identify APKPure as the base and Platinmods as reference-only.")
           if "TenzoNkz/YuGiOh-Duel-Link-MOD" not in project_state:
               problems.append("PROJECT_STATE.md is missing the canonical repository identifier.")
           if "NEXT ACTION" not in handover:
