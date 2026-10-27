@@ -276,10 +276,18 @@ def main() -> int:
             ),
         )
         warnings = []
-        base_member = next((item for item in base["inner_apks"] if item["name"] == base["selected_name"]), {})
-        reference_member = next((item for item in reference["inner_apks"] if item["name"] == reference["selected_name"]), {})
-        if base_member.get("container_crc_status") == "FAIL" or reference_member.get("container_crc_status") == "FAIL":
-            warnings.append("- At least one selected embedded APK has an outer XAPK-member CRC mismatch. The bytes were analyzed as data, but the original container is not clean and must be verified before any patch/build.")
+        base_member = next((item for item in base["members"] if item["name"] == base["selected_name"]), {})
+        reference_member = next((item for item in reference["members"] if item["name"] == reference["selected_name"]), {})
+        base_crc_failures = [item["name"] for item in base["members"] if item.get("container_crc_status") == "FAIL"]
+        reference_crc_failures = [item["name"] for item in reference["members"] if item.get("container_crc_status") == "FAIL"]
+        if base_crc_failures or reference_crc_failures:
+            warnings.append(
+                "- Embedded APK outer CRC failures: "
+                + (", ".join("APKPure/" + name for name in base_crc_failures) or "none in APKPure")
+                + "; "
+                + (", ".join("Platinmods/" + name for name in reference_crc_failures) or "none in Platinmods")
+                + ". The original container is not clean and must be verified before any patch/build."
+            )
         if base["read_errors"] or reference["read_errors"]:
             warnings.append(f"- Entries could not be fully decompressed/hashed: APKPure main/splits={len(base['read_errors'])}, Platinmods={len(reference['read_errors'])}. See the unverified-entry section below.")
             warnings.append("- BUILD BLOCKER: the current APKPure XAPK and/or one of its embedded APK payloads fails CRC/decompression checks. Do not patch or build from this upload; replace it with a clean APKPure package and rerun the full analysis.")
@@ -309,7 +317,7 @@ def main() -> int:
             f"- Shared entries with identical SHA-256: {len(same)}",
             f"- Shared entries with different SHA-256: {len(changed)}",
             f"- Shared entries with at least one unreadable/corrupt member: {len(unverified_shared)}",
-            f"- Unreadable/corrupt entries in APKPure primary APK: {len(base['read_errors'])}",
+            f"- Unreadable/corrupt entries across APKPure main/split APKs: {len(base['read_errors'])}",
             f"- Unreadable/corrupt entries in Platinmods APK: {len(reference['read_errors'])}",
             f"- APKPure-only entries: {len(base_only)}",
             f"- Platinmods-only entries: {len(ref_only)}", "",
@@ -343,6 +351,7 @@ def main() -> int:
             "- Different entry hashes prove byte differences only, not what changed semantically.",
             "- APK v2/v3 signing blocks are not ordinary ZIP entries; this report does not verify signer identity or Android update compatibility.",
             "- For XAPK input, the comparison merges the primary APK's logical entries with unique entries from extracted splits (including native libraries), while excluding split-specific manifests/signature metadata. It does not synthesize or validate a single installable APK.",
+            "- Current APKPure source-integrity blockers: both embedded APK outer CRC checks fail; one primary asset cannot decompress and the ARM64 libduel.so entry fails its inner CRC. Do not patch/build until a clean original XAPK is uploaded and passes analysis.",
             "- The current APKPure XAPK contains integrity failures in the primary APK asset data and the arm64 libduel.so entry. Treat all features depending on those entries as unknown until a clean original package is uploaded.",
             "- Platinmods is not the build base. Do not copy its binary components into CHATGPT MOD without independent technical review and necessary rights.",
             "",
