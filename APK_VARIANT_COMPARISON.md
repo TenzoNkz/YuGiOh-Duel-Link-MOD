@@ -1,6 +1,6 @@
 # APKPure Original vs Platinmods — Static Variant Comparison
 
-Generated: 2026-10-27 05:09:20 UTC
+Generated: 2026-10-27 05:10:56 UTC
 Purpose: APKPure Original is the sole intended mod base. Platinmods is a comparison reference only.
 Method: Release digest checks, primary APK resolution, archive entry inventory, and per-entry SHA-256 comparison. No app was installed or executed.
 
@@ -310,8 +310,7 @@ Method: Release digest checks, primary APK resolution, archive entry inventory, 
 - Different entry hashes prove byte differences only, not what changed semantically.
 - APK v2/v3 signing blocks are not ordinary ZIP entries; this report does not verify signer identity or Android update compatibility.
 - For XAPK input, the comparison merges the primary APK's logical entries with unique entries from extracted splits (including native libraries), while excluding split-specific manifests/signature metadata. It does not synthesize or validate a single installable APK.
-- Current APKPure source-integrity blockers: both embedded APK outer CRC checks fail; one primary asset cannot decompress and the ARM64 libduel.so entry fails its inner CRC. Do not patch/build until a clean original XAPK is uploaded and passes analysis.
-- The current APKPure XAPK contains integrity failures in the primary APK asset data and the arm64 libduel.so entry. Treat all features depending on those entries as unknown until a clean original package is uploaded.
+- APKPure source-integrity assessment: PASS: Release digest matched; embedded APK outer CRCs and per-entry reads passed.
 - Platinmods is not the build base. Do not copy its binary components into CHATGPT MOD without independent technical review and necessary rights.
 
 ## Next reverse-engineering actions
