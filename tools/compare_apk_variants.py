@@ -15,6 +15,7 @@ import sys
 import tempfile
 import urllib.error
 import zipfile
+import zlib
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -63,15 +64,25 @@ def load_package(repo: str, tag: str, work: Path, role: str) -> dict:
     }
     with zipfile.ZipFile(apk_path, "r") as archive:
         entries = {}
+        read_errors = {}
         for item in archive.infolist():
             if item.is_dir():
                 continue
+            try:
+                digest = hash_zip_member(archive, item)
+                error_note = None
+            except (zipfile.BadZipFile, zlib.error, EOFError, OSError, RuntimeError, NotImplementedError) as error:
+                digest = None
+                error_note = f"{type(error).__name__}: {error}"
+                read_errors[item.filename] = error_note
             entries[item.filename] = {
                 "size": item.file_size,
                 "compressed": item.compress_size,
-                "sha256": hash_zip_member(archive, item),
+                "sha256": digest,
+                "read_error": error_note,
             }
     package["entries"] = entries
+    package["read_errors"] = read_errors
     package["entry_count"] = len(entries)
     package["uncompressed_size"] = sum(entry["size"] for entry in entries.values())
     package["dex"] = sorted(name for name in entries if re.fullmatch(r"classes(?:[0-9]+)?\.dex", name))
@@ -140,8 +151,16 @@ def main() -> int:
         left, right = base["entries"], reference["entries"]
         left_names, right_names = set(left), set(right)
         shared = sorted(left_names & right_names)
-        same = [name for name in shared if left[name]["sha256"] == right[name]["sha256"]]
-        changed = [name for name in shared if left[name]["sha256"] != right[name]["sha256"]]
+        comparable = [
+            name for name in shared
+            if left[name]["sha256"] is not None and right[name]["sha256"] is not None
+        ]
+        same = [name for name in comparable if left[name]["sha256"] == right[name]["sha256"]]
+        changed = [name for name in comparable if left[name]["sha256"] != right[name]["sha256"]]
+        unverified_shared = [
+            name for name in shared
+            if left[name]["sha256"] is None or right[name]["sha256"] is None
+        ]
         base_only, ref_only = sorted(left_names - right_names), sorted(right_names - left_names)
         important = [
             "AndroidManifest.xml", *base["dex"], *reference["dex"],
@@ -157,6 +176,7 @@ def main() -> int:
             if not a and not b:
                 continue
             status = "APKPURE_ONLY" if a and not b else "PLATINMODS_ONLY" if b and not a else (
+                "UNVERIFIED_CORRUPT_ENTRY" if a["sha256"] is None or b["sha256"] is None else
                 "IDENTICAL" if a["sha256"] == b["sha256"] else "DIFFERENT"
             )
             key_rows.append(f"| {name} | {a['size'] if a else '—'} | {b['size'] if b else '—'} | {status} |")
@@ -173,6 +193,8 @@ def main() -> int:
         reference_member = next((item for item in reference["inner_apks"] if item["name"] == reference["selected_name"]), {})
         if base_member.get("container_crc_status") == "FAIL" or reference_member.get("container_crc_status") == "FAIL":
             warnings.append("- At least one selected embedded APK has an outer XAPK-member CRC mismatch. The bytes were analyzed as data, but the original container is not clean and must be verified before any patch/build.")
+        if base["read_errors"] or reference["read_errors"]:
+            warnings.append(f"- Entries could not be fully decompressed/hashed: APKPure={len(base['read_errors'])}, Platinmods={len(reference['read_errors'])}. See the unverified-entry section below.")
         if base["digest_ok"] is False or reference["digest_ok"] is False:
             warnings.append("- One or both container downloads did not match GitHub's declared SHA-256. Resolve before patching.")
         if base["apk_sha"] == reference["apk_sha"]:
@@ -196,6 +218,9 @@ def main() -> int:
             f"- Shared entry paths: {len(shared)}",
             f"- Shared entries with identical SHA-256: {len(same)}",
             f"- Shared entries with different SHA-256: {len(changed)}",
+            f"- Shared entries with at least one unreadable/corrupt member: {len(unverified_shared)}",
+            f"- Unreadable/corrupt entries in APKPure primary APK: {len(base['read_errors'])}",
+            f"- Unreadable/corrupt entries in Platinmods APK: {len(reference['read_errors'])}",
             f"- APKPure-only entries: {len(base_only)}",
             f"- Platinmods-only entries: {len(ref_only)}", "",
             "## Key package and executable entries",
@@ -213,6 +238,9 @@ def main() -> int:
         if not priority:
             lines.append("| No different shared paths | — | — | None found |")
         lines.extend([
+            "",
+            "## Shared entries with unreadable/corrupt content (first 60)",
+            *([f"- {name}: APKPure={left[name]['read_error'] or 'readable'}, Platinmods={right[name]['read_error'] or 'readable'}" for name in unverified_shared[:60]] or ["- None found."]),
             "",
             "## APKPure-only entries (first 60)",
             *([f"- {name} — {bytes_label(left[name]['size'])}" for name in base_only[:60]] or ["- None found."]),
