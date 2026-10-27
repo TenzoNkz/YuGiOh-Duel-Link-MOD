@@ -20,8 +20,9 @@ Canonical branch: main
 8. IL2CPP_ANALYSIS_REPORT.md
 9. APK_VARIANT_COMPARISON.md
 10. MOD_CANDIDATES.md
-11. ANALYSIS_LOG.md
-12. README.md
+11. MOD_INTEGRATION_PLAN.md
+12. ANALYSIS_LOG.md
+13. README.md
 
 ## GitHub workflows
 - APK Static Analysis: .github/workflows/apk-static-analysis.yml — defaults to APKPure_Latest; inventories primary APK and embedded split APKs.
@@ -32,7 +33,7 @@ Canonical branch: main
 ## Scripts and reports
 - tools/apk_inputs.py — Release API, asset download, safe primary/split member extraction and CRC reporting.
 - tools/analyze_release_apk.py — static integrity and structural inventory for APK/XAPK, including embedded config/split APK details.
-- tools/analyze_apk_code.py — Apktool/JADX and native/IL2CPP string analysis for the APKPure primary APK and readable splits.
+- tools/analyze_apk_code.py — Apktool/JADX, inner APK CRC scans, native/IL2CPP strings and YgomMainActivity lifecycle/native/window trace.
 - tools/analyze_il2cpp.py — pinned Il2CppDumper attempt using the APKPure ARM64 library and metadata.
 - tools/compare_apk_variants.py — aggregate primary + split APK payload comparison: APKPure base versus Platinmods reference.
 - tests/test_apk_inputs.py — APK/XAPK selection, split extraction, OBB inventory, CRC mismatch handling and GitHub API token headers.
@@ -44,6 +45,7 @@ Canonical branch: main
 - IL2CPP_ANALYSIS_REPORT.md — type/method metadata recovery attempt and focused symbols.
 - APK_VARIANT_COMPARISON.md — byte-level package comparison and integrity warnings.
 - MOD_CANDIDATES.md — candidate evidence and feasibility status.
+- MOD_INTEGRATION_PLAN.md — Activity entry point, menu integration options and build gates.
 - CHATGPT_MOD_BUILD_REPORT.md — true build state and blockers.
 
 ## Current source integrity and build status
@@ -51,9 +53,9 @@ The current APKPure XAPK (92,726,986 bytes) has SHA-256 66ba31c32fbba03b5fe0f75e
 
 ## Latest workflow checkpoints
 - Static archive integrity: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40453605293 — success.
-- Full code-analysis report and metadata recovery: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40453733126 — success, with the corrected current Release digest and inner archive CRC checks in the IL2CPP report.
-- Checkpoint/unit validation: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40454118233 — success after the ZIP-signature regression-test correction.
-- The enhanced APK Code Analysis run at https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40454023712 refreshes the report with full inner ZIP CRC checks and should be checked for its final result before the next checkpoint is declared complete.
+- Full code-analysis report, full inner ZIP CRC scans and Activity entry-point trace: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40454946821 — success.
+- Checkpoint/unit validation including Activity trace and archive-integrity regression tests: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40454946814 — success.
+- MOD_INTEGRATION_PLAN.md records the evidence and proposed safe menu integration approach.
 
 ## Persistence contract
 Committed GitHub records, Release metadata and verified Actions outputs are durable project state. New chats must reload live main, latest reports and Actions outcomes, then continue from HANDOVER.md. Never report a test/build as successful without checking its real output.
