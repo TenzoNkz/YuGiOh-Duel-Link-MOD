@@ -29,6 +29,8 @@ jobs:
     name: Download APKPure APK/XAPK and inspect primary APK as data
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7.0.1
