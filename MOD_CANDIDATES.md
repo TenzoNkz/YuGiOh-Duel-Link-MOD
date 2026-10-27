@@ -14,16 +14,14 @@ Status meanings:
 
 ## Verified APKPure V11.1.0 package findings
 
-- APKPure Release asset is an XAPK (92,726,986 bytes). Its computed container SHA-256 matches GitHub's metadata.
-- The XAPK contains jp.konami.duellinks.apk (55,854,706 bytes) and config.arm64_v8a.apk (36,869,159 bytes), and no OBB member was detected.
-- Both embedded APK members fail their outer-container CRC check.
-- The primary APK has three DEX files and 3,368 central-directory entries, but its compressed asset at assets/bin/Data/e1f73dc34613ec042897cc46749d448c fails decompression with “invalid literal/length code”.
-- The ARM64 config split contains nine native libraries. Its lib/arm64-v8a/libduel.so fails its ZIP CRC check; findings depending on this library remain unverified.
-- Aggregate comparison against Platinmods reports 2,874 identical readable paths, 205 different readable shared paths, 296 APKPure-only paths, 317 Platinmods-only paths, and two shared paths with unreadable APKPure content.
-- ARM64 libil2cpp.so and global-metadata.dat are byte-identical in both packages. AndroidManifest.xml and the three DEX files differ by bytes; that does not establish what the changes mean.
-- Platinmods includes libplatinmods.so in both ARM64 and ARMv7 libraries; those exact paths are absent from the APKPure package inventory. The current APKPure config split contains ARM64 libraries only.
-- Apktool fails while copying the corrupted primary asset. JADX generates partial source and reports 96 decompilation errors. A pinned IL2CPP metadata-recovery stage has been added; read IL2CPP_ANALYSIS_REPORT.md after the current workflow finishes.
-- **Hard blocker:** the current APKPure package is not clean enough for patch/build. Replace it with a clean original XAPK, then repeat the analysis. A matching outer checksum only proves the file matches the uploaded Release asset; it does not make its internal contents valid.
+- Current APKPure XAPK size is 92,726,986 bytes. Its expected and calculated SHA-256 match: 66ba31c32fbba03b5fe0f75ef27dd9fa875978de7921a0c4ee8b93b878ce64eb. The previous hash 1f2cf45f87f52217227611b1d48f83a1d3990c326a0b2a6c64fa54296237be16 belongs to the previous corrupt upload and is superseded.
+- It contains jp.konami.duellinks.apk (55,854,706 bytes) and config.arm64_v8a.apk (36,869,159 bytes), with no OBB member detected.
+- Both embedded APK outer CRC checks pass. The primary APK and ARM64 split both pass full inner ZIP CRC/decompression scans.
+- The primary APK has 3,368 entries and three DEX files; the config split has nine native libraries. Current primary SHA-256: e2f38c25eb8d32c66f6b2a036cbe1eeb44164841f6cb684073d9f5ea1ac0c11d. Current ARM64 split SHA-256: d2bb8f75605e457b1680b2c428ba653840aed11ca49644d9ad5d10bd649dacf4.
+- Aggregate comparison against Platinmods reports 2,876 identical shared paths and 205 different shared paths in the current report. Byte differences do not by themselves explain what changed semantically.
+- ARM64 libil2cpp.so and global-metadata.dat are byte-identical between the two package variants. AndroidManifest.xml and the three DEX files differ by bytes. APKPure has no exact libplatinmods.so path; the comparison remains informational rather than a recipe to copy its components.
+- APKTool successfully decodes the primary APK (exit code 0). JADX reports 96 decompilation errors with partial source output (exit code 3). This is a code-analysis limitation, not an inner ZIP CRC failure.
+- **Source integrity is now PASS.** Do not ask for another upload based on the obsolete corruption findings. Final build remains blocked by incomplete call-flow validation, no approved feature scope, and absence of a genuine APKPure-based patch/build pipeline.
 
 ## Historical Platinmods V11.0.0 evidence (reference only)
 
@@ -39,16 +37,16 @@ Status meanings:
 
 | Candidate | Current feasibility | Evidence | Next validation | Boundary |
 |---|---|---|---|---|
-| Custom CHATGPT MOD floating menu | High for UI concept; integration risk high/unknown | APKPure lacks the exact Platinmods libplatinmods.so path; old reference has a generic menu architecture, but its implementation is not part of APKPure | After clean reupload, inspect manifest components and DEX entry points; design an independent overlay/service integration and test lifecycle | Own implementation on APKPure base; do not copy Platinmods binary components blindly |
+| Custom CHATGPT MOD floating menu | High for UI concept; integration risk high/unknown | APKPure lacks the exact Platinmods libplatinmods.so path; old reference has a generic menu architecture, but its implementation is not part of APKPure | Trace the clean manifest and YgomMainActivity DEX lifecycle; determine whether an owned menu can attach cleanly without importing Platinmods code | Own implementation on APKPure base; do not copy Platinmods binary components blindly |
 | Menu drag/minimize/restore, size, opacity and theme | High for UI behavior; not yet integrated | Standard Android UI concept; no runtime test yet | Implement an isolated menu layer and verify window/lifecycle behavior on target Android versions | Local presentation/accessibility only |
 | Toggle, slider, dropdown, text input | High for UI controls; no game action proven | Generic controls appeared in historical Platinmods V11.0.0 code | Create owned controls, persistence and state tests; map gameplay callback separately if one is approved | A visible toggle does not imply an active gameplay feature |
 | Persist own menu settings | High | Android preference storage is a straightforward independent design; historical reference used SharedPreferences | Define namespace, defaults, reset and migration tests | Keep CHATGPT MOD preferences independent |
-| Show Monster & Status Details | Low/medium, unconfirmed | Il2CppDumper produced `ShowMonster(bool immediate, bool showAura, Action onFinished)` and a `Task3DCardMove.showMonster` field. Neither proves a status-reading feature or a mod callback. | Confirm enclosing type, call sites and input data from a clean source package. | Local rendering only; no hidden-opponent-information feature |
+| Show Monster & Status Details | Low/medium, unconfirmed | Il2CppDumper produced `ShowMonster(bool immediate, bool showAura, Action onFinished)` and a `Task3DCardMove.showMonster` field. Neither proves a status-reading feature or a mod callback. | Confirm enclosing type, call sites and input data in the now CRC-clean source, then determine whether this is only animation/render state. | Local rendering only; no hidden-opponent-information feature |
 | Card-face inspection API | Unknown; no reveal feature approved | `dump.cs` contains `GetFieldCardFace(int player, int position, int index)`, `GetCardFace(...)`, and `DLL_DuelGetCardFace(...)`. This shows query APIs exist, not that hidden faces can be accessed in an online state. | Establish the enclosing types, callers, state/visibility semantics and behavior on a clean package. | Do not expose hidden opponent information in online duels |
 | AutoPlay Bot | Unknown; built-in controls found, mod feasibility unproven | `DuelMenu` metadata includes `GetAutoPlay`, `SetAutoPlay(bool)`, `ChangeAutoPlay`, `autoPlayEnable` and `fastAutoEnable`; `DuelClient` metadata includes autoplay-related state. No third-party mod callback was found in APKPure. | Establish intended game mode, enclosing types, callers and whether these controls are normal game behavior; test only a permitted isolated mode. | No automation that abuses online matches or bypasses fair-play controls |
 | FPS/performance/display/accessibility settings | Low/medium, unverified | ARM64 Unity libraries exist; no candidate setter/callback confirmed | Inspect manifest/config and IL2CPP dump, then test controlled settings in a sandbox | Prefer display/accessibility or stability improvements |
 | Offline damage-rule simulator | High as a separate test utility | Can be implemented independently of proprietary game internals | Define deterministic test vectors and verify with unit tests | Offline sandbox only; not a live-game patch |
-| Damage inspection / Cheat Card symbols | Read-only damage inspection is a research candidate; live manipulation is excluded | `dump.cs` shows `DLL_DuelGetDamageValue(int)`, `PVP_DuelGetDamageValue(int)`, source/destination-position getters and `PvP.Command.CHEATCARD = 9`. The ARM64 `libduel.so` source entry is corrupt; these signatures do not reveal writable hooks or runtime semantics. | Re-run on clean assets; map call sites and semantics for local display only. Test calculations separately in an offline model. | No live-duel damage manipulation; no unfair outcome changes |
+| Damage inspection / Cheat Card symbols | Read-only damage inspection is a research candidate; live manipulation is excluded | `dump.cs` shows `DLL_DuelGetDamageValue(int)`, `PVP_DuelGetDamageValue(int)`, source/destination-position getters and `PvP.Command.CHEATCARD = 9`. The relevant ARM64 package now passes CRC checks, but these signatures still do not reveal writable hooks or runtime semantics. | Trace getter call sites and data semantics for local display only. Test calculations separately in an offline model. | No live-duel damage manipulation; no unfair outcome changes |
 
 ## Additional IL2CPP observations (static only)
 
@@ -56,13 +54,13 @@ Status meanings:
 - `PvP.Command.CHEATCARD = 9` is an enum value, not evidence that a cheat-card operation works or can be triggered.
 - `IDS_CARD.PROCESS_DAMAGE` and variants 1–3 are enum constants, not proof of a damage modification hook.
 - `DLL_DuelGetDamageValue` is a getter declaration; no writable damage multiplier was identified by this pass.
-- The APKPure source package remains internally corrupt, so all conclusions are provisional until a clean V11.1.0 upload is analyzed. Do not treat a partial metadata dump as complete reverse engineering.
+- The refreshed APKPure package passed container digest, both embedded APK outer CRCs, and both inner ZIP CRC/decompression scans. Conclusions remain provisional because the metadata dump does not show full call flow or prove runtime behavior.
 
 ## Feature priority recommendation
 
-1. **First:** independent CHATGPT MOD menu shell, visual settings and preference persistence. This provides a usable foundation without claiming game toggles work.
-2. **Second:** after a clean source package is available, inspect app manifest/window lifecycle and test menu integration plus installation integrity.
-3. **Third:** only then decide whether any game-information or display helper can be implemented, based on the IL2CPP dump and reliable native binaries.
+1. **First:** map the Activity/DEX entry point and document an APKPure-only integration strategy for an independent CHATGPT MOD UI. No actual overlay is integrated yet.
+2. **Second:** prototype and test menu UI/preferences independently, then integrate only through a reviewed patch path that preserves the original game package.
+3. **Third:** investigate any game-information/display helper only after its type, callers, data semantics and permitted mode have been established.
 4. **Separate optional work:** offline damage/card-rule simulator with unit tests.
 
 ## Evidence required before feature approval
@@ -76,7 +74,7 @@ Status meanings:
 
 ## Current decision
 
-Build remains blocked by source integrity. Do not start final packaging or call any gameplay feature possible until a clean APKPure package has been analyzed and the implementation path is supported by evidence.
+The refreshed APKPure source passes container and inner-package integrity checks, so source corruption is no longer the blocker. Final packaging remains blocked because reverse engineering is partial, no bounded feature scope has been approved, XAPK/split install strategy and signing compatibility are unresolved, and a genuine APKPure-based patch/build tool does not yet exist. Do not treat any candidate as a working cheat based only on names or strings.
 
 ## Build approval checkpoint
 
