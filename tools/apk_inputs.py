@@ -8,6 +8,7 @@ import re
 import shutil
 import urllib.request
 import zipfile
+import zlib
 from pathlib import Path
 from typing import Any
 
@@ -119,14 +120,36 @@ def resolve_primary_apk(
             )
         # Record member sizes, not content: detailed hashes are computed from the selected APK.
         nested_summary = [
-            {"name": item.filename, "size": item.file_size, "compressed_size": item.compress_size}
+            {
+                "name": item.filename,
+                "size": item.file_size,
+                "compressed_size": item.compress_size,
+                "container_crc_status": "NOT_SELECTED",
+            }
             for item in sorted(apk_infos, key=lambda item: item.filename)
         ]
         destination.parent.mkdir(parents=True, exist_ok=True)
+        # Some third-party XAPK containers have an incorrect CRC in the outer
+        # ZIP directory even though the embedded APK bytes form a valid APK.
+        # Extract to a controlled path without trusting the outer CRC, then
+        # explicitly calculate and report the actual CRC. Never suppress the
+        # selected APK's own archive-integrity tests.
         with archive.open(selected, "r") as source, destination.open("wb") as output:
+            if hasattr(source, "_expected_crc"):
+                source._expected_crc = None
             shutil.copyfileobj(source, output, length=1024 * 1024)
         if destination.stat().st_size != selected.file_size:
             raise RuntimeError("Extracted primary APK size does not match its XAPK directory entry")
+        crc = 0
+        with destination.open("rb") as selected_stream:
+            for chunk in iter(lambda: selected_stream.read(1024 * 1024), b""):
+                crc = zlib.crc32(chunk, crc)
+        selected_crc_status = "PASS" if (crc & 0xFFFFFFFF) == selected.CRC else "FAIL"
+        for item in nested_summary:
+            if item["name"] == selected.filename:
+                item["container_crc_status"] = selected_crc_status
+                item["expected_container_crc32"] = f"{selected.CRC:08x}"
+                item["calculated_container_crc32"] = f"{crc & 0xFFFFFFFF:08x}"
         # Ensure the selected nested APK is itself a readable ZIP/APK.
         with zipfile.ZipFile(destination, "r") as nested:
             if "AndroidManifest.xml" not in nested.namelist():
