@@ -17,15 +17,17 @@ class ApkCodeArchiveIntegrityTests(unittest.TestCase):
             package_dir = source_root / "jp" / "konami" / "duellinks" / "plugins"
             package_dir.mkdir(parents=True)
             (package_dir / "YgomMainActivity.java").write_text(
-                "package jp.konami.duellinks.plugins;\\n"
-                "public class YgomMainActivity extends Activity {\\n"
-                "  protected void onCreate(Bundle state) {\\n"
-                "    super.onCreate(state);\\n"
-                "    System.loadLibrary(\\\"duel\\\");\\n"
-                "    setContentView(new View(this));\\n"
-                "  }\\n"
-                "  public void onResume() { super.onResume(); }\\n"
-                "}\\n",
+                "\n".join([
+                    "package jp.konami.duellinks.plugins;",
+                    "public class YgomMainActivity extends Activity {",
+                    "  protected void onCreate(Bundle state) {",
+                    "    super.onCreate(state);",
+                    "    System.loadLibrary(\"duel\");",
+                    "    setContentView(new View(this));",
+                    "  }",
+                    "  public void onResume() { super.onResume(); }",
+                    "}",
+                ]) + "\n",
                 encoding="utf-8",
             )
             summary = summarize_android_entrypoint(source_root)
