@@ -77,7 +77,10 @@ jobs:
             echo "No code-analysis report was produced; see the analysis step output."
             exit 0
           fi
-          git add APK_CODE_ANALYSIS.md APK_VARIANT_COMPARISON.md
+          git add APK_CODE_ANALYSIS.md
+          if [ -f APK_VARIANT_COMPARISON.md ]; then
+            git add APK_VARIANT_COMPARISON.md
+          fi
           if git diff --cached --quiet; then
             echo "The code-analysis report has no changes."
             exit 0
