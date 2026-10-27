@@ -67,7 +67,7 @@ jobs:
               problems.append("Missing required files: " + ", ".join(missing))
           if empty:
               problems.append("Empty required files: " + ", ".join(empty))
-          for marker in ("Diskusi!", "Eksekusi Full!", "Eksekusi Build App!", "CHATGPT Mod", "CANONICAL REPOSITORY"):
+          for marker in ("Diskusi!", "Eksekusi Full!", "Eksekusi Build App!", "CHATGPT Mod", "Canonical repository:"):
               if marker not in transfer:
                   problems.append("CHAT_TRANSFER.md is missing marker: " + marker)
           if not Path(".github/workflows/build-chatgpt-mod.yml").is_file():
