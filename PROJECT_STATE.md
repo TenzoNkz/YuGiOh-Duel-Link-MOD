@@ -8,7 +8,7 @@ Canonical branch: main
 - APKPure Original V11.1.0, Release tag APKPure_Latest, is the sole intended mod base.
 - Platinmods V11.1.0, Release tag Latest, is comparison-only reference.
 - Intended output is a real modified APK with in-game menu title CHATGPT MOD.
-- Do not run final packaging until a safe feature scope is reviewed and a genuine APKPure-based patch/build pipeline exists.
+- Do not run any APK patch/build until the safe feature scope is explicitly approved in MOD_CANDIDATES.md. The gated patcher and UI helper now exist, but end-to-end APK build/runtime are still unverified.
 
 ## Current APKPure source identity — verified clean
 - Release asset: Yu-Gi-Oh.Duel.Links.APKPure.V11.1.0.xapk, size 92,726,986 bytes.
@@ -47,7 +47,7 @@ Canonical branch: main
 - Interpretation: there is no ready-made Platinmods overlay to enable. An independently implemented same-Activity View attached after super.onCreate is only a prototype hypothesis; Unity fullscreen rendering/touch interaction and lifecycle must be tested on a real patched app. Details: MOD_INTEGRATION_PLAN.md.
 
 ## Feature feasibility — current assessment
-- Highest conceptual feasibility: an independently implemented CHATGPT MOD menu shell, controls and local preference persistence. The Android Activity entry point is mapped; same-window attachment is not yet implemented or runtime-tested.
+- The owned UI-only helper is implemented and compiles to DEX in CI. The patcher can inject one call after Activity onCreate's superclass call and merge the ARM64 split libraries into a single-APK test candidate, but the full XAPK-to-APK path has not yet been executed.
 - Unconfirmed: Show Monster/status display, card-face queries and AutoPlay control. Their types, call sites, state visibility and allowable modes still need investigation.
 - Read-only damage inspection or an offline damage-rule simulator can be evaluated separately. No writable damage multiplier or working CHEATCARD invocation has been proven.
 - Live-online-duel outcome manipulation and hidden-opponent-information features are not implementation targets.
@@ -55,8 +55,8 @@ Canonical branch: main
 ## Build status
 - No CHATGPT MOD APK has been built, signed, installed or runtime-tested.
 - The source-integrity blocker has been resolved by the updated APKPure Release asset.
-- Remaining blockers are incomplete method/call-flow validation, no approved feature scope, no genuine APKPure-based patch/build pipeline, unresolved single-APK versus XAPK/split strategy, and signer/update/install compatibility.
+- Remaining blockers are incomplete feature call-flow validation, no approved safe feature scope, no end-to-end APK build proof, no device runtime tests, and signer/update/install compatibility. Source split merging is implemented in the gated patcher but not verified by a built APK.
 - Do not use a standalone Gradle demo or rename/copy an APK and claim it is the modified game. Do not promise overwriting Platinmods unless the signing/update constraints are actually satisfied.
 
 ## NEXT ACTION
-Review and approve a bounded first feature scope—recommended: independently implemented CHATGPT MOD menu shell plus local preference persistence only, with no gameplay callbacks yet. Then implement a genuine APKPure-based patch/build tool and a non-release test build; verify Activity attachment, Unity touch/lifecycle behavior, XAPK/split packaging and signing before considering release packaging.
+Review and explicitly approve the bounded UI-only scope in MOD_CANDIDATES.md—owned CHATGPT MOD launcher/panel, drag, open/close, and saved local panel preference; no gameplay callbacks. Then configure the required signing secrets and run the gated build workflow to produce a non-release test APK, followed by device testing of launch stability, Unity touch passthrough, lifecycle and preferences.
