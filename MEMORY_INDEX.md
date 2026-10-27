@@ -59,6 +59,8 @@ The current APKPure XAPK (92,726,986 bytes) has SHA-256 66ba31c32fbba03b5fe0f75e
 - Static archive integrity: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40453605293 — success.
 - Full code-analysis report, full inner ZIP CRC scans and Activity entry-point trace: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40454946821 — success.
 - Menu helper validation (Java-to-DEX compilation, preflight and approval-bypass regression): https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40457542823 — success.
+- Checkpoint validation after report refresh: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40457665323 — success.
+- Latest checkpoint validation after this index update: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40457671064 — verify its final result.
 - Checkpoint validation after transfer/report update: https://github.com/TenzoNkz/YuGiOh-Duel-Link-MOD/actions/runs/40457598014 — final result to verify.
 - MOD_INTEGRATION_PLAN.md records the Activity evidence, UI-only helper, gated patcher and remaining gates.
 
